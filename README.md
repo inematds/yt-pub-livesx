@@ -20,6 +20,14 @@ YouTube (lives do canal origem) → Transcricao → Analise IA → Corte (FFmpeg
 5. **Gera thumbnails** com IA (LLM + gerador de imagem) ou local
 6. **Publica clips** no canal de destino com titulo, descricao, tags e thumbnail
 
+## Modos de entrada
+
+Alem do fluxo principal (cortar lives → gerar clips → publicar), o pipeline aceita mais duas fontes de video:
+
+1. **Lives do YouTube** → transcricao → analise IA → corte (FFmpeg) → thumbnail → publicacao
+2. **Import de videos** → pasta `imports/` vira fila do pipeline → thumbnail → publicacao
+3. **Sync TikTok → YouTube** → scan de canais TikTok → download → fila do pipeline → publicacao no canal YouTube de destino
+
 ## Estrutura
 
 ```
