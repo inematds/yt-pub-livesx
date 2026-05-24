@@ -270,7 +270,8 @@ def get_db_stats(instance_path):
 
         cur.execute("SELECT COALESCE(SUM(CAST(qtd_clips AS INTEGER)),0) FROM lives WHERE video_id LIKE 'import_%' AND titulo NOT LIKE 'TikTok @%'")
         imports_clips_total = cur.fetchone()[0]
-        imports_pend = max(0, imports_clips_total - imports_pub - imports_erro)
+        cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id LIKE 'import_%' AND (clip_video_id IS NULL OR clip_video_id IN ('', 'publicando'))")
+        imports_pend = cur.fetchone()[0]
 
         # Cortados ultimas 24h
         cur.execute("SELECT COUNT(*) FROM lives WHERE data_corte >= ?", (since_24h,))
