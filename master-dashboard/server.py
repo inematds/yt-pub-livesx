@@ -236,7 +236,8 @@ def get_db_stats(instance_path):
         cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id NOT LIKE 'import_%' AND clip_video_id NOT IN ('erro_upload','publicando','') AND clip_video_id != '' AND clip_video_id NOT LIKE 'moved_%'")
         clips_publicados = cur.fetchone()[0]
 
-        clips_pendentes = max(0, total_clips - clips_publicados)
+        cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id NOT LIKE 'import_%' AND (clip_video_id IS NULL OR clip_video_id IN ('', 'publicando'))")
+        clips_pendentes = cur.fetchone()[0]
 
         # TikTok stats (imports where titulo starts with 'TikTok @')
         cur.execute("SELECT video_id FROM lives WHERE video_id LIKE 'import_%' AND titulo LIKE 'TikTok @%'")
