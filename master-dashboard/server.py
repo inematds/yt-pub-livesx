@@ -271,8 +271,33 @@ def get_db_stats(instance_path):
 
         cur.execute("SELECT COALESCE(SUM(CAST(qtd_clips AS INTEGER)),0) FROM lives WHERE video_id LIKE 'import_%' AND titulo NOT LIKE 'TikTok @%'")
         imports_clips_total = cur.fetchone()[0]
+
+        # imports_pend: combina fila publicados + manifests no disco
+        # (mesma logica do dashboard local pra refletir pendencias reais nao registradas)
         cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id LIKE 'import_%' AND (clip_video_id IS NULL OR clip_video_id IN ('', 'publicando'))")
         imports_pend = cur.fetchone()[0]
+
+        cur.execute("SELECT video_id FROM lives WHERE video_id LIKE 'import_%' AND titulo NOT LIKE 'TikTok @%'")
+        import_only_ids = [r[0] for r in cur.fetchall()]
+        if import_only_ids:
+            placeholders = ','.join(['?'] * len(import_only_ids))
+            cur.execute(
+                f"SELECT live_video_id, COUNT(*) FROM publicados WHERE live_video_id IN ({placeholders}) "
+                "AND clip_video_id IS NOT NULL AND clip_video_id NOT IN ('erro_upload','publicando','') "
+                "AND clip_video_id NOT LIKE 'moved_%' GROUP BY live_video_id",
+                import_only_ids,
+            )
+            pub_count_by_live = dict(cur.fetchall())
+            lives_dir = os.path.join(instance_path, 'lives')
+            for vid in import_only_ids:
+                manifest_path = os.path.join(lives_dir, vid, 'clips_manifest.json')
+                if os.path.exists(manifest_path):
+                    try:
+                        with open(manifest_path) as mf:
+                            clips = json.load(mf)
+                        imports_pend += max(0, len(clips) - pub_count_by_live.get(vid, 0))
+                    except Exception:
+                        pass
 
         # Cortados ultimas 24h
         cur.execute("SELECT COUNT(*) FROM lives WHERE data_corte >= ?", (since_24h,))
