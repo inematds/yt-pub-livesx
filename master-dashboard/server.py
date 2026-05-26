@@ -230,7 +230,9 @@ def get_db_stats(instance_path):
         lives_erro = cur.fetchone()[0]
 
         # Clips stats (exclui imports — imports tem contagem propria)
-        cur.execute("SELECT COALESCE(SUM(CAST(qtd_clips AS INTEGER)),0) FROM lives WHERE video_id NOT LIKE 'import_%'")
+        # total_clips conta rows reais em publicados, nao qtd_clips declarado
+        # (qtd_clips e a intencao inicial; o cortador pode produzir menos clips)
+        cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id NOT LIKE 'import_%'")
         total_clips = cur.fetchone()[0]
 
         cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id NOT LIKE 'import_%' AND clip_video_id NOT IN ('erro_upload','publicando','') AND clip_video_id != '' AND clip_video_id NOT LIKE 'moved_%'")
