@@ -15,19 +15,42 @@ echo ""
 
 # 1. Pre-requisitos apt (silencioso se ja instalados)
 echo "==> Pre-requisitos apt..."
-APT_PREREQS=(python3-pip unzip)
+APT_PREREQS=(python3-pip unzip ffmpeg curl pipx)
 NEED_APT=()
 for pkg in "${APT_PREREQS[@]}"; do
   dpkg -s "$pkg" &>/dev/null || NEED_APT+=("$pkg")
 done
 if [ ${#NEED_APT[@]} -gt 0 ]; then
   echo "    Instalando: ${NEED_APT[*]}"
+  sudo apt-get update -qq                          # indispensavel em maquina nova (lists/ vazio)
   sudo apt-get install -y "${NEED_APT[@]}" -qq
 else
-  echo "    python3-pip + unzip: OK"
+  echo "    ${APT_PREREQS[*]}: OK"
 fi
 
-# 2. Dependencias do sistema
+# pipx instala em ~/.local/bin — garante no PATH desta sessao
+export PATH="$HOME/.local/bin:$PATH"
+
+# 2. yt-dlp (via pipx) — auto-instala se faltar
+echo "==> yt-dlp..."
+if command -v yt-dlp >/dev/null; then
+  echo "    yt-dlp: OK"
+else
+  echo "    Instalando yt-dlp via pipx..."
+  pipx install yt-dlp
+fi
+
+# 3. deno (runtime JS do yt-dlp) — auto-instala se faltar (precisa do unzip)
+echo "==> deno..."
+if command -v deno >/dev/null; then
+  echo "    deno: OK"
+else
+  echo "    Instalando deno..."
+  curl -fsSL https://deno.land/install.sh | sh
+fi
+export PATH="$HOME/.deno/bin:$PATH"
+
+# 4. Verificacao final das dependencias
 echo "==> Verificando dependencias..."
 MISSING=()
 for tool in python3 ffmpeg curl yt-dlp deno; do
@@ -40,34 +63,28 @@ for tool in python3 ffmpeg curl yt-dlp deno; do
 done
 if [ ${#MISSING[@]} -gt 0 ]; then
   echo ""
-  echo "ERRO: instale antes:"
-  for t in "${MISSING[@]}"; do
-    case "$t" in
-      yt-dlp) echo "    sudo apt-get install -y pipx && pipx install yt-dlp" ;;
-      deno)   echo "    apt install -y unzip && curl -fsSL https://deno.land/install.sh | sh" ;;
-      *)      echo "    sudo apt-get install $t" ;;
-    esac
-  done
+  echo "ERRO: nao foi possivel instalar automaticamente: ${MISSING[*]}"
+  echo "      Instale manualmente e rode novamente."
   exit 1
 fi
 
-# 3. Pacotes Python
+# 5. Pacotes Python
 echo "==> Pacotes Python..."
 # root + Ubuntu 22.04+: sem --user, com --break-system-packages (PEP 668)
 pip3 install --quiet --break-system-packages -r "$TEMPLATE_DIR/requirements.txt"
 python3 -c "import cryptography, anthropic" \
   && echo "    cryptography + anthropic: OK"
 
-# 4. PATH
+# 6. PATH (persistente — yt-dlp em ~/.local/bin, deno em ~/.deno/bin)
 BIN_DIR="$HOME/.local/bin"
 mkdir -p "$BIN_DIR"
-if ! echo "$PATH" | grep -q "$BIN_DIR"; then
+if ! echo "$PATH" | grep -q "$BIN_DIR" || ! echo "$PATH" | grep -q "$HOME/.deno/bin"; then
   echo ""
   echo "==> Adicione ao seu ~/.bashrc:"
-  echo "    export PATH=\"\$HOME/.local/bin:\$PATH\""
+  echo "    export PATH=\"\$HOME/.local/bin:\$HOME/.deno/bin:\$PATH\""
 fi
 
-# 5. Master-dashboard — verifica conflitos antes de subir
+# 7. Master-dashboard — verifica conflitos antes de subir
 echo ""
 echo "==> Master-dashboard (porta $MASTER_PORT)..."
 if systemctl --user is-active --quiet "$MASTER_SERVICE" 2>/dev/null; then
@@ -81,7 +98,7 @@ if ss -ltn 2>/dev/null | grep -q ":$MASTER_PORT "; then
   exit 1
 fi
 
-# 6. Gera service file com paths do TEMPLATE_DIR detectado
+# 8. Gera service file com paths do TEMPLATE_DIR detectado
 SVC="$HOME/.config/systemd/user/$MASTER_SERVICE.service"
 mkdir -p "$(dirname "$SVC")"
 cat > "$SVC" <<EOF
