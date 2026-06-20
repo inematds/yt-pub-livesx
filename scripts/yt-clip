@@ -57,6 +57,12 @@ while [[ $# -gt 0 ]]; do
       echo "  --max-dur     Duração máxima de clip em segundos (padrão: 900)"
       exit 0
       ;;
+    --)
+      shift
+      VIDEO_ID="${1:-}"
+      [[ -n "$VIDEO_ID" ]] && shift
+      break
+      ;;
     -*)
       echo "Erro: opção desconhecida: $1" >&2
       exit 1

@@ -1041,7 +1041,8 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                         clips = json.load(f)
                     for c in clips:
                         title = c.get('title', '')
-                        if title not in pub_titles:
+                        _fn = c.get('filename', '')
+                        if title not in pub_titles and _fn and os.path.exists(os.path.join(lives_dir, lid, 'clips', _fn)):
                             pendentes.append({
                                 'title':         title,
                                 'description':   c.get('description', ''),
@@ -1069,8 +1070,9 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                                 }
                     for t in topics_data.get('topics', []):
                         title = t.get('title', '')
-                        if title not in pub_titles:
-                            m = manifest.get(title, {})
+                        m = manifest.get(title, {})
+                        _fn = m.get('filename', '')
+                        if title not in pub_titles and _fn and os.path.exists(os.path.join(lives_dir, lid, 'clips', _fn)):
                             pendentes.append({
                                 'title':         title,
                                 'description':   t.get('description', ''),
@@ -1249,12 +1251,14 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                 else:
                     total_publicados += 1
 
-        # Clips pendentes de imports (no manifest mas nao no publicados)
-        pub_titles_by_live = {}
+        # Clips pendentes de imports (manifest total - ja publicados, por quantidade)
+        # Nao usar set de titulos: manifests com titulos duplicados ('Video') colapsam para 1
+        pub_count_by_live = {}
         for pub in pub_list:
             lid = pub.get('live_video_id', '')
-            if lid in import_ids:
-                pub_titles_by_live.setdefault(lid, set()).add(pub.get('clip_titulo', ''))
+            cid = pub.get('clip_video_id', '')
+            if lid in import_ids and cid and cid not in ('erro_upload', 'publicando') and not cid.startswith('moved_'):
+                pub_count_by_live[lid] = pub_count_by_live.get(lid, 0) + 1
 
         lives_dir = os.environ.get('LIVES_DIR', os.path.join(PROJECT_ROOT, 'lives'))
         import_only_ids = import_ids - tiktok_ids
@@ -1265,8 +1269,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                     import json as _json
                     with open(manifest_path) as f:
                         clips = _json.load(f)
-                    known = pub_titles_by_live.get(vid, set())
-                    imports_clips_pend += sum(1 for c in clips if c.get('title', '') not in known)
+                    imports_clips_pend += max(0, len(clips) - pub_count_by_live.get(vid, 0))
                 except Exception:
                     pass
 

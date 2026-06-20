@@ -141,7 +141,7 @@ def run_corte(video_id, config=None):
                 env['PIRAMYD_API_KEY'] = key
 
     proc = subprocess.Popen(
-        [script, video_id, '--ai', ai_mode],
+        [script, '--ai', ai_mode, '--', video_id],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         text=True, env=env
     )
@@ -186,8 +186,21 @@ def run_corte(video_id, config=None):
         update_status('idle', f'Corte concluido: {video_id}', video_id)
         return True
     else:
-        last_output = '\n'.join(output_lines[-5:]) if output_lines else 'sem output'
-        log(f'  Erro no corte: {last_output}')
+        # Filtra linhas ruido (download% do yt-dlp) para que o tail capture o erro real
+        meaningful = [l for l in output_lines if not ('[download]' in l and '%' in l)]
+        last_output = '\n'.join(meaningful[-30:]) if meaningful else (output_lines[-5:] if output_lines else ['sem output'])
+        if isinstance(last_output, list):
+            last_output = '\n'.join(last_output)
+        log(f'  Erro no corte:\n{last_output}')
+        # Salva output completo em arquivo para debug
+        try:
+            err_dir = os.path.join(PROJECT_ROOT, 'data')
+            os.makedirs(err_dir, exist_ok=True)
+            err_file = os.path.join(err_dir, f'last_corte_error_{video_id}.log')
+            with open(err_file, 'w') as f:
+                f.write('\n'.join(output_lines))
+        except Exception:
+            pass
         update_status('erro', f'Erro no corte: {video_id}', video_id)
         return False
 

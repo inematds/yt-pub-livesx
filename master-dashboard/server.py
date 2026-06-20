@@ -219,14 +219,15 @@ def get_db_stats(instance_path):
         row = cur.fetchone()
         canal_nome = row[0] if row else ''
 
-        # Lives por status
-        cur.execute("SELECT COUNT(*) FROM lives WHERE status_cortes='pendente'")
+        # Lives por status (mesma definicao do dashboard local: exclui imports/tiktok;
+        # pendente = tudo que nao e concluido/erro, nao so status=='pendente')
+        cur.execute("SELECT COUNT(*) FROM lives WHERE video_id NOT LIKE 'import_%' AND COALESCE(status_cortes,'') NOT IN ('concluido','erro')")
         lives_pendentes = cur.fetchone()[0]
 
-        cur.execute("SELECT COUNT(*) FROM lives WHERE status_cortes='concluido'")
+        cur.execute("SELECT COUNT(*) FROM lives WHERE video_id NOT LIKE 'import_%' AND status_cortes='concluido'")
         lives_cortadas = cur.fetchone()[0]
 
-        cur.execute("SELECT COUNT(*) FROM lives WHERE status_cortes='erro'")
+        cur.execute("SELECT COUNT(*) FROM lives WHERE video_id NOT LIKE 'import_%' AND status_cortes='erro'")
         lives_erro = cur.fetchone()[0]
 
         # Clips stats (exclui imports — imports tem contagem propria)
@@ -274,10 +275,10 @@ def get_db_stats(instance_path):
         cur.execute("SELECT COALESCE(SUM(CAST(qtd_clips AS INTEGER)),0) FROM lives WHERE video_id LIKE 'import_%' AND titulo NOT LIKE 'TikTok @%'")
         imports_clips_total = cur.fetchone()[0]
 
-        # imports_pend: combina fila publicados + manifests no disco
-        # (mesma logica do dashboard local pra refletir pendencias reais nao registradas)
-        cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id LIKE 'import_%' AND (clip_video_id IS NULL OR clip_video_id IN ('', 'publicando'))")
-        imports_pend = cur.fetchone()[0]
+        # imports_pend: resto dos clips do manifest ainda nao publicados
+        # (mesma definicao do dashboard local: soma len(manifest) - publicados_reais por live;
+        # NAO somar a fila de publicados aqui — duplicava os clips em voo 'publicando')
+        imports_pend = 0
 
         cur.execute("SELECT video_id FROM lives WHERE video_id LIKE 'import_%' AND titulo NOT LIKE 'TikTok @%'")
         import_only_ids = [r[0] for r in cur.fetchall()]

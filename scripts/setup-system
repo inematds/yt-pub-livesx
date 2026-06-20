@@ -15,7 +15,7 @@ echo ""
 
 # 1. Pre-requisitos apt (silencioso se ja instalados)
 echo "==> Pre-requisitos apt..."
-APT_PREREQS=(python3-pip unzip ffmpeg curl pipx)
+APT_PREREQS=(python3-pip python3-pil unzip ffmpeg curl pipx)
 NEED_APT=()
 for pkg in "${APT_PREREQS[@]}"; do
   dpkg -s "$pkg" &>/dev/null || NEED_APT+=("$pkg")
@@ -72,8 +72,8 @@ fi
 echo "==> Pacotes Python..."
 # root + Ubuntu 22.04+: sem --user, com --break-system-packages (PEP 668)
 pip3 install --quiet --break-system-packages -r "$TEMPLATE_DIR/requirements.txt"
-python3 -c "import cryptography, anthropic" \
-  && echo "    cryptography + anthropic: OK"
+python3 -c "import cryptography, anthropic, PIL" \
+  && echo "    cryptography + anthropic + Pillow: OK"
 
 # 6. PATH (persistente — yt-dlp em ~/.local/bin, deno em ~/.deno/bin)
 BIN_DIR="$HOME/.local/bin"

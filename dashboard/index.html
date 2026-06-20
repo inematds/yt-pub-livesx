@@ -705,7 +705,7 @@
 
 <div class="container">
   <header>
-    <h1><span>INEMA</span> Lives & Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.27.29</a></small>
+    <h1><span>INEMA</span> Lives & Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.27.32</a></small>
       <span id="headerCanais" style="display:block;font-size:0.4em;font-weight:normal;margin-top:4px"></span>
     </h1>
     <div class="header-actions">
@@ -4276,6 +4276,22 @@ loadAll();
       <button onclick="closeModal('modalChangelog')" style="background:none;border:none;color:var(--muted);font-size:1.2em;cursor:pointer">X</button>
     </div>
     <div class="modal-body" style="padding:16px;overflow-y:auto;font-size:0.85em;line-height:1.8">
+      <h3 style="color:var(--accent);margin-bottom:8px">v3.27.32</h3>
+      <p style="color:var(--muted);margin-bottom:4px"><strong>Bug:</strong></p>
+      <ul style="margin:0 0 16px 20px;color:var(--text)">
+        <li>Preview do designer (e geracao de thumbnail no scheduler) quebrava em maquina nova com "No module named 'PIL'": o Pillow nao era instalado. O setup-system agora instala python3-pil via apt (jeito correto no Ubuntu 24/PEP 668) e a verificacao final checa import PIL.</li>
+      </ul>
+      <h3 style="color:var(--accent);margin-bottom:8px">v3.27.31</h3>
+      <p style="color:var(--muted);margin-bottom:4px"><strong>Bug:</strong></p>
+      <ul style="margin:0 0 16px 20px;color:var(--text)">
+        <li>Scheduler: video_ids que comecam com '-' (ex: -I2kOs0_GCk) eram interpretados como flag pelo yt-clip e davam "opcao desconhecida". Agora scheduler invoca com separador '--' e yt-clip aceita '--' antes do video_id.</li>
+        <li>Scheduler: melhor captura de erro no corte. Antes guardava so 5 ultimas linhas (engolia o erro real quando yt-dlp cuspia muito '[download]%'). Agora filtra linhas de download, mantem 30 ultimas linhas relevantes e salva output completo em data/last_corte_error_&lt;video_id&gt;.log.</li>
+      </ul>
+      <h3 style="color:var(--accent);margin-bottom:8px">v3.27.30</h3>
+      <p style="color:var(--muted);margin-bottom:4px"><strong>Bug:</strong></p>
+      <ul style="margin:0 0 16px 20px;color:var(--text)">
+        <li>Fix imports_clips_pend no dashboard: contava por set de titulos do manifest, e manifests com titulos duplicados (ex: todos 'Video') colapsavam para 1 e zeravam pendentes. Agora compara quantidade (len(manifest) - publicados_count).</li>
+      </ul>
       <h3 style="color:var(--accent);margin-bottom:8px">v3.27.29</h3>
       <p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
       <ul style="margin:0 0 16px 20px;color:var(--text)">
