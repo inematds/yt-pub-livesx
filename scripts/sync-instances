@@ -1,20 +1,45 @@
 #!/bin/bash
-# Sync common code from lives2 to all other instances
+# Sync common code from master template to all instances
 # Only copies CODE files, never config/data/credentials
 
-SOURCE="/home/nmaldaner/projetos/yt-pub-lives2"
+SOURCE="/home/nmaldaner/projetos/yt-pub-livesx-master"
 TARGETS=(
     "/home/nmaldaner/projetos/yt-pub-lives1"
+    "/home/nmaldaner/projetos/yt-pub-lives1x"
+    "/home/nmaldaner/projetos/yt-pub-lives2"
+    "/home/nmaldaner/projetos/yt-pub-lives2x"
     "/home/nmaldaner/projetos/yt-pub-lives3"
+    "/home/nmaldaner/projetos/yt-pub-lives3x"
     "/home/nmaldaner/projetos/yt-pub-lives4"
+    "/home/nmaldaner/projetos/yt-pub-lives4x"
     "/home/nmaldaner/projetos/yt-pub-lives5"
+    "/home/nmaldaner/projetos/yt-pub-lives5x"
     "/home/nmaldaner/projetos/yt-pub-lives6"
+    "/home/nmaldaner/projetos/yt-pub-lives6x"
     "/home/nmaldaner/projetos/yt-pub-lives7"
+    "/home/nmaldaner/projetos/yt-pub-lives7x"
     "/home/nmaldaner/projetos/yt-pub-lives8"
+    "/home/nmaldaner/projetos/yt-pub-lives8x"
     "/home/nmaldaner/projetos/yt-pub-lives9"
+    "/home/nmaldaner/projetos/yt-pub-lives9x"
     "/home/nmaldaner/projetos/yt-pub-lives10"
+    "/home/nmaldaner/projetos/yt-pub-lives10x"
     "/home/nmaldaner/projetos/yt-pub-lives11"
+    "/home/nmaldaner/projetos/yt-pub-lives11x"
     "/home/nmaldaner/projetos/yt-pub-lives12"
+    "/home/nmaldaner/projetos/yt-pub-lives13"
+    "/home/nmaldaner/projetos/yt-pub-lives21"
+    "/home/nmaldaner/projetos/yt-pub-lives22"
+    "/home/nmaldaner/projetos/yt-pub-lives23"
+    "/home/nmaldaner/projetos/yt-pub-lives24"
+    "/home/nmaldaner/projetos/yt-pub-lives25"
+    "/home/nmaldaner/projetos/yt-pub-lives26"
+    "/home/nmaldaner/projetos/yt-pub-lives27"
+    "/home/nmaldaner/projetos/yt-pub-lives28"
+    "/home/nmaldaner/projetos/yt-pub-lives29"
+    "/home/nmaldaner/projetos/yt-pub-lives30"
+    "/home/nmaldaner/projetos/yt-pub-lives31"
+    "/home/nmaldaner/projetos/yt-pub-lives32"
 )
 
 FILES=(
@@ -31,6 +56,9 @@ FILES=(
 )
 
 for target in "${TARGETS[@]}"; do
+    if [ ! -d "$target" ]; then
+        continue
+    fi
     name=$(basename "$target")
     echo "==> Syncing to $name"
     for file in "${FILES[@]}"; do

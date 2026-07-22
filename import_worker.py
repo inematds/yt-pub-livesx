@@ -20,6 +20,7 @@ import json
 import shutil
 import re
 import subprocess
+import tempfile
 from datetime import datetime
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -78,7 +79,7 @@ def _title_from_filename(filename):
 
 
 def _gerar_descricao_ia(title):
-    """Usa Claude CLI para gerar descricao curta a partir do titulo."""
+    """Usa Claude CLI para gerar descricao curta a partir do titulo (fallback sem transcricao)."""
     prompt = (
         f'Gere uma descricao curta (2-3 frases) em portugues para um video de YouTube '
         f'com o titulo: "{title}". Retorne apenas a descricao, sem introducao.'
@@ -95,6 +96,137 @@ def _gerar_descricao_ia(title):
     except Exception as e:
         log(f'  IA descricao erro: {e}')
     return ''
+
+
+# ---------------------------------------------------------------------------
+# Transcricao (Groq Whisper -> fallback whisper local) + titulo/descricao IA
+# ---------------------------------------------------------------------------
+
+TRANSCRIPT_MIN_CHARS = 30  # abaixo disso, transcricao e' considerada inutil (silencio/musica)
+
+_GROQ_KEY_PATHS = [
+    '/home/nmaldaner/projetos/openpcbot/.env',
+    '/home/nmaldaner/projetos/wifi/.env',
+]
+
+
+def _load_groq_key():
+    """Le GROQ_API_KEY em runtime de openpcbot/.env ou wifi/.env, sem duplicar/salvar em outro lugar."""
+    for path in _GROQ_KEY_PATHS:
+        try:
+            with open(path) as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith('GROQ_API_KEY='):
+                        return line.split('=', 1)[1].strip().strip('"').strip("'")
+        except Exception:
+            continue
+    return None
+
+
+def _extract_audio(clip_path, out_wav):
+    """Extrai audio mono 16kHz do clip via ffmpeg (formato ideal p/ whisper)."""
+    result = subprocess.run(
+        ['ffmpeg', '-y', '-i', clip_path, '-vn', '-ac', '1', '-ar', '16000', out_wav],
+        capture_output=True, text=True, timeout=120
+    )
+    return result.returncode == 0 and os.path.exists(out_wav)
+
+
+def _transcrever_groq(audio_path):
+    """Transcreve via Groq Whisper API (rapido, sem custo de GPU local)."""
+    import requests
+    key = _load_groq_key()
+    if not key:
+        return None
+    with open(audio_path, 'rb') as f:
+        resp = requests.post(
+            'https://api.groq.com/openai/v1/audio/transcriptions',
+            headers={'Authorization': f'Bearer {key}'},
+            files={'file': (os.path.basename(audio_path), f, 'audio/wav')},
+            data={'model': 'whisper-large-v3-turbo', 'language': 'pt', 'response_format': 'text'},
+            timeout=90,
+        )
+    if resp.status_code == 200:
+        return resp.text.strip()
+    raise RuntimeError(f'Groq HTTP {resp.status_code}: {resp.text[:200]}')
+
+
+def _transcrever_local(audio_path):
+    """Fallback: transcreve com whisper local (openai-whisper CLI), usado se a API Groq falhar."""
+    with tempfile.TemporaryDirectory() as out_dir:
+        result = subprocess.run(
+            ['whisper', audio_path, '--model', 'small', '--language', 'Portuguese',
+             '--output_format', 'txt', '--output_dir', out_dir],
+            capture_output=True, text=True, timeout=600
+        )
+        if result.returncode != 0:
+            return None
+        txt_path = os.path.join(out_dir, os.path.splitext(os.path.basename(audio_path))[0] + '.txt')
+        if os.path.exists(txt_path):
+            with open(txt_path) as f:
+                return f.read().strip()
+    return None
+
+
+def _transcrever_clip(clip_path):
+    """
+    Transcreve o audio do clip: tenta Groq Whisper (API), com fallback pro whisper local
+    se a API falhar (sem chave, erro de rede, rate limit, etc).
+    Retorna string vazia se nada funcionar ou o audio nao render transcricao util.
+    """
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        audio_path = os.path.join(tmp_dir, 'audio.wav')
+        if not _extract_audio(clip_path, audio_path):
+            log('  transcricao: falha ao extrair audio')
+            return ''
+
+        text = None
+        try:
+            text = _transcrever_groq(audio_path)
+        except Exception as e:
+            log(f'  transcricao Groq falhou ({e}), tentando whisper local...')
+
+        if not text:
+            try:
+                text = _transcrever_local(audio_path)
+            except Exception as e:
+                log(f'  transcricao local falhou: {e}')
+
+        return (text or '').strip()
+
+
+def _gerar_titulo_descricao_ia(transcript, fallback_title):
+    """
+    Gera titulo + descricao a partir da transcricao do clip (via Claude CLI).
+    Retorna (title, description). Cai pro fallback (titulo do arquivo + descricao
+    so-por-titulo) se a IA nao responder um JSON valido.
+    """
+    prompt = (
+        'Baseado na transcricao abaixo de um clip de video, gere um titulo chamativo '
+        '(ate 70 caracteres) e uma descricao curta (2-3 frases), ambos em portugues, '
+        'para publicacao no YouTube. Responda APENAS com um JSON no formato '
+        '{"title": "...", "description": "..."}, sem markdown, sem introducao.\n\n'
+        f'Transcricao:\n"""{transcript[:4000]}"""'
+    )
+    try:
+        env = os.environ.copy()
+        env.pop('CLAUDECODE', None)
+        result = subprocess.run(
+            ['claude', '-p', '--output-format', 'text', prompt],
+            capture_output=True, text=True, timeout=60, env=env
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            raw = result.stdout.strip()
+            raw = re.sub(r'^```(json)?|```$', '', raw.strip(), flags=re.MULTILINE).strip()
+            data = json.loads(raw)
+            title = (data.get('title') or '').strip()
+            description = (data.get('description') or '').strip()
+            if title and description:
+                return title, description
+    except Exception as e:
+        log(f'  IA titulo/descricao (transcricao) erro: {e}')
+    return None, None
 
 
 def _collect_mp4s(folder_path):
@@ -141,13 +273,28 @@ def _build_manifest(clips_dir, folder_path, gerar_descricao):
     clips = []
     for i, (src_path, fname) in enumerate(mp4_files, start=1):
         m = manual.get(fname, {})
-        title = m.get('title') or _title_from_filename(fname)
+        title_manual = m.get('title')
+        title = title_manual or _title_from_filename(fname)
         description = m.get('description', '')
         tags = m.get('tags', [])
 
         if not description and gerar_descricao:
-            log(f'  Gerando descricao IA para: {title[:50]}')
-            description = _gerar_descricao_ia(title)
+            log(f'  Transcrevendo audio para: {title[:50]}')
+            transcript = _transcrever_clip(src_path)
+
+            if transcript and len(transcript) >= TRANSCRIPT_MIN_CHARS:
+                ia_title, ia_description = _gerar_titulo_descricao_ia(transcript, title)
+                if ia_description:
+                    description = ia_description
+                    # so troca o titulo se ele nao veio explicito do manifest.json
+                    if ia_title and not title_manual:
+                        title = ia_title
+            else:
+                log('  transcricao vazia/curta, usando fallback por titulo')
+
+            if not description:
+                log(f'  Gerando descricao IA (fallback por titulo) para: {title[:50]}')
+                description = _gerar_descricao_ia(title)
 
         dest_file = os.path.join(clips_dir, fname)
         clips.append({
@@ -271,6 +418,7 @@ def _process_folder(folder_name, gerar_descricao, import_fila=True):
         'status_transcricao':  'concluido',
         'status_cortes':       'concluido',
         'qtd_clips':           str(len(clips)),
+        'clips_disco':         str(len(clips)),
         'clips_publicados':    '0',
         'clips_pendentes':     str(len(clips)),
         'data_sync':           now,
