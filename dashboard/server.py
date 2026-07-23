@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import base64
+import shutil
 import urllib.request
 import urllib.parse
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -35,6 +36,14 @@ import secrets as _sec
 
 _DASHBOARD_PASSWORD = os.environ.get('DASHBOARD_PASSWORD', 'Inema2026$$$')
 _VALID_SESSIONS = set()
+
+
+def yt_dlp_cmd():
+    """Return a yt-dlp command that works when the executable is not on PATH."""
+    exe = shutil.which('yt-dlp') or shutil.which('yt-dlp.exe')
+    if exe:
+        return [exe]
+    return [sys.executable, '-m', 'yt_dlp']
 
 _LOGIN_HTML = '''<!doctype html>
 <html lang="pt-br">
@@ -401,7 +410,8 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
             # Compose with sample text
             frase = data.get('preview_text', 'MULTIPLIQUE SEU LUCRO')
-            output_path = '/tmp/thumb_preview.jpg'
+            import tempfile
+            output_path = os.path.join(tempfile.gettempdir(), 'thumb_preview.jpg')
             yt_thumb.compose_thumbnail(bg, frase, '', output_path)
 
             # Return as base64
@@ -467,7 +477,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
         # yt-dlp
         try:
-            r = subprocess.run(['yt-dlp', '--version'], capture_output=True, text=True, timeout=5)
+            r = subprocess.run(yt_dlp_cmd() + ['--version'], capture_output=True, text=True, timeout=5)
             checks['yt_dlp'] = {'ok': r.returncode == 0, 'detail': r.stdout.strip() if r.returncode == 0 else 'erro'}
         except Exception as e:
             checks['yt_dlp'] = {'ok': False, 'detail': str(e)}
@@ -479,10 +489,23 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         except Exception as e:
             checks['database'] = {'ok': False, 'detail': str(e)}
 
-        # Claude CLI (IA cortes/pub)
+        cfg = db.load_config()
+
+        # IA cortes/pub
         try:
-            r = subprocess.run(['claude', '-p', '--output-format', 'json', 'diga ok'], capture_output=True, text=True, timeout=30)
-            checks['api_ia'] = {'ok': r.returncode == 0, 'detail': 'Claude CLI ok' if r.returncode == 0 else f'erro code {r.returncode}'}
+            ai_mode = cfg.get('ai_mode', 'claude-cli')
+            if ai_mode == 'openrouter-api':
+                openrouter_key = cfg.get('openrouter_api_key', '') or os.environ.get('OPENROUTER_API_KEY', '')
+                if openrouter_key:
+                    checks['api_ia'] = {'ok': True, 'detail': 'openrouter key configurada'}
+                else:
+                    checks['api_ia'] = {'ok': False, 'detail': 'sem openrouter_api_key'}
+            elif ai_mode == 'anthropic-api':
+                anthropic_key = cfg.get('anthropic_api_key', '') or os.environ.get('ANTHROPIC_API_KEY', '')
+                checks['api_ia'] = {'ok': bool(anthropic_key), 'detail': 'anthropic key configurada' if anthropic_key else 'sem anthropic_api_key'}
+            else:
+                r = subprocess.run(['claude', '-p', '--output-format', 'json', 'diga ok'], capture_output=True, text=True, timeout=30)
+                checks['api_ia'] = {'ok': r.returncode == 0, 'detail': 'Claude CLI ok' if r.returncode == 0 else f'erro code {r.returncode}'}
         except Exception as e:
             checks['api_ia'] = {'ok': False, 'detail': str(e)[:80]}
 
@@ -499,7 +522,6 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
         # Thumbnail API - testa o provider configurado
         try:
-            cfg = db.load_config()
             img_provider = cfg.get('thumb_image_provider', 'piramyd')
 
             if img_provider == 'kie':
@@ -512,7 +534,14 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                     checks['api_thumb'] = {'ok': True, 'detail': f'kie ok'}
                 else:
                     checks['api_thumb'] = {'ok': False, 'detail': 'sem kie_api_key'}
+            elif img_provider == 'minimax':
+                minimax_key = cfg.get('minimax_api_key', '') or os.environ.get('MINIMAX_API_KEY', '')
+                if minimax_key:
+                    checks['api_thumb'] = {'ok': True, 'detail': 'minimax key configurada'}
+                else:
+                    checks['api_thumb'] = {'ok': False, 'detail': 'sem minimax_api_key'}
             elif img_provider == 'piramyd':
+                api_key = cfg.get('thumb_api_key', '') or api_key
                 if api_key:
                     payload = json.dumps({'model': 'chatgpt-4.1', 'messages': [{'role': 'user', 'content': 'ok'}], 'max_tokens': 1}).encode()
                     req = urllib.request.Request('https://api.piramyd.cloud/v1/chat/completions', data=payload)
@@ -923,7 +952,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             import import_worker
 
             result = subprocess.run(
-                ['yt-dlp', '-j', '--no-warnings', url],
+                yt_dlp_cmd() + ['-j', '--no-warnings', url],
                 capture_output=True, text=True, timeout=120
             )
             if result.returncode != 0:
@@ -1004,7 +1033,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                 mp = os.path.join(lives_dir, lid, 'clips_manifest.json')
                 if os.path.exists(mp):
                     try:
-                        with open(mp) as f:
+                        with open(mp, encoding='utf-8') as f:
                             manifests_cache[lid] = {c.get('title', ''): c.get('filename', '') for c in json.load(f)}
                     except Exception:
                         manifests_cache[lid] = {}
@@ -1037,7 +1066,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                 if not os.path.exists(manifest_path):
                     continue
                 try:
-                    with open(manifest_path) as f:
+                    with open(manifest_path, encoding='utf-8') as f:
                         clips = json.load(f)
                     for c in clips:
                         title = c.get('title', '')
@@ -1057,12 +1086,12 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                     pass
             elif os.path.exists(topics_path):
                 try:
-                    with open(topics_path) as f:
+                    with open(topics_path, encoding='utf-8') as f:
                         topics_data = json.load(f)
                     # Load manifest for filenames and paused state
                     manifest = {}
                     if os.path.exists(manifest_path):
-                        with open(manifest_path) as f:
+                        with open(manifest_path, encoding='utf-8') as f:
                             for c in json.load(f):
                                 manifest[c.get('title', '')] = {
                                     'filename': c.get('filename', ''),
@@ -1119,6 +1148,9 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         config = db.load_config()
         to_save = {}
 
+        if 'minimax_api_key' not in config and os.environ.get('MINIMAX_API_KEY'):
+            config['minimax_api_key'] = os.environ.get('MINIMAX_API_KEY', '')
+
         # Add canal info from env/YouTube API
         channel_id = os.environ.get('YOUTUBE_CHANNEL_ID', '')
         if channel_id and 'canal_origem_nome' not in config:
@@ -1166,7 +1198,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         for name in ('prompt_cortes', 'prompt_pub', 'prompt_thumb', 'prompt_enrich'):
             path = os.path.join(config_dir, f'{name}.txt')
             if os.path.exists(path):
-                with open(path) as f:
+                with open(path, encoding='utf-8') as f:
                     prompts[name] = f.read()
             else:
                 prompts[name] = ''
@@ -1178,7 +1210,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         for name in ('prompt_cortes', 'prompt_pub', 'prompt_thumb', 'prompt_enrich'):
             if name in data:
                 path = os.path.join(config_dir, f'{name}.txt')
-                with open(path, 'w') as f:
+                with open(path, 'w', encoding='utf-8') as f:
                     f.write(data[name])
                 saved.append(name)
         self.send_json(200, {'ok': True, 'saved': saved})

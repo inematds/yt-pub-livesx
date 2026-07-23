@@ -1015,6 +1015,7 @@
         <input type="hidden" id="cfgOpenrouterApiKey">
         <input type="hidden" id="cfgThumbApiKey">
         <input type="hidden" id="cfgKieApiKey">
+        <input type="hidden" id="cfgMinimaxApiKey">
         <input type="hidden" id="cfgInemaimgUrl">
         <input type="hidden" id="cfgAiModel">
         <div style="margin-top:12px;padding:10px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:8px;">
@@ -2557,6 +2558,7 @@ function updateThumbFields() {
   const container = document.getElementById('thumbFieldsExtra');
   const thumbH = document.getElementById('cfgThumbApiKey');
   const kieH = document.getElementById('cfgKieApiKey');
+  const minimaxH = document.getElementById('cfgMinimaxApiKey');
   const inemaH = document.getElementById('cfgInemaimgUrl');
 
   const providerMap = {
@@ -2564,7 +2566,7 @@ function updateThumbFields() {
       models: 'dreamshaper, flux2-klein-4b, sdxl-lite, flux-schnell'},
     'kie': {id: 'cfgKieApiKey', label: 'API Key Kie.ai', placeholder: 'abc123...', src: kieH,
       models: 'gpt4o-image, flux-kontext-pro, google/nano-banana'},
-    'minimax': {id: '', label: '', placeholder: '', src: null,
+    'minimax': {id: 'cfgMinimaxApiKey', label: 'API Key MiniMax', placeholder: 'eyJ...', src: minimaxH,
       models: 'image-01 (unico modelo)'},
     'google': {id: '', label: '', placeholder: '', src: null,
       models: 'imagen-4.0-fast-generate-001, imagen-4.0-generate-001'},
@@ -3428,6 +3430,7 @@ async function loadConfig() {
   setVal('cfgThumbApiKey', c.thumb_api_key);
   setVal('cfgOpenrouterApiKey', c.openrouter_api_key);
   setVal('cfgKieApiKey', c.kie_api_key);
+  setVal('cfgMinimaxApiKey', c.minimax_api_key);
   setVal('cfgInemaimgUrl', c.inemaimg_url);
 
   // Analise IA
@@ -3634,6 +3637,7 @@ function saveApis(btn) {
       thumb_api_key: document.getElementById('cfgThumbApiKey').value,
       openrouter_api_key: document.getElementById('cfgOpenrouterApiKey').value,
       kie_api_key: document.getElementById('cfgKieApiKey').value,
+      minimax_api_key: document.getElementById('cfgMinimaxApiKey').value,
       inemaimg_url: document.getElementById('cfgInemaimgUrl').value,
       thumb_mode: document.getElementById('cfgThumbMode').value,
       thumb_image_provider: document.getElementById('cfgThumbImageProvider').value,

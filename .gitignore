@@ -9,8 +9,10 @@ config/.env
 config/credentials.enc
 config/.encryption_key
 config/client_secret.json
+client_secret_*.json
 config/token_cache.json
 lives/
+data/
 node_modules/
 *.log
 dashboard/scheduler_status.json

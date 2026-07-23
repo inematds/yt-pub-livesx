@@ -22,7 +22,10 @@ fi
 GWS_CONFIG_DIR="${GWS_CONFIG_DIR:-${SCRIPT_DIR}/../config}"
 CLIENT_ID="${CLIENT_ID:?Erro: CLIENT_ID não definido. Verifique $ENV_FILE}"
 CLIENT_SECRET="${CLIENT_SECRET:?Erro: CLIENT_SECRET não definido. Verifique $ENV_FILE}"
-API_KEY="${API_KEY:?Erro: API_KEY não definido. Verifique $ENV_FILE}"
+API_KEY="${API_KEY:-}"
+if [[ "$API_KEY" =~ ^(your|example|demo|xxx|placeholder) ]]; then
+  API_KEY=""
+fi
 GWS_BIN="${HOME}/.npm-global/bin/gws"
 
 # --- Defaults ---
@@ -158,27 +161,37 @@ echo "==> Arquivo: $FILE_PATH ($FILE_SIZE bytes)"
 # --- Monta metadata ---
 TAGS_JSON="[]"
 if [[ -n "$TAGS" ]]; then
-  TAGS_JSON=$(python3 -c "import json; print(json.dumps('$TAGS'.split(',')))")
+  TAGS_JSON=$(TAGS_RAW="$TAGS" python3 - <<'PYEOF'
+import json
+import os
+
+tags = [t.strip() for t in os.environ.get('TAGS_RAW', '').split(',') if t.strip()]
+print(json.dumps(tags, ensure_ascii=False))
+PYEOF
+)
 fi
 
-METADATA=$(python3 -c "
+METADATA=$(TITLE_RAW="$TITLE" DESCRIPTION_RAW="$DESCRIPTION" TAGS_JSON="$TAGS_JSON" CATEGORY_RAW="$CATEGORY" LANGUAGE_RAW="$LANGUAGE" PRIVACY_RAW="$PRIVACY" python3 - <<'PYEOF'
 import json
+import os
+
 meta = {
     'snippet': {
-        'title': '''$TITLE''',
-        'description': '''$DESCRIPTION''',
-        'tags': $TAGS_JSON,
-        'categoryId': '$CATEGORY',
-        'defaultLanguage': '$LANGUAGE',
-        'defaultAudioLanguage': '$LANGUAGE'
+        'title': os.environ.get('TITLE_RAW', ''),
+        'description': os.environ.get('DESCRIPTION_RAW', ''),
+        'tags': json.loads(os.environ.get('TAGS_JSON', '[]')),
+        'categoryId': os.environ.get('CATEGORY_RAW', '22'),
+        'defaultLanguage': os.environ.get('LANGUAGE_RAW', 'pt'),
+        'defaultAudioLanguage': os.environ.get('LANGUAGE_RAW', 'pt')
     },
     'status': {
-        'privacyStatus': '$PRIVACY',
+        'privacyStatus': os.environ.get('PRIVACY_RAW', 'public'),
         'selfDeclaredMadeForKids': False
     }
 }
-print(json.dumps(meta))
-")
+print(json.dumps(meta, ensure_ascii=False))
+PYEOF
+)
 
 echo "==> Iniciando upload para YouTube..."
 echo "    Título: $TITLE"
@@ -187,6 +200,11 @@ echo "    Categoria: $CATEGORY"
 
 # --- Upload resumable ---
 # Step 1: Initiate upload
+UPLOAD_ENDPOINT="https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status"
+if [[ -n "$API_KEY" ]]; then
+  UPLOAD_ENDPOINT="${UPLOAD_ENDPOINT}&key=${API_KEY}"
+fi
+
 UPLOAD_URL=$(curl -s -X POST \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "Content-Type: application/json; charset=UTF-8" \
@@ -194,7 +212,7 @@ UPLOAD_URL=$(curl -s -X POST \
   -H "X-Upload-Content-Type: video/*" \
   -D - \
   -d "$METADATA" \
-  "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status&key=$API_KEY" \
+  "$UPLOAD_ENDPOINT" \
   2>/dev/null | grep -i "^location:" | tr -d '\r' | sed 's/location: //i')
 
 if [[ -z "$UPLOAD_URL" ]]; then

@@ -115,7 +115,7 @@ echo "==> [2/5] Processando transcrição..."
 python3 << PYEOF
 import json
 
-with open('$JOB_DIR/transcript_raw.json3') as f:
+with open('$JOB_DIR/transcript_raw.json3', encoding='utf-8') as f:
     data = json.load(f)
 
 events = data.get('events', [])
@@ -152,7 +152,7 @@ for b in blocks:
     end = f"{int(b['end_ms']/1000//60):02d}:{int(b['end_ms']/1000%60):02d}"
     condensed.append(f"[{start}-{end}] {b['text'].strip()}")
 
-with open('$JOB_DIR/condensed.txt', 'w') as f:
+with open('$JOB_DIR/condensed.txt', 'w', encoding='utf-8') as f:
     f.write('\n'.join(condensed))
 
 duration_min = blocks[-1]['end_ms'] / 1000 / 60 if blocks else 0
@@ -222,13 +222,13 @@ PROMPTEOF
   python3 << PYEOF
 import json, re
 
-with open('$JOB_DIR/claude_response.txt') as f:
+with open('$JOB_DIR/claude_response.txt', encoding='utf-8') as f:
     response_text = f.read()
 
 json_match = re.search(r'\{[\s\S]*\}', response_text)
 if json_match:
     topics_data = json.loads(json_match.group())
-    with open('$JOB_DIR/topics.json', 'w') as f:
+    with open('$JOB_DIR/topics.json', 'w', encoding='utf-8') as f:
         json.dump(topics_data, f, ensure_ascii=False, indent=2)
     print(f"    Encontrados {len(topics_data.get('topics',[]))} tópicos")
 else:
@@ -259,7 +259,7 @@ import json, urllib.request, os, re
 
 api_key = os.environ['ANTHROPIC_API_KEY']
 
-with open('$JOB_DIR/prompt.txt') as f:
+with open('$JOB_DIR/prompt.txt', encoding='utf-8') as f:
     prompt_text = f.read()
 
 payload = {
@@ -281,7 +281,7 @@ response_text = result['content'][0]['text']
 json_match = re.search(r'\{[\s\S]*\}', response_text)
 if json_match:
     topics_data = json.loads(json_match.group())
-    with open('$JOB_DIR/topics.json', 'w') as f:
+    with open('$JOB_DIR/topics.json', 'w', encoding='utf-8') as f:
         json.dump(topics_data, f, ensure_ascii=False, indent=2)
     print(f"    Encontrados {len(topics_data.get('topics',[]))} tópicos")
 else:
@@ -311,7 +311,7 @@ import json, urllib.request, os, re
 api_key = os.environ['OPENROUTER_API_KEY']
 model = os.environ.get('AI_MODEL', 'anthropic/claude-sonnet-4')
 
-with open('$JOB_DIR/prompt.txt') as f:
+with open('$JOB_DIR/prompt.txt', encoding='utf-8') as f:
     prompt_text = f.read()
 
 payload = {
@@ -332,7 +332,7 @@ response_text = result['choices'][0]['message']['content']
 json_match = re.search(r'\{[\s\S]*\}', response_text)
 if json_match:
     topics_data = json.loads(json_match.group())
-    with open('$JOB_DIR/topics.json', 'w') as f:
+    with open('$JOB_DIR/topics.json', 'w', encoding='utf-8') as f:
         json.dump(topics_data, f, ensure_ascii=False, indent=2)
     print(f"    Encontrados {len(topics_data.get('topics',[]))} tópicos")
 else:
@@ -362,7 +362,7 @@ import json, urllib.request, os, re
 api_key = os.environ['PIRAMYD_API_KEY']
 model = os.environ.get('AI_MODEL', 'claude-sonnet-4.5')
 
-with open('$JOB_DIR/prompt.txt') as f:
+with open('$JOB_DIR/prompt.txt', encoding='utf-8') as f:
     prompt_text = f.read()
 
 payload = {
@@ -383,7 +383,7 @@ response_text = result['choices'][0]['message']['content']
 json_match = re.search(r'\{[\s\S]*\}', response_text)
 if json_match:
     topics_data = json.loads(json_match.group())
-    with open('$JOB_DIR/topics.json', 'w') as f:
+    with open('$JOB_DIR/topics.json', 'w', encoding='utf-8') as f:
         json.dump(topics_data, f, ensure_ascii=False, indent=2)
     print(f"    Encontrados {len(topics_data.get('topics',[]))} tópicos")
 else:
@@ -418,7 +418,7 @@ fi
 echo ""
 python3 << PYEOF
 import json
-with open('$JOB_DIR/topics.json') as f:
+with open('$JOB_DIR/topics.json', encoding='utf-8') as f:
     data = json.load(f)
 
 print(f"    Video: {data.get('video_title','')}")
@@ -443,7 +443,7 @@ echo "==> [4/5] Baixando vídeo e cortando clips..."
 
 # Valida source.mp4 existente (remove se corrompido/incompleto)
 if [[ -f "$JOB_DIR/source.mp4" ]]; then
-  if ! ffprobe -v error -select_streams v:0 -show_entries stream=codec_type "$JOB_DIR/source.mp4" >/dev/null 2>&1; then
+  if ! ffmpeg -v error -i "$JOB_DIR/source.mp4" -f null - >/dev/null 2>&1; then
     echo "    source.mp4 existente corrompido, removendo para re-download..."
     rm -f "$JOB_DIR/source.mp4"
   fi
@@ -467,7 +467,7 @@ if [[ ! -f "$JOB_DIR/source.mp4" ]]; then
   echo "    Download completo"
 
   # Valida download recem-feito
-  if ! ffprobe -v error -select_streams v:0 -show_entries stream=codec_type "$JOB_DIR/source.mp4" >/dev/null 2>&1; then
+  if ! ffmpeg -v error -i "$JOB_DIR/source.mp4" -f null - >/dev/null 2>&1; then
     echo "Erro: source.mp4 baixado esta corrompido" >&2
     rm -f "$JOB_DIR/source.mp4"
     exit 1
@@ -478,7 +478,7 @@ fi
 python3 << PYEOF
 import json, subprocess, os
 
-with open('$JOB_DIR/topics.json') as f:
+with open('$JOB_DIR/topics.json', encoding='utf-8') as f:
     data = json.load(f)
 
 clips_dir = '$JOB_DIR/clips'
@@ -534,7 +534,7 @@ for i, t in enumerate(data.get('topics', []), 1):
         'duration': duration
     })
 
-with open('$JOB_DIR/clips_manifest.json', 'w') as f:
+with open('$JOB_DIR/clips_manifest.json', 'w', encoding='utf-8') as f:
     json.dump(results, f, ensure_ascii=False, indent=2)
 
 total = len(data.get('topics', []))
@@ -553,7 +553,7 @@ if [[ "$PUBLISH" == "true" ]]; then
   python3 << PYEOF
 import json, subprocess
 
-with open('$JOB_DIR/clips_manifest.json') as f:
+with open('$JOB_DIR/clips_manifest.json', encoding='utf-8') as f:
     clips = json.load(f)
 
 published = []
@@ -589,7 +589,7 @@ for clip in clips:
     else:
         print(f"    ✗ Erro: {output[:200]}")
 
-with open('$JOB_DIR/published.json', 'w') as f:
+with open('$JOB_DIR/published.json', 'w', encoding='utf-8') as f:
     json.dump(published, f, ensure_ascii=False, indent=2)
 
 print(f"\n==> {len(published)} clips publicados!")

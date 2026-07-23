@@ -381,14 +381,19 @@ def _generate_image_minimax(image_prompt):
     result = json.loads(resp.read())
 
     base_resp = result.get('base_resp', {})
-    if base_resp.get('status_code', 0) != 0:
+    if str(base_resp.get('status_code', 0)) != '0':
         raise ValueError(f'MiniMax erro: {base_resp.get("status_msg", "unknown")}')
 
-    data = result.get('data', [])
+    data = result.get('data') or {}
     if not data:
         raise ValueError('MiniMax nao retornou imagem')
 
-    img_b64 = data[0].get('b64_image', '')
+    images = data.get('image_base64') or data.get('images') or []
+    img_b64 = ''
+    if images:
+        img_b64 = images[0]
+    elif isinstance(data, list) and data:
+        img_b64 = data[0].get('b64_image', '') or data[0].get('image_base64', '')
     if not img_b64:
         raise ValueError('MiniMax sem base64 na resposta')
 
@@ -513,6 +518,21 @@ FONT_MAP = {
 }
 
 
+def resolve_font_path(font_key):
+    candidates = [
+        FONT_MAP.get(font_key, ''),
+        FONT_MAP['dejavu'],
+        r'C:\Windows\Fonts\arialbd.ttf',
+        r'C:\Windows\Fonts\segoeuib.ttf',
+        r'C:\Windows\Fonts\arial.ttf',
+        r'C:\Windows\Fonts\segoeui.ttf',
+    ]
+    for path in candidates:
+        if path and os.path.exists(path):
+            return path
+    return FONT_MAP['dejavu']
+
+
 PRESETS = {
     'premium': {'DESIGN_FONT':'montserrat-extrabold','DESIGN_FONT_SIZE':'82','DESIGN_LAST_LINE_SCALE':'15','DESIGN_LINE_HEIGHT':'90','DESIGN_TRACKING':'tight','DESIGN_CASE':'upper','DESIGN_TEXT_COLOR':'#F5F3EE','DESIGN_HIGHLIGHT_COLOR':'#D9B65B','DESIGN_HIGHLIGHT_ENABLED':'true','DESIGN_ACCENT_COLOR':'#D9B65B','DESIGN_ACCENT_WIDTH':'250','DESIGN_ACCENT_HEIGHT':'5','DESIGN_ACCENT_GAP':'30','DESIGN_ACCENT_ENABLED':'true','DESIGN_SHADOW_TYPE':'blur','DESIGN_SHADOW_COLOR':'#000000','DESIGN_SHADOW_SIZE':'8','DESIGN_SHADOW_OPACITY':'180','DESIGN_GRADIENT':'top-left','DESIGN_GRADIENT_OPACITY':'160','DESIGN_GRADIENT_COVERAGE':'40','DESIGN_BRAND_FONT':'montserrat-extrabold','DESIGN_BRAND_SIZE':'26','DESIGN_BRAND_COLOR':'#D9B65B','DESIGN_BRAND_POSITION':'bottom-left','DESIGN_POSITION':'top-left'},
     'youtube': {'DESIGN_FONT':'anton','DESIGN_FONT_SIZE':'90','DESIGN_LAST_LINE_SCALE':'0','DESIGN_LINE_HEIGHT':'96','DESIGN_TRACKING':'normal','DESIGN_CASE':'upper','DESIGN_TEXT_COLOR':'#FFFFFF','DESIGN_HIGHLIGHT_COLOR':'#FFFF00','DESIGN_HIGHLIGHT_ENABLED':'true','DESIGN_ACCENT_COLOR':'#FF0000','DESIGN_ACCENT_WIDTH':'250','DESIGN_ACCENT_HEIGHT':'5','DESIGN_ACCENT_GAP':'30','DESIGN_ACCENT_ENABLED':'true','DESIGN_SHADOW_TYPE':'outline','DESIGN_SHADOW_COLOR':'#000000','DESIGN_SHADOW_SIZE':'4','DESIGN_SHADOW_OPACITY':'255','DESIGN_GRADIENT':'none','DESIGN_GRADIENT_OPACITY':'0','DESIGN_GRADIENT_COVERAGE':'0','DESIGN_BRAND_FONT':'anton','DESIGN_BRAND_SIZE':'28','DESIGN_BRAND_COLOR':'#FF0000','DESIGN_BRAND_POSITION':'bottom-left','DESIGN_POSITION':'center-left'},
@@ -605,9 +625,7 @@ def compose_thumbnail(bg, frase_curta, cores_str, output_path):
     design_brand_position = os.environ.get('DESIGN_BRAND_POSITION', 'bottom-left')
     design_position = os.environ.get('DESIGN_POSITION', THUMB_TEXT_POSITION)
 
-    font_path = FONT_MAP.get(design_font, FONT_MAP['dejavu'])
-    if not os.path.exists(font_path):
-        font_path = FONT_MAP['dejavu']
+    font_path = resolve_font_path(design_font)
 
     # Apply text case
     text = frase_curta.upper() if design_case == 'upper' else frase_curta
@@ -763,9 +781,7 @@ def compose_thumbnail(bg, frase_curta, cores_str, output_path):
         draw.rectangle([x_start, accent_y, x_start + design_accent_width, accent_y + design_accent_height], fill=design_accent_color)
 
     # --- Brand pill ---
-    brand_font_path = FONT_MAP.get(design_brand_font, FONT_MAP['dejavu'])
-    if not os.path.exists(brand_font_path):
-        brand_font_path = FONT_MAP['dejavu']
+    brand_font_path = resolve_font_path(design_brand_font)
     brand_font = ImageFont.truetype(brand_font_path, design_brand_size)
     bbox = draw.textbbox((0, 0), design_brand, font=brand_font)
     brand_w = bbox[2] - bbox[0]
