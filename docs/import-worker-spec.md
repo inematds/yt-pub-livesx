@@ -180,3 +180,31 @@ python3 import_worker.py clean-clips
 # Limpar clips/ de todas as lives
 python3 import_worker.py clean-clips --all
 ```
+
+---
+
+## Re-enriquecer imports ja publicados (titulo/descricao genericos)
+
+Se um import cair no fallback (`import_gerar_descricao=false` ou transcricao falhou) e
+o video ja foi publicado no YouTube com titulo generico (ex: nome do arquivo, "Mkivideo"),
+use `scripts/reenrich_imports.py` pra corrigir depois:
+
+```bash
+python3 scripts/reenrich_imports.py
+```
+
+O que ele faz:
+1. Le a tabela `publicados`, filtra as linhas vindas de import (`live_video_id` comeca com `import_`).
+2. Acha o clip mp4 original via `lives/<lote>/clips_manifest.json` (casa pelo indice no
+   final do `filename` salvo em `publicados`, ex: `import_20260722_videos_3` -> indice 3).
+   Se o mp4 nao existir mais em disco, pula esse video.
+3. Transcreve o audio (Groq Whisper, fallback whisper local) e gera titulo+descricao
+   via Claude CLI a partir da transcricao real (mesma logica de `_gerar_titulo_descricao_ia`
+   do `import_worker.py`). Se a transcricao falhar/for curta demais, cai no fallback
+   (titulo do nome do arquivo + descricao gerada so a partir do titulo).
+4. Atualiza direto no YouTube (`scheduler.update_video_metadata`, PUT na Data API v3)
+   e atualiza `clip_titulo` na tabela `publicados`.
+
+Roda pra **todos** os imports publicados encontrados no banco, sem limite e sem filtro
+de "ja enriquecido" — reprocessa mesmo os que ja tem titulo bom, entao rode sob demanda,
+nao agendado.
