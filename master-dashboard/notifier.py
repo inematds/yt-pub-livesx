@@ -23,6 +23,7 @@ import html
 import json
 import mimetypes
 import os
+import re
 import sqlite3
 import threading
 import time
@@ -312,12 +313,18 @@ def _resolve_clip_file(inst, live_video_id, filename):
 
 # --------------------------------------------------------- loop de aviso
 
+def _chat_ids(cfg):
+    """telegram_notify_chat_id aceita varios ids separados por virgula."""
+    raw = cfg.get('telegram_notify_chat_id', '') or ''
+    return [c.strip() for c in raw.replace(';', ',').split(',') if c.strip()]
+
+
 def _notify_instance(inst):
     cfg = _read_config(inst)
     if (cfg.get('telegram_notify_enabled', 'false') or 'false').lower() != 'true':
         return
-    chat_id = (cfg.get('telegram_notify_chat_id', '') or '').strip()
-    if not chat_id:
+    chats = _chat_ids(cfg)
+    if not chats:
         return
 
     since = (datetime.now() - timedelta(hours=WINDOW_HOURS)).strftime('%Y-%m-%d %H:%M')
@@ -355,12 +362,18 @@ def _notify_instance(inst):
             'text': '📤 Enviar o video',
             'callback_data': f"v:{inst['id']}:{r['id']}",
         }]]}
-        resp = send_message(chat_id, text, markup)
-        if resp and resp.get('ok'):
+        ok = 0
+        for chat_id in chats:
+            resp = send_message(chat_id, text, markup)
+            if resp and resp.get('ok'):
+                ok += 1
+
+        if ok:
             with _state_lock:
                 _inst_state(inst['name'])['notified'][str(r['id'])] = r.get('data_publicacao') or since
                 _save_state()
-            _log(f"[notifier] {inst['name']}: avisado {label} '{titulo[:40]}'")
+            _log(f"[notifier] {inst['name']}: avisado {label} '{titulo[:40]}' "
+                 f"({ok}/{len(chats)} destinos)")
         else:
             # nao marca como notificado — tenta de novo no proximo ciclo
             _log(f"[notifier] {inst['name']}: falha ao avisar row {r['id']}")
@@ -378,6 +391,106 @@ def notify_loop():
             except Exception as e:
                 _log(f"[notifier] erro em {inst.get('name')}: {e}")
         time.sleep(NOTIFY_INTERVAL)
+
+
+# ------------------------------------------------------------- cadastro
+
+def enroll_open():
+    with _state_lock:
+        return bool(_load_state().get('enroll_open'))
+
+
+def set_enroll(open_):
+    """Abre/fecha o cadastro por ping. Fechado, ninguem novo entra."""
+    with _state_lock:
+        _load_state()['enroll_open'] = bool(open_)
+        _save_state()
+    _log(f"[notifier] cadastro por ping {'ABERTO' if open_ else 'FECHADO'}")
+
+
+def _write_config(inst, chave, valor):
+    """Escreve uma chave na tabela config da instancia."""
+    conn = sqlite3.connect(_db_path(inst), timeout=10)
+    try:
+        conn.execute('INSERT OR REPLACE INTO config (chave, valor) VALUES (?, ?)',
+                     (chave, str(valor)))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _match_instance(text):
+    """'meu canal e o lives10' / 'livesN' / 'lives3x' -> instancia."""
+    m = re.search(r'lives\s*0*(\d+)\s*(x?)', (text or '').lower())
+    if not m:
+        return None
+    alvo = f"lives{int(m.group(1))}{m.group(2)}"
+    for i in _instances:
+        nome = (i.get('name') or '').lower()
+        if nome == alvo or nome == f'yt-pub-{alvo}':
+            return i
+    return None
+
+
+def _enroll(chat_id, inst):
+    """Adiciona o chat na lista do canal e liga a notificacao."""
+    cfg = _read_config(inst)
+    if not cfg:
+        return False, 'Canal sem banco de dados acessivel.'
+
+    chats = _chat_ids(cfg)
+    ja = str(chat_id) in chats
+    if not ja:
+        chats.append(str(chat_id))
+        try:
+            _write_config(inst, 'telegram_notify_chat_id', ','.join(chats))
+        except Exception as e:
+            _log(f"[notifier] falha ao cadastrar {chat_id} em {inst['name']}: {e}")
+            return False, 'Nao consegui gravar o cadastro. Avisa o admin.'
+
+    if (cfg.get('telegram_notify_enabled', 'false') or '').lower() != 'true':
+        try:
+            _write_config(inst, 'telegram_notify_enabled', 'true')
+        except Exception as e:
+            _log(f"[notifier] falha ao ligar notificacao em {inst['name']}: {e}")
+
+    _log(f"[notifier] cadastrado chat {chat_id} em {inst['name']} "
+         f"({'ja estava' if ja else 'novo'})")
+    nome = html.escape(inst['name'])
+    if ja:
+        return True, f'Voce ja esta cadastrado no <b>{nome}</b>.'
+    return True, (f'✅ Cadastrado no <b>{nome}</b>.\n\n'
+                  f'A partir da proxima publicacao voce recebe o aviso com o link, '
+                  f'e um botao pra eu te mandar o video.')
+
+
+_AJUDA = ('Sou o bot de avisos de publicacao.\n\n'
+          'Pra receber os avisos de um canal, manda:\n'
+          '<code>meu canal e o lives10</code>')
+
+
+def _handle_message(msg):
+    chat = msg.get('chat') or {}
+    chat_id = chat.get('id')
+    text = (msg.get('text') or '').strip()
+    if chat_id is None or not text:
+        return
+
+    inst = _match_instance(text)
+
+    if inst is None:
+        if text.lower().startswith('/start') or 'canal' in text.lower():
+            send_message(chat_id, _AJUDA)
+        return
+
+    if not enroll_open():
+        send_message(chat_id, 'Cadastro fechado no momento. Fala com o admin.')
+        _log(f'[notifier] cadastro recusado (fechado): chat {chat_id} '
+             f"pediu {inst['name']}")
+        return
+
+    ok, resposta = _enroll(chat_id, inst)
+    send_message(chat_id, resposta)
 
 
 # ------------------------------------------------------ loop dos cliques
@@ -449,7 +562,7 @@ def updates_loop():
             resp = _api_call('getUpdates', {
                 'offset': offset,
                 'timeout': LONGPOLL_TIMEOUT,
-                'allowed_updates': json.dumps(['callback_query']),
+                'allowed_updates': json.dumps(['callback_query', 'message']),
             })
             if not resp.get('ok'):
                 _log(f'[notifier] getUpdates nao-ok: {resp}')
@@ -459,8 +572,13 @@ def updates_loop():
                 with _state_lock:
                     _load_state()['offset'] = upd['update_id'] + 1
                     _save_state()
-                if 'callback_query' in upd:
-                    _handle_callback(upd['callback_query'])
+                try:
+                    if 'callback_query' in upd:
+                        _handle_callback(upd['callback_query'])
+                    elif 'message' in upd:
+                        _handle_message(upd['message'])
+                except Exception as e:
+                    _log(f'[notifier] erro tratando update: {e}')
         except urllib.error.HTTPError as e:
             if e.code == 409:
                 _log('[notifier] 409 Conflict — este token ja esta sendo pollado '

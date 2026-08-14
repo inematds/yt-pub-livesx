@@ -7,7 +7,8 @@ Configuracao **por canal**, deteccao e envio **na master**.
 - **Canal (instancia):** duas chaves na tabela `config`, editaveis na aba
   *Config > Horarios* do dashboard:
   - `telegram_notify_enabled` — `true` / `false`
-  - `telegram_notify_chat_id` — ID do usuario (ou grupo, comeca com `-`)
+  - `telegram_notify_chat_id` — um ou mais IDs separados por virgula
+    (grupo comeca com `-`)
 - **Master (`master-dashboard/notifier.py`):** duas threads, iniciadas pelo
   `main()` do `server.py`.
   - `notify_loop()` — a cada 60s le o `data/lives.db` de cada instancia,
@@ -29,6 +30,26 @@ normal).
 
 O destinatario precisa dar `/start` no bot uma vez, senao o Telegram recusa a
 mensagem com 403.
+
+## Cadastro pelo proprio bot
+
+O usuario manda `meu canal e o livesN` para o bot. O `updates_loop` reconhece o
+canal, adiciona o chat_id na lista daquele canal e liga
+`telegram_notify_enabled`. Idempotente: repetir nao duplica.
+
+**Interruptor:** so funciona com o cadastro aberto — flag `enroll_open` no
+`notify_state.json`. Fechado, o bot responde "cadastro fechado" e nao grava
+nada. Abrir / fechar:
+
+```bash
+cd <master>/master-dashboard
+python3 -c "import notifier,json; notifier.init([], print); notifier.set_enroll(True)"
+systemctl --user restart yt-master-dashboard   # recarrega o estado
+```
+
+Enquanto estiver aberto, **qualquer pessoa que descubra o bot consegue se
+inscrever num canal e pedir o MP4**. Fechar assim que terminar o cadastro da
+turma.
 
 ## Deteccao
 
