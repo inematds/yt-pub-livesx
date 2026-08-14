@@ -124,6 +124,57 @@ def _load_groq_key():
     return None
 
 
+def _ensure_faststart(mp4_path):
+    """
+    Garante que o moov atom esta no inicio do MP4 (faststart).
+    TikTok rejeita videos sem faststart ('video nao esta codificado').
+    Instagram aceita ambos, por isso passa la mas falha no TikTok.
+    Usa ffmpeg -movflags +faststart com stream copy (sem re-encode).
+    """
+    import struct
+    try:
+        with open(mp4_path, 'rb') as f:
+            # Le os primeiros atoms para checar se moov ja esta antes de mdat
+            atoms = []
+            for _ in range(10):
+                pos = f.tell()
+                hdr = f.read(8)
+                if len(hdr) < 8:
+                    break
+                size = struct.unpack('>I', hdr[:4])[0]
+                name = hdr[4:8].decode('ascii', errors='replace')
+                atoms.append(name)
+                if name in ('moov', 'mdat'):
+                    break
+                if size < 8:
+                    break
+                f.seek(pos + size)
+            # Se moov aparece antes de mdat, ja esta ok
+            if 'moov' in atoms and ('mdat' not in atoms or atoms.index('moov') < atoms.index('mdat')):
+                return
+    except Exception:
+        pass  # na duvida, re-processa
+
+    tmp = os.path.join(tempfile.gettempdir(), f'faststart_{os.getpid()}_{os.path.basename(mp4_path)}')
+    try:
+        result = subprocess.run(
+            ['ffmpeg', '-y', '-i', mp4_path, '-c', 'copy',
+             '-movflags', '+faststart', tmp],
+            capture_output=True, text=True, timeout=300
+        )
+        if result.returncode == 0 and os.path.exists(tmp) and os.path.getsize(tmp) > 0:
+            os.replace(tmp, mp4_path)
+            log(f'  faststart aplicado: {os.path.basename(mp4_path)}')
+        else:
+            log(f'  AVISO: faststart falhou para {os.path.basename(mp4_path)}')
+            if os.path.exists(tmp):
+                os.remove(tmp)
+    except Exception as e:
+        log(f'  AVISO: faststart erro: {e}')
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+
 def _extract_audio(clip_path, out_wav):
     """Extrai audio mono 16kHz do clip via ffmpeg (formato ideal p/ whisper)."""
     result = subprocess.run(
@@ -456,11 +507,14 @@ def _process_folder(folder_name, gerar_descricao, import_fila=True):
             clip['privacy'] = meta['privacy']
 
     # Move MP4s (usa _src_path para suportar arquivos em subdiretorios)
+    # Aplica faststart (moov atom no inicio) para compatibilidade com TikTok
     for clip in clips:
         src = clip.pop('_src_path', os.path.join(folder_path, clip['filename']))
         dst = clip['file']
         if os.path.exists(src):
             shutil.move(src, dst)
+            # Garante faststart: TikTok rejeita MP4 com moov atom no final
+            _ensure_faststart(dst)
             log(f'  Movido: {clip["filename"]}')
 
     # Escreve clips_manifest.json
