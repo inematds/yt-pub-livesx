@@ -453,13 +453,13 @@ fi
 if [[ ! -f "$JOB_DIR/source.mp4" ]]; then
   echo "    Baixando vídeo..."
   if ! yt-dlp --cookies-from-browser firefox --remote-components ejs:github \
-    -f "bestvideo[height<=1080]+bestaudio/best[height<=1080]" \
+    -f "bestvideo[height<=1080]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]" \
     --merge-output-format mp4 \
     -o "$JOB_DIR/source.mp4" \
     "https://www.youtube.com/watch?v=$VIDEO_ID" 2>/dev/null; then
     echo "    Falha com cookies, tentando sem cookies..."
     yt-dlp --remote-components ejs:github \
-      -f "bestvideo[height<=1080]+bestaudio/best[height<=1080]" \
+      -f "bestvideo[height<=1080]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]" \
       --merge-output-format mp4 \
       -o "$JOB_DIR/source.mp4" \
       "https://www.youtube.com/watch?v=$VIDEO_ID" 2>/dev/null
@@ -511,7 +511,13 @@ for i, t in enumerate(data.get('topics', []), 1):
             '-ss', str(start_sec),
             '-i', '$JOB_DIR/source.mp4',
             '-t', str(duration),
-            '-c', 'copy',
+            # Video copiado; audio SEMPRE re-encodado pra AAC. O melhor audio
+            # do YouTube e Opus, e MP4 com Opus e recusado pelo TikTok e pela
+            # maioria dos editores ("video nao esta codificado").
+            '-c:v', 'copy',
+            '-c:a', 'aac', '-b:a', '192k',
+            # moov atom no inicio: TikTok exige, Instagram nao liga.
+            '-movflags', '+faststart',
             '-avoid_negative_ts', 'make_zero',
             filepath
         ]
