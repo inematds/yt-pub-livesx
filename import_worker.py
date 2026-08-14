@@ -105,7 +105,7 @@ def _gerar_descricao_ia(title):
 TRANSCRIPT_MIN_CHARS = 30  # abaixo disso, transcricao e' considerada inutil (silencio/musica)
 
 _GROQ_KEY_PATHS = [
-    '/home/nmaldaner/projetos/openpcbot/.env',
+    '/home/nmaldaner/projetos/openpcbotv2/.env',
     '/home/nmaldaner/projetos/wifi/.env',
 ]
 
@@ -229,19 +229,78 @@ def _gerar_titulo_descricao_ia(transcript, fallback_title):
     return None, None
 
 
-def _collect_mp4s(folder_path):
+def _collect_mp4s(folder_path, exclude_dir=None):
     """
     Coleta todos os arquivos MP4 dentro de folder_path, recursivamente.
     Retorna lista de (caminho_absoluto, nome_arquivo) ordenada por nome.
+
+    exclude_dir: caminho da pasta de destino, ignorada se estiver dentro de
+    folder_path. Antes ignorava-se qualquer diretorio chamado 'clips', o que
+    tornava invisivel todo lote cujo payload fica em <lote>/clips/ (layout
+    gerado pelo distribute_imports e pela saida de outras instancias).
     """
+    skip = os.path.realpath(exclude_dir) if exclude_dir else None
     found = []
     for root, dirs, files in os.walk(folder_path):
-        # Ignora a propria pasta de destino (clips_dir pode estar dentro)
-        dirs[:] = [d for d in sorted(dirs) if d != 'clips']
+        dirs[:] = [
+            d for d in sorted(dirs)
+            if not (skip and os.path.realpath(os.path.join(root, d)) == skip)
+        ]
         for f in sorted(files):
             if f.lower().endswith('.mp4'):
                 found.append((os.path.join(root, f), f))
     return found
+
+
+def _find_batches(root, rel='', depth=0):
+    """
+    Expande uma pasta de imports/ na lista de LOTES reais que ela contem.
+
+    Uma pasta e um lote quando tem MP4 direto ou uma subpasta 'clips'.
+    Caso contrario e so um container (ex.: imports/lives/ com uma subpasta por
+    dia, ou imports/yt-pub-lives21/lives/<lote>/) e descemos um nivel.
+    Sem isso, imports/lives/ viraria UM unico lote juntando dias diferentes.
+
+    Retorna caminhos relativos a root.
+    """
+    path = os.path.join(root, rel) if rel else root
+    if depth > 4:
+        return []
+    try:
+        entries = os.listdir(path)
+    except OSError:
+        return []
+
+    subdirs = [
+        e for e in sorted(entries)
+        if not e.startswith('.') and os.path.isdir(os.path.join(path, e))
+    ]
+    has_mp4 = any(e.lower().endswith('.mp4') for e in entries)
+
+    if has_mp4 or 'clips' in subdirs:
+        return [rel]
+
+    batches = []
+    for d in subdirs:
+        batches.extend(_find_batches(root, os.path.join(rel, d), depth + 1))
+    return batches
+
+
+def _prune_empty_parents(rel):
+    """
+    Remove containers que ficaram sem nenhum arquivo apos o lote sair de
+    imports/. So poda esqueleto de diretorios: se sobrou qualquer arquivo,
+    para e deixa como esta.
+    """
+    parent = os.path.dirname(rel)
+    while parent:
+        p = os.path.join(IMPORTS_DIR, parent)
+        if not os.path.isdir(p):
+            return
+        if any(files for _, _, files in os.walk(p)):
+            return
+        shutil.rmtree(p, ignore_errors=True)
+        parent = os.path.dirname(parent)
 
 
 def _build_manifest(clips_dir, folder_path, gerar_descricao):
@@ -251,7 +310,7 @@ def _build_manifest(clips_dir, folder_path, gerar_descricao):
     Usa manifest.json da pasta de import se existir para metadados.
     """
     manifest_src = os.path.join(folder_path, 'manifest.json')
-    mp4_files = _collect_mp4s(folder_path)
+    mp4_files = _collect_mp4s(folder_path, exclude_dir=clips_dir)
 
     if not mp4_files:
         return []
@@ -356,16 +415,25 @@ def _process_folder(folder_name, gerar_descricao, import_fila=True):
         return None
 
     date_str  = datetime.now().strftime('%Y%m%d')
-    video_id  = f'import_{date_str}_{_sanitize(folder_name)}'
+    base_id   = f'import_{date_str}_{_sanitize(os.path.basename(folder_name))}'
 
-    # Verifica se ja existe no banco
-    if db.get_live(video_id):
-        log(f'  {video_id} ja existe no banco, pulando')
-        return None
+    # video_id do dia ja usado -> sufixa em vez de pular.
+    # Pular deixava a pasta presa em imports/ ate virar o dia: todo arquivo que
+    # chegasse depois do primeiro import do dia so entrava 24h mais tarde.
+    video_id = base_id
+    seq = 1
+    while db.get_live(video_id):
+        seq += 1
+        video_id = f'{base_id}_{seq}'
+        if seq > 50:
+            log(f'  {base_id}: mais de 50 lotes hoje, pulando')
+            return None
+    if seq > 1:
+        log(f'  {base_id} ja existe, usando {video_id}')
 
     # Le metadados do lote (publish_at, privacy, titulo)
     meta = _read_folder_meta(folder_path)
-    titulo_lote = meta.get('titulo') or folder_name
+    titulo_lote = meta.get('titulo') or os.path.basename(folder_name)
 
     # publish_at: so usado se import_fila=False
     publish_at = '' if import_fila else meta.get('publish_at', '')
@@ -428,8 +496,9 @@ def _process_folder(folder_name, gerar_descricao, import_fila=True):
 
     log(f'  Criado {video_id}: {len(clips)} clips | publish_at={publish_at or "fila_global"} | privacy={meta.get("privacy") or "config_global"}')
 
-    # Remove subfolder de imports/
+    # Remove subfolder de imports/ (e os containers que ficarem vazios)
     shutil.rmtree(folder_path, ignore_errors=True)
+    _prune_empty_parents(folder_name)
 
     return video_id, len(clips)
 
@@ -456,11 +525,19 @@ def process_imports(config=None):
     # import_fila_global=false -> respeita publish_at do manifest se definido
     import_fila = config.get('import_fila_global', 'true') == 'true'
 
-    folders = [
-        f for f in os.listdir(IMPORTS_DIR)
+    tops = [
+        f for f in sorted(os.listdir(IMPORTS_DIR))
         if os.path.isdir(os.path.join(IMPORTS_DIR, f))
         and not f.startswith('.')
     ]
+
+    # Cada pasta de topo pode conter varios lotes aninhados
+    folders = []
+    for top in tops:
+        found = _find_batches(IMPORTS_DIR, top)
+        if not found:
+            log(f'  {top}: sem MP4, ignorando')
+        folders.extend(found)
 
     if not folders:
         log('imports/: nenhuma pasta nova encontrada')

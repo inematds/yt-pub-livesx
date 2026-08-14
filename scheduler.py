@@ -804,10 +804,12 @@ def process_enrich(config):
                         with open(topics_file) as f:
                             topics = json.load(f)
                         qtd_clips = len(topics.get('topics', []))
-                    has_clips = os.path.isdir(clips_dir) and len(os.listdir(clips_dir)) > 0
+                    mp4s = [f for f in os.listdir(clips_dir) if f.endswith('.mp4')] if os.path.isdir(clips_dir) else []
+                    has_clips = len(mp4s) > 0
                     update_live_status(vid, 'status_transcricao', 'transcricao', {
                         'status_cortes': 'concluido' if has_clips else 'pendente',
                         'qtd_clips': qtd_clips,
+                        'clips_disco': str(len(mp4s)),
                         'data_corte': datetime.now().strftime('%Y-%m-%d %H:%M')
                     })
                 else:
@@ -867,11 +869,13 @@ def process_cortes(config):
                     topics = json.load(f)
                 qtd_clips = len(topics.get('topics', []))
 
-            has_clips = os.path.isdir(clips_dir) and len(os.listdir(clips_dir)) > 0
+            mp4s = [f for f in os.listdir(clips_dir) if f.endswith('.mp4')] if os.path.isdir(clips_dir) else []
+            has_clips = len(mp4s) > 0
 
             update_live_status(vid, 'status_transcricao', 'transcricao', {
                 'status_cortes': 'concluido' if has_clips else 'pendente',
                 'qtd_clips': qtd_clips,
+                'clips_disco': str(len(mp4s)),
                 'data_corte': datetime.now().strftime('%Y-%m-%d %H:%M')
             })
 
@@ -1043,8 +1047,9 @@ def _publish_import_list(label, lives, max_por_vez, privacy, config):
                 published_ids.add(clip_id)
                 log(f'  [{label}] Falha: {clip_title[:50]}')
 
-        if pub_ok != publicados_count:
-            pend = max(0, qtd_clips - pub_ok)
+        if pub_ok != publicados_count or pub_erro:
+            # pendente = ainda na fila (exclui publicados OK e os com erro)
+            pend = max(0, qtd_clips - pub_ok - pub_erro)
             update_live_status(vid, 'clips_publicados', str(pub_ok), {'clips_pendentes': str(pend)})
 
     if not found_any:
@@ -1185,8 +1190,9 @@ def _process_publicacao_inner(config):
 
         # Update counter
         new_total = pub_ok
-        if new_total != publicados_count:
-            pend = max(0, qtd_clips - new_total)
+        if new_total != publicados_count or pub_erro:
+            # pendente = ainda na fila (exclui publicados OK e os com erro)
+            pend = max(0, qtd_clips - new_total - pub_erro)
             update_live_status(vid, 'clips_publicados', str(new_total), {'clips_pendentes': str(pend)})
             log(f'  Atualizado clips_publicados: {publicados_count} -> {new_total} para {vid}')
 

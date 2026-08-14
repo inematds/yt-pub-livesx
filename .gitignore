@@ -5,6 +5,10 @@ __pycache__/
 dashboard/auth.html
 master-dashboard/instances.json
 master-dashboard/extra_validations.json
+master-dashboard/notify_state.json
+data/
+*.bak
+*.bak_*
 config/.env
 config/credentials.enc
 config/.encryption_key

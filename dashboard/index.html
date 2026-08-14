@@ -705,7 +705,7 @@
 
 <div class="container">
   <header>
-    <h1><span>INEMA</span> Lives & Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.27.32</a></small>
+    <h1><span>INEMA</span> Lives & Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.28.32</a></small>
       <span id="headerCanais" style="display:block;font-size:0.4em;font-weight:normal;margin-top:4px"></span>
     </h1>
     <div class="header-actions">
@@ -957,6 +957,29 @@
             <label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
             <input type="number" id="cfgPubMinuto" min="0" max="59" value="0" style="width:60px">
             <span style="font-size:0.8em;color:var(--muted)">Ex: 15 → roda em HH:15</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notificacao Telegram -->
+      <div class="config-section">
+        <h3>Notificacao Telegram</h3>
+        <div class="config-grid" style="grid-template-columns: 1fr 2fr;">
+          <div class="config-field">
+            <label>Notificar publicacoes</label>
+            <select id="cfgTelegramNotifyEnabled">
+              <option value="false">Nao</option>
+              <option value="true">Sim</option>
+            </select>
+            <div class="hint">Avisa a cada video publicado (clip, import ou TikTok)</div>
+          </div>
+          <div class="config-field">
+            <label>Chat ID do Telegram</label>
+            <input type="text" id="cfgTelegramNotifyChatId" placeholder="123456789">
+            <div class="hint">
+              ID do usuario ou grupo (grupo comeca com -). O destinatario precisa
+              dar /start no bot uma vez. O envio e feito pelo master-dashboard.
+            </div>
           </div>
         </div>
       </div>
@@ -2941,18 +2964,7 @@ async function loadStats() {
   document.getElementById('statLivesErro').textContent = data.lives_erro || 0;
   document.getElementById('statClipsErro').textContent = data.clips_erro || 0;
 
-  // Calcular clips aguardando publicacao (excluindo imports)
-  let aguardando = 0;
-  if (allLives && allLives.length) {
-    allLives.forEach(l => {
-      if (l.status_cortes === 'concluido' && !(l.video_id || '').startsWith('import_')) {
-        const qtd = parseInt(l.qtd_clips) || 0;
-        const pub = parseInt(l.clips_publicados) || 0;
-        if (qtd > pub) aguardando += (qtd - pub);
-      }
-    });
-  }
-  document.getElementById('statAguardando').textContent = aguardando;
+  document.getElementById('statAguardando').textContent = data.clips_pendentes || 0;
 
   // Imports stats
   document.getElementById('statImports').textContent = data.imports_total || 0;
@@ -3406,6 +3418,10 @@ async function loadConfig() {
   if (c.pub_max_por_vez) document.getElementById('cfgPubMax').value = c.pub_max_por_vez;
   document.getElementById('cfgPubLinkLive').value = c.pub_link_live || 'true';
 
+  // Notificacao Telegram
+  document.getElementById('cfgTelegramNotifyEnabled').value = c.telegram_notify_enabled || 'false';
+  document.getElementById('cfgTelegramNotifyChatId').value = c.telegram_notify_chat_id || '';
+
   // Cortes
   if (c.corte_auto) document.getElementById('cfgCorteAuto').value = c.corte_auto;
   if (c.corte_max_por_dia) document.getElementById('cfgCorteMax').value = c.corte_max_por_dia;
@@ -3618,7 +3634,9 @@ function saveHorarios(btn) {
       pub_max_por_vez: document.getElementById('cfgPubMax').value,
       pub_link_live: document.getElementById('cfgPubLinkLive').value,
       pub_minuto: document.getElementById('cfgPubMinuto').value,
-      corte_minuto: document.getElementById('cfgCorteMinuto').value
+      corte_minuto: document.getElementById('cfgCorteMinuto').value,
+      telegram_notify_enabled: document.getElementById('cfgTelegramNotifyEnabled').value,
+      telegram_notify_chat_id: document.getElementById('cfgTelegramNotifyChatId').value.trim()
     })
   }));
 }
@@ -4276,6 +4294,14 @@ loadAll();
       <button onclick="closeModal('modalChangelog')" style="background:none;border:none;color:var(--muted);font-size:1.2em;cursor:pointer">X</button>
     </div>
     <div class="modal-body" style="padding:16px;overflow-y:auto;font-size:0.85em;line-height:1.8">
+      <h3 style="color:var(--accent);margin-bottom:8px">v3.28.32</h3>
+      <p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
+      <ul style="margin:0 0 16px 20px;color:var(--text)">
+        <li>Notificacao Telegram por canal: novo Chat ID + liga/desliga na aba Horarios</li>
+        <li>Cada video publicado (clip / import / TikTok) gera aviso com o link do YouTube</li>
+        <li>Botao "Enviar o video" na mensagem manda o MP4 (ate 50 MB)</li>
+        <li>Deteccao e envio rodam no master-dashboard, com bot dedicado</li>
+      </ul>
       <h3 style="color:var(--accent);margin-bottom:8px">v3.27.32</h3>
       <p style="color:var(--muted);margin-bottom:4px"><strong>Bug:</strong></p>
       <ul style="margin:0 0 16px 20px;color:var(--text)">

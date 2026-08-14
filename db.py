@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS lives (
     clips_pendentes TEXT NOT NULL DEFAULT '0',
     data_sync TEXT NOT NULL DEFAULT '',
     observacoes TEXT NOT NULL DEFAULT '',
-    data_corte TEXT NOT NULL DEFAULT ''
+    data_corte TEXT NOT NULL DEFAULT '',
+    clips_disco TEXT NOT NULL DEFAULT '0'
 );
 
 CREATE TABLE IF NOT EXISTS tiktok_channels (
@@ -96,8 +97,17 @@ def get_db():
         db.row_factory = sqlite3.Row
         db.executescript(SCHEMA)
         _migrate_tiktok_videos(db)
+        _migrate_clips_disco(db)
         _local.db = db
     return db
+
+
+def _migrate_clips_disco(db):
+    """Adiciona coluna clips_disco se nao existir (migracao 1x)."""
+    cols = [r[1] for r in db.execute('PRAGMA table_info(lives)').fetchall()]
+    if 'clips_disco' not in cols:
+        db.execute("ALTER TABLE lives ADD COLUMN clips_disco TEXT NOT NULL DEFAULT '0'")
+        db.commit()
 
 
 def _migrate_tiktok_videos(db):
@@ -175,7 +185,7 @@ LIVES_COLUMNS = [
     'video_id', 'titulo', 'data_live', 'duracao_min', 'url',
     'status_transcricao', 'status_cortes', 'qtd_clips',
     'clips_publicados', 'clips_pendentes', 'data_sync', 'observacoes',
-    'data_corte'
+    'data_corte', 'clips_disco'
 ]
 
 

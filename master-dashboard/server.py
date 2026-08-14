@@ -161,8 +161,8 @@ def get_db_stats(instance_path):
         conn = sqlite3.connect(db_path, timeout=2)
         cur = conn.cursor()
 
-        # Total lives
-        cur.execute("SELECT COUNT(*) FROM lives")
+        # Total lives (exclui imports e tiktok — mesma definicao do dashboard local)
+        cur.execute("SELECT COUNT(*) FROM lives WHERE video_id NOT LIKE 'import_%'")
         total_lives = cur.fetchone()[0]
 
         # Total publicados
@@ -201,8 +201,8 @@ def get_db_stats(instance_path):
         row = cur.fetchone()
         ultimo = {'title': row[0], 'at': row[1], 'video_id': row[2]} if row else None
 
-        # Erros
-        cur.execute("SELECT COUNT(*) FROM publicados WHERE clip_video_id LIKE 'erro%'")
+        # Erros de clips (exclui imports e tiktok — mesma definicao do dashboard local)
+        cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id NOT LIKE 'import_%' AND clip_video_id='erro_upload'")
         erros = cur.fetchone()[0]
 
         # Canal URL
@@ -231,34 +231,39 @@ def get_db_stats(instance_path):
         lives_erro = cur.fetchone()[0]
 
         # Clips stats (exclui imports — imports tem contagem propria)
-        # total_clips conta rows reais em publicados, nao qtd_clips declarado
-        # (qtd_clips e a intencao inicial; o cortador pode produzir menos clips)
-        cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id NOT LIKE 'import_%'")
+        # total_clips = soma de clips_disco (count real no disco, gravado pelo scheduler)
+        cur.execute("SELECT COALESCE(SUM(CAST(clips_disco AS INTEGER)),0) FROM lives WHERE video_id NOT LIKE 'import_%'")
         total_clips = cur.fetchone()[0]
 
         cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id NOT LIKE 'import_%' AND clip_video_id NOT IN ('erro_upload','publicando','') AND clip_video_id != '' AND clip_video_id NOT LIKE 'moved_%'")
         clips_publicados = cur.fetchone()[0]
 
-        cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id NOT LIKE 'import_%' AND (clip_video_id IS NULL OR clip_video_id IN ('', 'publicando'))")
-        clips_pendentes = cur.fetchone()[0]
+        cur.execute("SELECT COUNT(*) FROM publicados WHERE live_video_id NOT LIKE 'import_%' AND clip_video_id='erro_upload'")
+        clips_erro_pub = cur.fetchone()[0]
 
-        # TikTok stats (imports where titulo starts with 'TikTok @')
-        cur.execute("SELECT video_id FROM lives WHERE video_id LIKE 'import_%' AND titulo LIKE 'TikTok @%'")
-        tiktok_ids = {r[0] for r in cur.fetchall()}
-        tiktok_total = len(tiktok_ids)
-        tiktok_pub = 0
-        tiktok_erro = 0
-        if tiktok_ids:
-            placeholders = ','.join(['?'] * len(tiktok_ids))
-            cur.execute(f"SELECT clip_video_id FROM publicados WHERE live_video_id IN ({placeholders})", list(tiktok_ids))
-            for r in cur.fetchall():
-                if r[0] in ('erro_upload', 'publicando', ''):
-                    tiktok_erro += 1
-                else:
-                    tiktok_pub += 1
-        cur.execute("SELECT COALESCE(SUM(CAST(qtd_clips AS INTEGER)),0) FROM lives WHERE video_id LIKE 'import_%' AND titulo LIKE 'TikTok @%'")
-        tiktok_clips_total = cur.fetchone()[0]
-        tiktok_pend = max(0, tiktok_clips_total - tiktok_pub - tiktok_erro)
+        clips_pendentes = max(0, total_clips - clips_publicados - clips_erro_pub)
+
+        # TikTok stats
+        cur.execute("""
+            SELECT
+                COUNT(*),
+                COALESCE(SUM(CAST(clips_disco AS INTEGER)),0)
+            FROM lives WHERE video_id LIKE 'import_%' AND titulo LIKE 'TikTok @%'
+        """)
+        tiktok_total, tiktok_clips_total = cur.fetchone()
+
+        cur.execute("""
+            SELECT
+                SUM(CASE WHEN p.clip_video_id NOT IN ('','publicando','erro_upload') THEN 1 ELSE 0 END),
+                SUM(CASE WHEN p.clip_video_id='erro_upload' THEN 1 ELSE 0 END)
+            FROM publicados p
+            JOIN lives l ON p.live_video_id = l.video_id
+            WHERE l.video_id LIKE 'import_%' AND l.titulo LIKE 'TikTok @%'
+        """)
+        tiktok_pub, tiktok_erro = cur.fetchone()
+        tiktok_pub = tiktok_pub or 0
+        tiktok_erro = tiktok_erro or 0
+        tiktok_pend = max(0, (tiktok_clips_total or 0) - tiktok_pub - tiktok_erro)
 
         # Imports stats (excluding TikTok)
         cur.execute("SELECT COUNT(*) FROM lives WHERE video_id LIKE 'import_%' AND titulo NOT LIKE 'TikTok @%'")
@@ -272,35 +277,22 @@ def get_db_stats(instance_path):
         imports_erro_all = cur.fetchone()[0]
         imports_erro = imports_erro_all - tiktok_erro
 
-        cur.execute("SELECT COALESCE(SUM(CAST(qtd_clips AS INTEGER)),0) FROM lives WHERE video_id LIKE 'import_%' AND titulo NOT LIKE 'TikTok @%'")
+        cur.execute("SELECT COALESCE(SUM(CAST(clips_disco AS INTEGER)),0) FROM lives WHERE video_id LIKE 'import_%' AND titulo NOT LIKE 'TikTok @%'")
         imports_clips_total = cur.fetchone()[0]
 
-        # imports_pend: resto dos clips do manifest ainda nao publicados
-        # (mesma definicao do dashboard local: soma len(manifest) - publicados_reais por live;
-        # NAO somar a fila de publicados aqui — duplicava os clips em voo 'publicando')
-        imports_pend = 0
-
-        cur.execute("SELECT video_id FROM lives WHERE video_id LIKE 'import_%' AND titulo NOT LIKE 'TikTok @%'")
-        import_only_ids = [r[0] for r in cur.fetchall()]
-        if import_only_ids:
-            placeholders = ','.join(['?'] * len(import_only_ids))
-            cur.execute(
-                f"SELECT live_video_id, COUNT(*) FROM publicados WHERE live_video_id IN ({placeholders}) "
-                "AND clip_video_id IS NOT NULL AND clip_video_id NOT IN ('erro_upload','publicando','') "
-                "AND clip_video_id NOT LIKE 'moved_%' GROUP BY live_video_id",
-                import_only_ids,
-            )
-            pub_count_by_live = dict(cur.fetchall())
-            lives_dir = os.path.join(instance_path, 'lives')
-            for vid in import_only_ids:
-                manifest_path = os.path.join(lives_dir, vid, 'clips_manifest.json')
-                if os.path.exists(manifest_path):
-                    try:
-                        with open(manifest_path) as mf:
-                            clips = json.load(mf)
-                        imports_pend += max(0, len(clips) - pub_count_by_live.get(vid, 0))
-                    except Exception:
-                        pass
+        # imports_pend: clips_disco - publicados - erros (tudo da tabela, sem leitura de disco)
+        cur.execute(
+            "SELECT l.video_id, CAST(l.clips_disco AS INTEGER), "
+            "COALESCE(SUM(CASE WHEN p.clip_video_id NOT IN ('erro_upload','publicando','') AND p.clip_video_id NOT LIKE 'moved_%' AND p.clip_video_id IS NOT NULL AND p.clip_video_id != '' THEN 1 ELSE 0 END),0), "
+            "COALESCE(SUM(CASE WHEN p.clip_video_id='erro_upload' THEN 1 ELSE 0 END),0) "
+            "FROM lives l LEFT JOIN publicados p ON p.live_video_id=l.video_id "
+            "WHERE l.video_id LIKE 'import_%' AND l.titulo NOT LIKE 'TikTok @%' "
+            "GROUP BY l.video_id"
+        )
+        imports_pend = sum(
+            max(0, (disco or 0) - pub_ok - pub_err)
+            for _, disco, pub_ok, pub_err in cur.fetchall()
+        )
 
         # Cortados ultimas 24h
         cur.execute("SELECT COUNT(*) FROM lives WHERE data_corte >= ?", (since_24h,))
@@ -709,6 +701,8 @@ class Handler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=DASHBOARD_DIR, **kwargs)
 
     def _require_auth(self):
+        if not _DASHBOARD_PASSWORD:
+            return True
         cookie = self.headers.get('Cookie', '')
         for part in cookie.split(';'):
             p = part.strip()
@@ -1433,6 +1427,13 @@ def main():
     # Thread de heartbeat
     t = threading.Thread(target=heartbeat_loop, daemon=True)
     t.start()
+
+    # Notificacao Telegram de publicacoes (bot dedicado)
+    try:
+        import notifier
+        notifier.start(INSTANCES, log)
+    except Exception as e:
+        log(f'[notifier] falha ao iniciar: {e}')
 
     # HTTP server
     server = ThreadedHTTPServer(('0.0.0.0', PORT), Handler)

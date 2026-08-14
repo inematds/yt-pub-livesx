@@ -158,6 +158,8 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(Path(__file__).parent), **kwargs)
 
     def _require_auth(self):
+        if not _DASHBOARD_PASSWORD:
+            return True
         cookie = self.headers.get('Cookie', '')
         for part in cookie.split(';'):
             p = part.strip()
@@ -1184,149 +1186,121 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         self.send_json(200, {'ok': True, 'saved': saved})
 
     def handle_api_stats(self):
-        lives_list = db.get_lives()
-        pub_list = db.get_publicados()
+        from datetime import datetime as _dt, timedelta
+        since_24h = (_dt.now() - timedelta(hours=24)).strftime('%Y-%m-%d %H:%M')
+        conn = db.get_db()
 
-        total_lives = 0
-        total_publicados = 0
-        total_clips = 0
-        pendentes = 0
-        cortados = 0
-        lives_erro = 0
+        # Lives (nao-import)
+        r = conn.execute("""
+            SELECT
+                COUNT(*),
+                SUM(CASE WHEN status_cortes='concluido' THEN 1 ELSE 0 END),
+                SUM(CASE WHEN status_cortes NOT IN ('concluido','erro') THEN 1 ELSE 0 END),
+                SUM(CASE WHEN status_cortes='erro' THEN 1 ELSE 0 END),
+                COALESCE(SUM(CAST(clips_disco AS INTEGER)),0),
+                SUM(CASE WHEN status_cortes='concluido' AND data_corte >= ? THEN 1 ELSE 0 END)
+            FROM lives WHERE video_id NOT LIKE 'import_%'
+        """, (since_24h,)).fetchone()
+        total_lives, lives_cortadas, lives_pendentes, lives_erro, total_clips, cortados_24h = r
 
-        # Import stats
-        imports_total = 0
-        imports_clips_pub = 0
-        imports_clips_pend = 0
-        imports_clips_erro = 0
+        # Clips (nao-import) da tabela publicados
+        r = conn.execute("""
+            SELECT
+                SUM(CASE WHEN clip_video_id NOT IN ('','publicando','erro_upload') AND clip_video_id NOT LIKE 'moved_%' THEN 1 ELSE 0 END),
+                SUM(CASE WHEN clip_video_id='erro_upload' THEN 1 ELSE 0 END),
+                SUM(CASE WHEN clip_video_id NOT IN ('','publicando','erro_upload') AND clip_video_id NOT LIKE 'moved_%' AND data_publicacao >= ? THEN 1 ELSE 0 END)
+            FROM publicados WHERE live_video_id NOT LIKE 'import_%'
+        """, (since_24h,)).fetchone()
+        total_publicados, clips_erro, clips_24h = r
+        clips_pendentes = max(0, (total_clips or 0) - (total_publicados or 0) - (clips_erro or 0))
 
-        import_ids = set()
-        tiktok_ids = set()
+        # Imports (nao-tiktok)
+        r = conn.execute("""
+            SELECT COUNT(*), COALESCE(SUM(CAST(clips_disco AS INTEGER)),0)
+            FROM lives WHERE video_id LIKE 'import_%' AND titulo NOT LIKE 'TikTok @%'
+        """).fetchone()
+        imports_total, imports_clips_disco = r
 
-        for live in lives_list:
-            vid = live.get('video_id', '')
-            is_import = vid.startswith('import_')
-            is_tiktok = is_import and (live.get('titulo', '') or '').startswith('TikTok @')
-            status = live.get('status_cortes', '')
-            qtd = int(live.get('qtd_clips', '0') or '0')
-            pub = int(live.get('clips_publicados', '0') or '0')
+        r = conn.execute("""
+            SELECT
+                SUM(CASE WHEN p.clip_video_id NOT IN ('','publicando','erro_upload') AND p.clip_video_id NOT LIKE 'moved_%' THEN 1 ELSE 0 END),
+                SUM(CASE WHEN p.clip_video_id='erro_upload' THEN 1 ELSE 0 END),
+                SUM(CASE WHEN p.clip_video_id IN ('','publicando') THEN 1 ELSE 0 END),
+                SUM(CASE WHEN p.clip_video_id NOT IN ('','publicando','erro_upload') AND p.clip_video_id NOT LIKE 'moved_%' AND p.data_publicacao >= ? THEN 1 ELSE 0 END)
+            FROM publicados p
+            JOIN lives l ON p.live_video_id = l.video_id
+            WHERE l.video_id LIKE 'import_%' AND l.titulo NOT LIKE 'TikTok @%'
+        """, (since_24h,)).fetchone()
+        imports_clips_pub, imports_clips_erro, imports_clips_fila, imports_24h = r
 
-            if is_import:
-                import_ids.add(vid)
-                if is_tiktok:
-                    tiktok_ids.add(vid)
-                else:
-                    imports_total += 1
-            else:
-                total_lives += 1
-                total_clips += qtd
-                if status == 'concluido':
-                    cortados += 1
-                elif status == 'erro':
-                    lives_erro += 1
-                else:
-                    pendentes += 1
+        # imports_clips_pend: por live (mesmo calculo do master-dashboard), nao agregado
+        # global -- evita que o historico de publicados de lives antigas/limpas do disco
+        # cancele os pendentes reais de lives novas
+        r = conn.execute("""
+            SELECT l.video_id, CAST(l.clips_disco AS INTEGER),
+                COALESCE(SUM(CASE WHEN p.clip_video_id NOT IN ('erro_upload','publicando','') AND p.clip_video_id NOT LIKE 'moved_%' AND p.clip_video_id IS NOT NULL AND p.clip_video_id != '' THEN 1 ELSE 0 END),0),
+                COALESCE(SUM(CASE WHEN p.clip_video_id='erro_upload' THEN 1 ELSE 0 END),0)
+            FROM lives l LEFT JOIN publicados p ON p.live_video_id = l.video_id
+            WHERE l.video_id LIKE 'import_%' AND l.titulo NOT LIKE 'TikTok @%'
+            GROUP BY l.video_id
+        """).fetchall()
+        imports_clips_pend = sum(max(0, (disco or 0) - pub_ok - pub_err) for _, disco, pub_ok, pub_err in r)
 
-        # Clips stats (separate lives, imports, tiktok)
-        clips_erro = 0
-        tiktok_pub = 0
-        tiktok_erro = 0
-        for pub in pub_list:
-            vid_status = pub.get('clip_video_id', '')
-            live_vid = pub.get('live_video_id', '')
-            is_err = vid_status in ('erro_upload', 'publicando', '')
-            if live_vid in tiktok_ids:
-                if is_err:
-                    tiktok_erro += 1
-                else:
-                    tiktok_pub += 1
-            elif live_vid in import_ids:
-                if is_err:
-                    imports_clips_erro += 1
-                else:
-                    imports_clips_pub += 1
-            else:
-                if is_err:
-                    clips_erro += 1
-                else:
-                    total_publicados += 1
+        # TikTok
+        r = conn.execute("""
+            SELECT COUNT(*), COALESCE(SUM(CAST(clips_disco AS INTEGER)),0)
+            FROM lives WHERE video_id LIKE 'import_%' AND titulo LIKE 'TikTok @%'
+        """).fetchone()
+        tiktok_total, tiktok_clips_disco = r
 
-        # Clips pendentes de imports (manifest total - ja publicados, por quantidade)
-        # Nao usar set de titulos: manifests com titulos duplicados ('Video') colapsam para 1
-        pub_count_by_live = {}
-        for pub in pub_list:
-            lid = pub.get('live_video_id', '')
-            cid = pub.get('clip_video_id', '')
-            if lid in import_ids and cid and cid not in ('erro_upload', 'publicando') and not cid.startswith('moved_'):
-                pub_count_by_live[lid] = pub_count_by_live.get(lid, 0) + 1
+        r = conn.execute("""
+            SELECT
+                SUM(CASE WHEN p.clip_video_id NOT IN ('','publicando','erro_upload') THEN 1 ELSE 0 END),
+                SUM(CASE WHEN p.clip_video_id='erro_upload' THEN 1 ELSE 0 END),
+                SUM(CASE WHEN p.clip_video_id NOT IN ('','publicando','erro_upload') AND p.data_publicacao >= ? THEN 1 ELSE 0 END)
+            FROM publicados p
+            JOIN lives l ON p.live_video_id = l.video_id
+            WHERE l.video_id LIKE 'import_%' AND l.titulo LIKE 'TikTok @%'
+        """, (since_24h,)).fetchone()
+        tiktok_pub, tiktok_erro, tiktok_24h = r
 
-        lives_dir = os.environ.get('LIVES_DIR', os.path.join(PROJECT_ROOT, 'lives'))
-        import_only_ids = import_ids - tiktok_ids
-        for vid in import_only_ids:
-            manifest_path = os.path.join(lives_dir, vid, 'clips_manifest.json')
-            if os.path.exists(manifest_path):
-                try:
-                    import json as _json
-                    with open(manifest_path) as f:
-                        clips = _json.load(f)
-                    imports_clips_pend += max(0, len(clips) - pub_count_by_live.get(vid, 0))
-                except Exception:
-                    pass
+        # tiktok_pend: por live (mesma correcao aplicada em imports_clips_pend), nao
+        # agregado global -- evita que o historico de publicados de lives antigas/limpas
+        # do disco cancele os pendentes reais de lives novas
+        r = conn.execute("""
+            SELECT l.video_id, CAST(l.clips_disco AS INTEGER),
+                COALESCE(SUM(CASE WHEN p.clip_video_id NOT IN ('erro_upload','publicando','') AND p.clip_video_id IS NOT NULL AND p.clip_video_id != '' THEN 1 ELSE 0 END),0),
+                COALESCE(SUM(CASE WHEN p.clip_video_id='erro_upload' THEN 1 ELSE 0 END),0)
+            FROM lives l LEFT JOIN publicados p ON p.live_video_id = l.video_id
+            WHERE l.video_id LIKE 'import_%' AND l.titulo LIKE 'TikTok @%'
+            GROUP BY l.video_id
+        """).fetchall()
+        tiktok_pend = sum(max(0, (disco or 0) - pub_ok - pub_err) for _, disco, pub_ok, pub_err in r)
 
-        # Motivo de nao rodar imports
+        # Motivo imports
         config = db.load_config()
         import_motivo = ''
         if config.get('pipeline_imports_paused', 'false') == 'true':
             import_motivo = 'pausado'
         elif not config.get('import_pub_horarios', '').strip():
             import_motivo = 'sem horario'
-        elif imports_total == 0 and imports_clips_pend > 0:
+        elif imports_clips_pend == 0:
             import_motivo = 'fila vazia'
-
-        # TikTok stats
-        tiktok_total = len(tiktok_ids)
-        tiktok_clips_total = sum(
-            int(l.get('qtd_clips', '0') or '0')
-            for l in lives_list if l.get('video_id', '') in tiktok_ids
-        )
-        tiktok_pend = max(0, tiktok_clips_total - tiktok_pub - tiktok_erro)
-
-        # Publicados nas ultimas 24h por tipo
-        from datetime import datetime as _dt, timedelta
-        since_24h = (_dt.now() - timedelta(hours=24)).strftime('%Y-%m-%d %H:%M')
-        clips_24h = 0
-        imports_24h = 0
-        tiktok_24h = 0
-        cortados_24h = 0
-        for pub in pub_list:
-            if pub.get('data_publicacao', '') < since_24h:
-                continue
-            vid_status = pub.get('clip_video_id', '')
-            if vid_status in ('erro_upload', 'publicando', ''):
-                continue
-            live_vid = pub.get('live_video_id', '')
-            if live_vid in tiktok_ids:
-                tiktok_24h += 1
-            elif live_vid in import_ids:
-                imports_24h += 1
-            else:
-                clips_24h += 1
-        for live in lives_list:
-            if live.get('data_corte', '') >= since_24h and live.get('status_cortes') == 'concluido':
-                cortados_24h += 1
 
         self.send_json(200, {
             'instance_name': os.environ.get('INSTANCE_NAME', 'yt-pub-lives'),
             'total_lives': total_lives,
             'total_clips': total_clips,
             'total_publicados': total_publicados,
-            'lives_cortadas': cortados,
-            'lives_pendentes': pendentes,
+            'clips_pendentes': clips_pendentes,
+            'lives_cortadas': lives_cortadas,
+            'lives_pendentes': lives_pendentes,
             'lives_erro': lives_erro,
             'clips_erro': clips_erro,
             'imports_total': imports_total,
             'imports_clips_pub': imports_clips_pub,
             'imports_clips_pend': imports_clips_pend,
+            'imports_clips_fila': imports_clips_fila,
             'imports_clips_erro': imports_clips_erro,
             'import_motivo': import_motivo,
             'tiktok_total': tiktok_total,
