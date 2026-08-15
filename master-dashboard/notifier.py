@@ -24,7 +24,10 @@ import json
 import mimetypes
 import os
 import re
+import shutil
 import sqlite3
+import subprocess
+import tempfile
 import threading
 import time
 import urllib.error
@@ -41,6 +44,10 @@ WINDOW_HOURS = 48
 NOTIFY_INTERVAL = 60          # segundos entre varreduras
 LONGPOLL_TIMEOUT = 30         # segundos de long-poll no getUpdates
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024   # teto de upload multipart da Bot API
+# Acima do teto, re-encoda uma copia menor em vez de recusar o envio.
+# Regra vigente ate liberacao explicita (flag send_shrink no notify_state.json).
+SHRINK_TARGET_BYTES = 45 * 1024 * 1024
+SHRINK_DIR = os.path.join(tempfile.gettempdir(), 'yt-notifier-shrink')
 
 API = 'https://api.telegram.org/bot{token}/{method}'
 
@@ -193,6 +200,130 @@ def send_video(chat_id, file_path, caption='', filename=None):
 
 
 # ------------------------------------------------------- leitura do canal
+
+def shrink_enabled():
+    """Regra vigente: encolher o que passa de 50 MB em vez de recusar."""
+    with _state_lock:
+        return _load_state().get('send_shrink', True)
+
+
+def set_shrink(on):
+    with _state_lock:
+        _load_state()['send_shrink'] = bool(on)
+        _save_state()
+    _log(f"[notifier] encolher acima de 50MB: {'SIM' if on else 'NAO'}")
+
+
+def auto_video():
+    """Manda o video junto com o aviso, sem depender do clique no botao."""
+    with _state_lock:
+        return _load_state().get('auto_video', True)
+
+
+def set_auto_video(on):
+    with _state_lock:
+        _load_state()['auto_video'] = bool(on)
+        _save_state()
+    _log(f"[notifier] envio automatico do video: {'SIM' if on else 'NAO'}")
+
+
+def _preparar_arquivo(inst, row):
+    """Caminho pronto pra upload (encolhido se preciso) + tamanho original."""
+    fpath = _resolve_clip_file(inst, row.get('live_video_id'), row.get('filename'))
+    if not fpath or not os.path.exists(fpath):
+        return None, 0
+    size = os.path.getsize(fpath)
+    if size <= MAX_UPLOAD_BYTES:
+        return fpath, size
+    if not shrink_enabled():
+        return None, size
+    return _shrink(fpath), size
+
+
+def _send_video_row(chat_id, inst, row, titulo, url):
+    """Envia o MP4 da publicacao. Devolve True se foi."""
+    canal = html.escape(_short_name(inst))
+    envio, size = _preparar_arquivo(inst, row)
+    if not envio:
+        return False
+    reduzido = size > MAX_UPLOAD_BYTES
+    nota = f'\n<i>versao reduzida — original tem {size/1048576:.0f} MB</i>' if reduzido else ''
+    base = os.path.basename(_resolve_clip_file(inst, row.get('live_video_id'),
+                                               row.get('filename')) or envio)
+    nome = base if base.lower().startswith(canal.lower()) else f'{canal}_{base}'
+    try:
+        resp = send_video(chat_id, envio,
+                          caption=f'<b>{canal}</b>\n{html.escape(titulo)}\n{url}{nota}',
+                          filename=nome)
+        _record_sent(resp, chat_id, 'video', f"{inst['name']}:{row['id']}")
+        return bool(resp and resp.get('ok'))
+    except Exception as e:
+        _log(f"[notifier] envio automatico falhou ({inst['name']} row {row['id']}): {e}")
+        return False
+
+
+def _duration(path):
+    try:
+        r = subprocess.run(['ffprobe', '-v', 'error', '-show_entries',
+                            'format=duration', '-of', 'csv=p=0', path],
+                           capture_output=True, text=True, timeout=60)
+        return float((r.stdout or '0').strip())
+    except Exception:
+        return 0.0
+
+
+def _shrink(path):
+    """Re-encoda uma copia abaixo do teto. Devolve o caminho ou None.
+
+    O original NAO e tocado. A copia fica em cache por caminho+mtime+tamanho,
+    entao o segundo clique no mesmo video reaproveita.
+    """
+    dur = _duration(path)
+    if dur <= 0:
+        _log(f'[notifier] shrink: duracao desconhecida em {os.path.basename(path)}')
+        return None
+
+    try:
+        st = os.stat(path)
+        chave = f'{abs(hash((path, int(st.st_mtime), st.st_size)))}.mp4'
+        os.makedirs(SHRINK_DIR, exist_ok=True)
+        destino = os.path.join(SHRINK_DIR, chave)
+        if os.path.exists(destino) and 0 < os.path.getsize(destino) <= MAX_UPLOAD_BYTES:
+            return destino
+
+        audio_kbps = 128
+        # margem de 6% pro overhead do container
+        alvo_kbps = int((SHRINK_TARGET_BYTES * 8 / dur) / 1000 * 0.94) - audio_kbps
+        if alvo_kbps < 200:
+            _log(f'[notifier] shrink: {os.path.basename(path)} longo demais '
+                 f'({dur/60:.0f}min) para caber em 45MB')
+            return None
+
+        r = subprocess.run(
+            ['ffmpeg', '-y', '-i', path,
+             '-c:v', 'libx264', '-preset', 'veryfast',
+             '-b:v', f'{alvo_kbps}k', '-maxrate', f'{int(alvo_kbps*1.3)}k',
+             '-bufsize', f'{alvo_kbps*2}k',
+             '-c:a', 'aac', '-b:a', f'{audio_kbps}k',
+             '-movflags', '+faststart', destino],
+            capture_output=True, timeout=1800)
+        if r.returncode != 0 or not os.path.exists(destino) or os.path.getsize(destino) == 0:
+            _log(f'[notifier] shrink falhou em {os.path.basename(path)}')
+            if os.path.exists(destino):
+                os.remove(destino)
+            return None
+        if os.path.getsize(destino) > MAX_UPLOAD_BYTES:
+            _log(f'[notifier] shrink: ainda {os.path.getsize(destino)/1048576:.0f}MB, '
+                 f'acima do teto')
+            os.remove(destino)
+            return None
+        _log(f'[notifier] shrink: {os.path.getsize(path)/1048576:.0f}MB -> '
+             f'{os.path.getsize(destino)/1048576:.0f}MB ({os.path.basename(path)[:40]})')
+        return destino
+    except Exception as e:
+        _log(f'[notifier] shrink erro: {e}')
+        return None
+
 
 def _short_name(inst):
     """'yt-pub-lives10' -> 'lives10'."""
@@ -393,8 +524,17 @@ def _notify_instance(inst):
             'text': '📥 Receber o vídeo',
             'callback_data': f"v:{inst['id']}:{r['id']}",
         }]]}
+
+        # Modo padrao: manda o video junto com o link, sem exigir clique.
+        # So cai no aviso com botao se o arquivo nao estiver disponivel.
         ok = 0
         for chat_id in chats:
+            enviado = False
+            if auto_video():
+                enviado = _send_video_row(chat_id, inst, r, titulo, url)
+            if enviado:
+                ok += 1
+                continue
             resp = send_message(chat_id, text, markup)
             if resp and resp.get('ok'):
                 ok += 1
@@ -409,6 +549,120 @@ def _notify_instance(inst):
         else:
             # nao marca como notificado — tenta de novo no proximo ciclo
             _log(f"[notifier] {inst['name']}: falha ao avisar row {r['id']}")
+
+
+# ------------------------------------------- rotina diaria do backlog
+
+BACKFILL_HORA = 5            # 05:00
+BACKFILL_FIM = '2026-08-13'  # ultimo dia a enviar
+BACKFILL_PAUSA = 3           # segundos entre uploads
+
+
+def _dia_seguinte(d):
+    return (datetime.strptime(d, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')
+
+
+def _imports_do_dia(inst, dia):
+    path = _db_path(inst)
+    if not os.path.exists(path):
+        return []
+    try:
+        conn = sqlite3.connect(f'file:{path}?mode=ro', uri=True, timeout=5)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(f"""
+            SELECT p.id, p.clip_video_id, p.clip_titulo, p.clip_url, p.filename,
+                   p.live_video_id, l.titulo AS live_titulo
+            FROM publicados p LEFT JOIN lives l ON p.live_video_id = l.video_id
+            WHERE p.live_video_id LIKE 'import_%'
+              AND p.data_publicacao LIKE ?
+              AND {_OK_FILTER}
+            ORDER BY p.id
+        """, (f'{dia}%',)).fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        _log(f"[notifier] backlog: erro lendo {inst['name']}: {e}")
+        return []
+
+
+def _backfill_dia(dia):
+    """Manda os imports publicados em `dia` para cada canal cadastrado."""
+    with _state_lock:
+        ja = set(_load_state().setdefault('backfill_sent', []))
+
+    total = falhas = 0
+    for inst in _instances:
+        cfg = _read_config(inst)
+        if (cfg.get('telegram_notify_enabled', 'false') or '').lower() != 'true':
+            continue
+        chats = _chat_ids(cfg)
+        if not chats:
+            continue
+        for r in _imports_do_dia(inst, dia):
+            chave = f"{inst['name']}:{r['id']}"
+            if chave in ja:
+                continue
+            titulo = (r.get('clip_titulo') or '(sem titulo)')[:120]
+            url = r.get('clip_url') or f"https://www.youtube.com/watch?v={r.get('clip_video_id')}"
+            enviou = False
+            for chat_id in chats:
+                if _send_video_row(chat_id, inst, r, titulo, url):
+                    enviou = True
+                time.sleep(BACKFILL_PAUSA)
+            if enviou:
+                total += 1
+                ja.add(chave)
+                with _state_lock:
+                    _load_state()['backfill_sent'] = sorted(ja)
+                    _save_state()
+            else:
+                falhas += 1
+    _log(f'[notifier] backlog {dia}: {total} enviados, {falhas} sem arquivo/falha')
+    return total, falhas
+
+
+def _avisa_admin(texto):
+    with _state_lock:
+        admin = _load_state().get('admin_chat')
+    if admin:
+        send_message(admin, texto)
+
+
+def backfill_loop():
+    """Todo dia as 05:00 manda os imports de um dia, avancando ate BACKFILL_FIM."""
+    if not enabled():
+        return
+    _log('[notifier] rotina diaria do backlog iniciada')
+    while True:
+        try:
+            agora = datetime.now()
+            hoje = agora.strftime('%Y-%m-%d')
+            with _state_lock:
+                st = _load_state()
+                proximo = st.get('backfill_next')
+                ultimo = st.get('backfill_last_run')
+
+            if proximo and agora.hour >= BACKFILL_HORA and ultimo != hoje:
+                if proximo > BACKFILL_FIM:
+                    _avisa_admin('✅ Backlog de agosto concluido — todos os imports '
+                                 f'pendentes ate {BACKFILL_FIM} foram enviados.')
+                    _log('[notifier] backlog concluido')
+                    with _state_lock:
+                        _load_state()['backfill_next'] = None
+                        _save_state()
+                else:
+                    _log(f'[notifier] backlog: rodando dia {proximo}')
+                    total, falhas = _backfill_dia(proximo)
+                    with _state_lock:
+                        s = _load_state()
+                        s['backfill_next'] = _dia_seguinte(proximo)
+                        s['backfill_last_run'] = hoje
+                        _save_state()
+                    _avisa_admin(f'📦 Backlog {proximo}: {total} imports enviados'
+                                 + (f', {falhas} sem arquivo' if falhas else ''))
+        except Exception as e:
+            _log(f'[notifier] backlog erro: {e}')
+        time.sleep(300)
 
 
 def notify_loop():
@@ -548,16 +802,28 @@ def _handle_send_video(chat_id, inst_id, row_id):
         send_message(chat_id, f'⚠️ [{canal}] Arquivo nao esta mais no disco (limpeza).\n\n{titulo}\n{url}')
         return
 
+    envio = fpath
+    reduzido = False
     size = os.path.getsize(fpath)
     if size > MAX_UPLOAD_BYTES:
         mb = size / (1024 * 1024)
-        send_message(chat_id, f'⚠️ [{canal}] Video de {mb:.0f} MB — acima do limite de 50 MB do Telegram.\n\n{titulo}\n{url}')
-        return
+        if not shrink_enabled():
+            send_message(chat_id, f'⚠️ [{canal}] Video de {mb:.0f} MB — acima do limite '
+                                  f'de 50 MB do Telegram.\n\n{titulo}\n{url}')
+            return
+        menor = _shrink(fpath)
+        if not menor:
+            send_message(chat_id, f'⚠️ [{canal}] Video de {mb:.0f} MB e nao consegui '
+                                  f'reduzir abaixo de 50 MB.\n\n{titulo}\n{url}')
+            return
+        envio, reduzido = menor, True
 
     try:
         base = os.path.basename(fpath)
         nome = base if base.lower().startswith(canal.lower()) else f'{canal}_{base}'
-        resp = send_video(chat_id, fpath, caption=f'<b>{canal}</b>\n{titulo}\n{url}',
+        nota = (f'\n<i>versao reduzida — original tem {size/1048576:.0f} MB</i>'
+                if reduzido else '')
+        resp = send_video(chat_id, envio, caption=f'<b>{canal}</b>\n{titulo}\n{url}{nota}',
                           filename=nome)
         _record_sent(resp, chat_id, 'video', f"{inst['name']}:{row_id}")
         _log(f"[notifier] video enviado: {inst['name']} row {row_id}")
@@ -638,3 +904,4 @@ def start(instances, log_fn):
         return
     threading.Thread(target=notify_loop, daemon=True).start()
     threading.Thread(target=updates_loop, daemon=True).start()
+    threading.Thread(target=backfill_loop, daemon=True).start()

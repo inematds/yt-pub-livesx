@@ -51,6 +51,38 @@ Enquanto estiver aberto, **qualquer pessoa que descubra o bot consegue se
 inscrever num canal e pedir o MP4**. Fechar assim que terminar o cadastro da
 turma.
 
+## Envio automatico do video
+
+Por padrao o aviso ja vai **com o MP4 anexado** (`auto_video`, default ligado).
+O botao "Receber o video" continua existindo, mas so aparece quando o arquivo
+nao esta disponivel — ai serve de segunda chance.
+
+**Regra dos 50 MB:** o teto de upload da Bot API e 50 MB. Acima disso o notifier
+**re-encoda uma copia menor** (alvo 45 MB, h264 veryfast + AAC 128k, faststart)
+em vez de recusar — flag `send_shrink`, default ligado, valendo ate liberacao
+explicita. O original no disco nunca e tocado; a copia fica em cache em
+`/tmp/yt-notifier-shrink` por caminho+mtime+tamanho. A legenda avisa que e
+versao reduzida e informa o tamanho original.
+
+Liberar envio grande (volta a recusar em vez de encolher):
+`notifier.set_shrink(False)`. Desligar o anexo automatico:
+`notifier.set_auto_video(False)`. Nos dois casos, reiniciar o service.
+
+## Rotina diaria do backlog
+
+`backfill_loop()` roda **todo dia as 05:00** e manda os imports de **um dia por
+vez**, avancando a data: 02/08, depois 03/08, ate `BACKFILL_FIM` (13/08).
+Terminado, avisa o `admin_chat` que o backlog de agosto acabou e para sozinho.
+
+Estado no `notify_state.json`:
+- `backfill_next` — proxima data a enviar (`null` quando acabou)
+- `backfill_last_run` — dia em que ja rodou, evita repetir na mesma data
+- `backfill_sent` — chaves `instancia:row` ja enviadas, evita duplicata com
+  envios manuais
+- `admin_chat` — quem recebe o resumo de cada rodada e o aviso final
+
+Sao ~25 videos por dia (302 no total de 02 a 13/08), com 3s entre uploads.
+
 ## Envio por fora do notifier — nao faca
 
 Mandar link/video pro bot com script proprio (curl, sendMessage cru) produz
