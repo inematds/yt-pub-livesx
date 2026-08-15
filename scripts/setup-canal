@@ -62,9 +62,8 @@ read -rp "GCP_PROJECT: " GCP_PROJECT
 [ -z "$GCP_PROJECT" ] && { echo "ERRO: GCP_PROJECT obrigatorio"; exit 1; }
 
 # ============= D. IA =============
-echo ""
-read -rp "PIRAMYD_API_KEY: " PIRAMYD_API_KEY
-[ -z "$PIRAMYD_API_KEY" ] && { echo "ERRO: PIRAMYD_API_KEY obrigatoria"; exit 1; }
+# Nada a perguntar: a chave do Agnes e lida em runtime de
+# ~/projetos/agnes-nei/.env pelo scheduler, yt-clip e yt-thumbnail.
 
 # ============= E. Senha do dashboard =============
 echo ""
@@ -110,9 +109,6 @@ CLIENT_ID=$CLIENT_ID
 CLIENT_SECRET=$CLIENT_SECRET
 API_KEY=$API_KEY
 GCP_PROJECT=$GCP_PROJECT
-
-# IA
-PIRAMYD_API_KEY=$PIRAMYD_API_KEY
 
 # Identificacao
 INSTANCE_NAME=$NOME
