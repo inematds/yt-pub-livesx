@@ -26,8 +26,6 @@ TARGETS=(
     "/home/nmaldaner/projetos/yt-pub-lives10x"
     "/home/nmaldaner/projetos/yt-pub-lives11"
     "/home/nmaldaner/projetos/yt-pub-lives11x"
-    "/home/nmaldaner/projetos/yt-pub-lives12"
-    "/home/nmaldaner/projetos/yt-pub-lives13"
     "/home/nmaldaner/projetos/yt-pub-lives21"
     "/home/nmaldaner/projetos/yt-pub-lives22"
     "/home/nmaldaner/projetos/yt-pub-lives23"
@@ -37,7 +35,6 @@ TARGETS=(
     "/home/nmaldaner/projetos/yt-pub-lives27"
     "/home/nmaldaner/projetos/yt-pub-lives28"
     "/home/nmaldaner/projetos/yt-pub-lives29"
-    "/home/nmaldaner/projetos/yt-pub-lives30"
     "/home/nmaldaner/projetos/yt-pub-lives31"
     "/home/nmaldaner/projetos/yt-pub-lives32"
 )

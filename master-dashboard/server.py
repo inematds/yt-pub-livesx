@@ -554,7 +554,8 @@ def check_oauth_quick(instance_path):
         req = urllib.request.Request('https://oauth2.googleapis.com/token', data=token_data)
         resp = json.loads(urllib.request.urlopen(req, timeout=10).read())
         if 'access_token' in resp:
-            return {'ok': True, 'msg': 'OK'}
+            # _token NAO vai pro JSON da UI — check_instance remove antes de expor
+            return {'ok': True, 'msg': 'OK', '_token': resp['access_token']}
         return {'ok': False, 'msg': 'token refresh falhou'}
     except urllib.error.HTTPError as e:
         body = e.read().decode()[:100]
@@ -563,13 +564,64 @@ def check_oauth_quick(instance_path):
         return {'ok': False, 'msg': str(e)[:100]}
 
 
+def fill_canal_destino(instance_path, access_token):
+    """Grava canal_destino_* na config da instancia se ainda estiver vazio.
+
+    O dashboard da instancia so preenche isso quando alguem abre a aba Config
+    com o OAuth valido — canal novo ficava sem o badge YT ate essa visita.
+    Aqui o master resolve sozinho: uma chamada a API, so quando falta.
+    """
+    db_path = os.path.join(instance_path, 'data', 'lives.db')
+    if not os.path.exists(db_path):
+        return
+    try:
+        import sqlite3
+        conn = sqlite3.connect(db_path, timeout=5)
+        row = conn.execute(
+            "SELECT valor FROM config WHERE chave='canal_destino_url'").fetchone()
+        if row and row[0]:
+            conn.close()
+            return
+
+        req = urllib.request.Request(
+            'https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true')
+        req.add_header('Authorization', f'Bearer {access_token}')
+        items = json.loads(urllib.request.urlopen(req, timeout=15).read()).get('items', [])
+        if not items:
+            conn.close()
+            return
+
+        ch = items[0]
+        vals = {
+            'canal_destino_id': ch['id'],
+            'canal_destino_nome': ch['snippet']['title'],
+            'canal_destino_url': f"https://www.youtube.com/channel/{ch['id']}",
+        }
+        for k, v in vals.items():
+            conn.execute('INSERT OR REPLACE INTO config (chave, valor) VALUES (?, ?)', (k, v))
+        conn.commit()
+        conn.close()
+        log(f"canal_destino preenchido em {os.path.basename(instance_path)}: "
+            f"{vals['canal_destino_nome']}")
+    except Exception as e:
+        log(f'fill_canal_destino ({os.path.basename(instance_path)}): {e}')
+
+
 def check_instance(inst):
     """Coleta todos os dados de uma instância."""
     sched_info = get_service_info(inst['scheduler_svc'])
     dash_info = get_service_info(inst['dashboard_svc'])
     sched_status = get_scheduler_status(inst['path'])
-    db_stats = get_db_stats(inst['path'])
     oauth = check_oauth_quick(inst['path'])
+
+    # Token nunca sai daqui: usado so pra completar a config, e removido do
+    # dict antes de virar JSON no /api/status.
+    token = oauth.pop('_token', None)
+    if oauth.get('ok') and token:
+        fill_canal_destino(inst['path'], token)
+
+    # db_stats depois do fill, senao o canal_url so apareceria no ciclo seguinte
+    db_stats = get_db_stats(inst['path'])
 
     sched_running = sched_info.get('SubState') == 'running'
     dash_running = dash_info.get('SubState') == 'running'
