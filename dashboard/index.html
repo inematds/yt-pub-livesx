@@ -705,7 +705,7 @@
 
 <div class="container">
   <header>
-    <h1><span>INEMA</span> Lives & Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.29.32</a></small>
+    <h1><span>INEMA</span> Lives & Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.30.32</a></small>
       <span id="headerCanais" style="display:block;font-size:0.4em;font-weight:normal;margin-top:4px"></span>
     </h1>
     <div class="header-actions">
@@ -1003,7 +1003,7 @@
               <option value="claude-api">Claude CLI (OAuth)</option>
               <option value="anthropic-api">Anthropic API Key</option>
               <option value="openrouter-api">OpenRouter API</option>
-              <option value="piramyd-api">Piramyd API</option>
+              <option value="agnes-api">Agnes API (free)</option>
             </select>
           </div>
         </div>
@@ -1026,7 +1026,7 @@
           <div class="config-field">
             <label>Provider de Imagem</label>
             <select id="cfgThumbImageProvider" onchange="updateThumbFields()">
-              <option value="piramyd">Piramyd</option>
+              <option value="agnes">Agnes (free)</option>
               <option value="kie">Kie.ai</option>
               <option value="minimax">MiniMax</option>
               <option value="google">Google Imagen</option>
@@ -1051,7 +1051,7 @@
               <option value="claude-oauth">Claude OAuth</option>
               <option value="anthropic">Anthropic API</option>
               <option value="openrouter">OpenRouter</option>
-              <option value="piramyd">Piramyd</option>
+              <option value="agnes">Agnes (free)</option>
             </select>
             <span style="font-size:0.75rem;color:var(--muted);font-weight:600;">2.</span>
             <select id="cfgThumbLlm2Provider" style="padding:4px 8px;font-size:0.8rem;">
@@ -1059,7 +1059,7 @@
               <option value="claude-oauth">Claude OAuth</option>
               <option value="anthropic">Anthropic API</option>
               <option value="openrouter">OpenRouter</option>
-              <option value="piramyd">Piramyd</option>
+              <option value="agnes">Agnes (free)</option>
             </select>
             <span style="font-size:0.75rem;color:var(--muted);font-weight:600;">3.</span>
             <select id="cfgThumbLlm3Provider" style="padding:4px 8px;font-size:0.8rem;">
@@ -1067,7 +1067,7 @@
               <option value="claude-oauth">Claude OAuth</option>
               <option value="anthropic">Anthropic API</option>
               <option value="openrouter">OpenRouter</option>
-              <option value="piramyd">Piramyd</option>
+              <option value="agnes">Agnes (free)</option>
             </select>
             <span></span>
             <input type="text" id="cfgThumbLlm1Model" placeholder="(nao precisa para OAuth)" style="padding:4px 8px;font-size:0.8rem;">
@@ -2560,10 +2560,11 @@ function updateAiFields() {
   const keyMap = {
     'anthropic-api': {id: 'cfgAnthropicApiKey', label: 'API Key Anthropic', placeholder: 'sk-ant-...', src: anthH},
     'openrouter-api': {id: 'cfgOpenrouterApiKey', label: 'API Key OpenRouter', placeholder: 'sk-or-...', src: orH},
-    'piramyd-api': {id: 'cfgThumbApiKey', label: 'API Key Piramyd', placeholder: 'sk-...', src: thumbH}
+    'agnes-api': {id: null, label: 'Agnes: chave lida em runtime de ~/projetos/agnes-nei/.env — nada a preencher aqui', placeholder: '', src: thumbH}
   };
   const k = keyMap[mode];
-  const keyVal = k.src.value || '';
+  if (!k) return;
+  const keyVal = (k.src && k.src.value) || '';
   const modelVal = modelH.value || '';
 
   container.innerHTML = `
@@ -2571,10 +2572,10 @@ function updateAiFields() {
       <label>Modelo de Analise</label>
       <input type="text" id="_aiModel" value="${modelVal}" placeholder="claude-sonnet-4-20250514" oninput="document.getElementById('cfgAiModel').value=this.value">
     </div>
-    <div class="config-field">
+    ` + (k.id ? `<div class="config-field">
       <label>${k.label}</label>
       <input type="password" id="_aiKey" value="${keyVal}" placeholder="${k.placeholder}" oninput="document.getElementById('${k.id}').value=this.value">
-    </div>`;
+    </div>` : `<div class="config-field"><div class="hint" style="padding:8px 0">${k.label}</div></div>`);
 }
 
 function updateThumbFields() {
@@ -2585,8 +2586,8 @@ function updateThumbFields() {
   const inemaH = document.getElementById('cfgInemaimgUrl');
 
   const providerMap = {
-    'piramyd': {id: 'cfgThumbApiKey', label: 'API Key Piramyd', placeholder: 'sk-...', src: thumbH,
-      models: 'dreamshaper, flux2-klein-4b, sdxl-lite, flux-schnell'},
+    'agnes': {id: null, label: 'Agnes: chave lida em runtime de ~/projetos/agnes-nei/.env — nada a preencher aqui', placeholder: '', src: thumbH,
+      models: 'agnes-image-2.1-flash, agnes-image-2.0-flash'},
     'kie': {id: 'cfgKieApiKey', label: 'API Key Kie.ai', placeholder: 'abc123...', src: kieH,
       models: 'gpt4o-image, flux-kontext-pro, google/nano-banana'},
     'minimax': {id: '', label: '', placeholder: '', src: null,
@@ -2596,7 +2597,7 @@ function updateThumbFields() {
     'local': {id: 'cfgInemaimgUrl', label: 'URL inemaimg', placeholder: 'http://localhost:8000', src: inemaH,
       models: 'flux2-klein, flux2-dev, qwen-edit-2511, ernie, sdxl, sd15'}
   };
-  const p = providerMap[provider] || providerMap['piramyd'];
+  const p = providerMap[provider] || providerMap['agnes'];
   const modelEl = document.getElementById('cfgThumbModel');
   const modelVal = modelEl ? modelEl.value : '';
 
@@ -2613,7 +2614,7 @@ function updateThumbFields() {
       <input type="password" value="${keyVal}" placeholder="${p.placeholder}" oninput="document.getElementById('${p.id}').value=this.value">
     </div>`;
   } else {
-    html += '<div class="config-field"><div class="hint" style="padding:8px 0">Sem API key configuravel para este provider</div></div>';
+    html += `<div class="config-field"><div class="hint" style="padding:8px 0">${p.label || 'Sem API key configuravel para este provider'}</div></div>`;
   }
 
   container.innerHTML = html;
@@ -4296,7 +4297,7 @@ loadAll();
       <button onclick="closeModal('modalChangelog')" style="background:none;border:none;color:var(--muted);font-size:1.2em;cursor:pointer">X</button>
     </div>
     <div class="modal-body" style="padding:16px;overflow-y:auto;font-size:0.85em;line-height:1.8">
-      <h3 style="color:var(--accent);margin-bottom:8px">v3.29.32</h3>
+      <h3 style="color:var(--accent);margin-bottom:8px">v3.30.32</h3>
       <p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
       <ul style="margin:0 0 16px 20px;color:var(--text)">
         <li>Varios destinatarios por canal (Chat IDs separados por virgula)</li>

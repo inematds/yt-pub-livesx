@@ -29,19 +29,39 @@ if os.path.exists(ENV_FILE):
                 key, val = line.split('=', 1)
                 os.environ[key] = val
 
-PIRAMYD_API_KEY = os.environ.get('PIRAMYD_API_KEY', '')
-PIRAMYD_URL = 'https://api.piramyd.cloud/v1'
+AGNES_URL = 'https://apihub.agnes-ai.com/v1'
+AGNES_ENV = '/home/nmaldaner/projetos/agnes-nei/.env'
+
+
+def _agnes_key():
+    """Le AGNES_API_KEY em runtime do projeto agnes-nei (nao duplicamos a chave)."""
+    k = os.environ.get('AGNES_API_KEY', '')
+    if k:
+        return k
+    try:
+        with open(AGNES_ENV) as f:
+            for line in f:
+                if line.startswith('AGNES_API_KEY='):
+                    return line.split('=', 1)[1].strip()
+    except OSError:
+        pass
+    return ''
+
+
+AGNES_API_KEY = _agnes_key()
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
 OPENROUTER_URL = 'https://openrouter.ai/api/v1'
 IMAGE_MODEL = os.environ.get('THUMB_MODEL', 'flux2-klein-4b')
 CHAT_MODEL = 'claude-sonnet-4.5'
+AGNES_CHAT_MODEL = 'agnes-2.5-flash'
+AGNES_IMAGE_MODEL = 'agnes-image-2.1-flash'
 
 # LLM provider configs (loaded from env, set by scheduler)
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 ANTHROPIC_URL = 'https://api.anthropic.com/v1'
 
 PROVIDER_MAP = {
-    'piramyd': {'url': PIRAMYD_URL, 'key_env': 'PIRAMYD_API_KEY'},
+    'agnes': {'url': AGNES_URL, 'key_env': 'AGNES_API_KEY'},
     'openrouter': {'url': OPENROUTER_URL, 'key_env': 'OPENROUTER_API_KEY'},
     'anthropic': {'url': ANTHROPIC_URL, 'key_env': 'ANTHROPIC_API_KEY'},
     'claude-oauth': {'url': None, 'key_env': None},
@@ -64,13 +84,14 @@ def _get_llm_chain():
         if not model:
             continue
         info = PROVIDER_MAP[provider]
-        api_key = os.environ.get(info['key_env'], '')
+        api_key = AGNES_API_KEY if provider == 'agnes' else os.environ.get(info['key_env'], '')
         if not api_key:
             continue
         chain.append({'provider': provider, 'model': model, 'url': info['url'], 'api_key': api_key})
-    # Fallback: se nenhum configurado, usa o comportamento original
-    if not chain and PIRAMYD_API_KEY:
-        chain.append({'provider': 'piramyd', 'model': CHAT_MODEL, 'url': PIRAMYD_URL, 'api_key': PIRAMYD_API_KEY})
+    # Fallback: se nenhum configurado, usa o Agnes (free)
+    if not chain and AGNES_API_KEY:
+        chain.append({'provider': 'agnes', 'model': AGNES_CHAT_MODEL,
+                      'url': AGNES_URL, 'api_key': AGNES_API_KEY})
     return chain
 
 BRAND = os.environ.get('THUMB_BRAND', 'INEMA TDS')
@@ -192,6 +213,14 @@ def generate_prompt_json(title, description=''):
     user_msg = f'Titulo do video: "{title}"'
     if description:
         user_msg += f'\nDescricao: {description}'
+    # Os campos visuais alimentam o gerador de imagem. Prompt em portugues
+    # apanha do filtro de conteudo do Agnes e volta HTTP 400, entao a parte
+    # visual vai em ingles. O texto sobreposto e aplicado depois pelo Pillow,
+    # esse continua em portugues.
+    user_msg += ('\n\nIMPORTANTE: escreva os campos visuais '
+                 '(cena_principal, fundo_tematico, cores_dominantes, composicao, '
+                 'negative_prompt) EM INGLES. Os campos de texto que aparecem na '
+                 'thumbnail continuam em portugues.')
 
     messages = [
         {'role': 'system', 'content': SYSTEM_PROMPT},
@@ -252,7 +281,7 @@ INEMAIMG_MODEL_DEFAULT = 'flux2-klein'
 INEMAIMG_TIMEOUT = int(os.environ.get('INEMAIMG_TIMEOUT_S', '1800'))
 
 # Image provider config from env
-IMAGE_PROVIDER = os.environ.get('THUMB_IMAGE_PROVIDER', 'piramyd')
+IMAGE_PROVIDER = os.environ.get('THUMB_IMAGE_PROVIDER', 'agnes')
 
 # Kie model -> endpoint mapping
 KIE_ENDPOINTS = {
@@ -262,25 +291,49 @@ KIE_ENDPOINTS = {
 }
 
 
-def _generate_image_piramyd(image_prompt):
-    """Gera imagem via Piramyd API (sincrono, OpenAI-compatible)."""
+def _generate_image_agnes(image_prompt):
+    """Gera imagem via Agnes (OpenAI-compatible, free).
+
+    Duas particularidades medidas em ~/projetos/agnes-nei/NOTAS-API.md:
+    - ~34% das chamadas devolvem 503; o retry com backoff recupera quase tudo.
+    - prompt em portugues apanha do filtro de conteudo e volta 400, entao o
+      prompt de imagem vai em ingles (ver build_image_prompt).
+    - response_format so funciona dentro de extra_body.
+    """
+    import time
+    if not AGNES_API_KEY:
+        raise ValueError('AGNES_API_KEY nao encontrada (ver ' + AGNES_ENV + ')')
+
     payload = {
-        'model': IMAGE_MODEL,
+        'model': AGNES_IMAGE_MODEL,
         'prompt': image_prompt,
-        'n': 1,
-        'size': '1792x1024'
+        'size': '1K',
+        'ratio': '16:9',
+        'extra_body': {'response_format': 'url'},
     }
     body = json.dumps(payload).encode()
-    req = urllib.request.Request(f'{PIRAMYD_URL}/images/generations', data=body)
-    req.add_header('Content-Type', 'application/json')
-    req.add_header('Authorization', f'Bearer {PIRAMYD_API_KEY}')
 
-    resp = urllib.request.urlopen(req, timeout=120)
-    result = json.loads(resp.read())
-    data = result.get('data', [])
-    if not data or not data[0].get('url'):
-        raise ValueError('Piramyd nao retornou imagem')
-    return data[0]['url']
+    ultimo = ''
+    for tentativa in range(6):
+        req = urllib.request.Request(f'{AGNES_URL}/images/generations', data=body)
+        req.add_header('Content-Type', 'application/json')
+        req.add_header('Authorization', f'Bearer {AGNES_API_KEY}')
+        try:
+            result = json.loads(urllib.request.urlopen(req, timeout=400).read())
+            data = result.get('data', [])
+            if data and data[0].get('url'):
+                return data[0]['url']
+            ultimo = 'resposta sem url'
+        except urllib.error.HTTPError as e:
+            ultimo = f'HTTP {e.code}'
+            if e.code == 400:
+                # filtro de conteudo — retry nao resolve
+                raise ValueError(f'Agnes recusou o prompt (400): {e.read().decode()[:200]}')
+        except Exception as e:
+            ultimo = f'{type(e).__name__}: {e}'
+        if tentativa < 5:
+            time.sleep(2 ** tentativa)
+    raise ValueError(f'Agnes falhou apos 6 tentativas ({ultimo})')
 
 
 def _generate_image_kie(image_prompt):
@@ -460,7 +513,7 @@ def generate_ai_image(image_prompt):
     elif provider == 'kie':
         img_url = _generate_image_kie(image_prompt)
     else:
-        img_url = _generate_image_piramyd(image_prompt)
+        img_url = _generate_image_agnes(image_prompt)
 
     # Download
     dl_req = urllib.request.Request(img_url)

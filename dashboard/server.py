@@ -490,19 +490,22 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
         # Piramyd API key (para thumbnail)
         env_file = os.path.join(CONFIG_DIR, '.env')
-        api_key = ''
-        if os.path.exists(env_file):
-            with open(env_file) as f:
-                for line in f:
-                    if line.startswith('PIRAMYD_API_KEY='):
-                        api_key = line.split('=', 1)[1].strip()
+        # Chave do Agnes: runtime, do projeto agnes-nei (nao duplicamos a key)
+        api_key = os.environ.get('AGNES_API_KEY', '')
         if not api_key:
-            api_key = os.environ.get('PIRAMYD_API_KEY', '')
+            try:
+                with open('/home/nmaldaner/projetos/agnes-nei/.env') as f:
+                    for line in f:
+                        if line.startswith('AGNES_API_KEY='):
+                            api_key = line.split('=', 1)[1].strip()
+                            break
+            except OSError:
+                pass
 
         # Thumbnail API - testa o provider configurado
         try:
             cfg = db.load_config()
-            img_provider = cfg.get('thumb_image_provider', 'piramyd')
+            img_provider = cfg.get('thumb_image_provider', 'agnes')
 
             if img_provider == 'kie':
                 kie_key = cfg.get('kie_api_key', '')
@@ -514,16 +517,15 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                     checks['api_thumb'] = {'ok': True, 'detail': f'kie ok'}
                 else:
                     checks['api_thumb'] = {'ok': False, 'detail': 'sem kie_api_key'}
-            elif img_provider == 'piramyd':
+            elif img_provider == 'agnes':
                 if api_key:
-                    payload = json.dumps({'model': 'chatgpt-4.1', 'messages': [{'role': 'user', 'content': 'ok'}], 'max_tokens': 1}).encode()
-                    req = urllib.request.Request('https://api.piramyd.cloud/v1/chat/completions', data=payload)
-                    req.add_header('Content-Type', 'application/json')
+                    req = urllib.request.Request('https://apihub.agnes-ai.com/v1/models')
                     req.add_header('Authorization', f'Bearer {api_key}')
                     urllib.request.urlopen(req, timeout=15)
-                    checks['api_thumb'] = {'ok': True, 'detail': 'piramyd ok'}
+                    checks['api_thumb'] = {'ok': True, 'detail': 'agnes ok'}
                 else:
-                    checks['api_thumb'] = {'ok': False, 'detail': 'sem piramyd key'}
+                    checks['api_thumb'] = {'ok': False,
+                                           'detail': 'sem AGNES_API_KEY (~/projetos/agnes-nei/.env)'}
             elif img_provider == 'local':
                 url = cfg.get('inemaimg_url', '') or 'http://localhost:8000'
                 try:

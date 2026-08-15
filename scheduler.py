@@ -37,6 +37,23 @@ LIVES_DIR = os.environ.get('LIVES_DIR', os.path.join(PROJECT_ROOT, 'lives'))
 
 import db
 
+AGNES_ENV = '/home/nmaldaner/projetos/agnes-nei/.env'
+
+
+def _agnes_api_key():
+    """AGNES_API_KEY lida em runtime do projeto agnes-nei (nao duplicamos a key)."""
+    k = os.environ.get('AGNES_API_KEY', '')
+    if k:
+        return k
+    try:
+        with open(AGNES_ENV) as f:
+            for line in f:
+                if line.startswith('AGNES_API_KEY='):
+                    return line.split('=', 1)[1].strip()
+    except OSError:
+        pass
+    return ''
+
 
 def log(msg):
     ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -120,7 +137,7 @@ def run_corte(video_id, config=None):
     env['LIVES_DIR'] = LIVES_DIR
     env['PATH'] = f"{os.path.expanduser('~/.deno/bin')}:/usr/bin:{os.path.expanduser('~/.local/bin')}:{SCRIPTS_DIR}:{env.get('PATH', '')}"
 
-    # Modo de analise: claude-api | anthropic-api | openrouter-api | piramyd-api
+    # Modo de analise: claude-api | anthropic-api | openrouter-api | agnes-api
     ai_mode = 'claude-api'
     if config:
         ai_mode = config.get('ai_mode', 'claude-api')
@@ -135,10 +152,12 @@ def run_corte(video_id, config=None):
             key = config.get('openrouter_api_key', '')
             if key:
                 env['OPENROUTER_API_KEY'] = key
-        elif ai_mode == 'piramyd-api':
-            key = config.get('thumb_api_key', '')
+        elif ai_mode == 'agnes-api':
+            # Chave do Agnes vem em runtime do projeto agnes-nei; o yt-clip
+            # tambem sabe ler de la se nao vier no ambiente.
+            key = _agnes_api_key()
             if key:
-                env['PIRAMYD_API_KEY'] = key
+                env['AGNES_API_KEY'] = key
 
     proc = subprocess.Popen(
         [script, '--ai', ai_mode, '--', video_id],
@@ -382,11 +401,12 @@ def handle_thumbnail(video_id, title, description, config):
             # Set API key, model and visual config before importing
             api_key = config.get('thumb_api_key', '')
             model = config.get('thumb_model', 'dreamshaper')
-            if api_key:
-                os.environ['PIRAMYD_API_KEY'] = api_key
+            agnes_key = _agnes_api_key()
+            if agnes_key:
+                os.environ['AGNES_API_KEY'] = agnes_key
             os.environ['THUMB_MODEL'] = model
             # Image provider
-            img_provider = config.get('thumb_image_provider', 'piramyd')
+            img_provider = config.get('thumb_image_provider', 'agnes')
             os.environ['THUMB_IMAGE_PROVIDER'] = img_provider
             kie_key = config.get('kie_api_key', '')
             if kie_key:

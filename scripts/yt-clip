@@ -341,12 +341,17 @@ else:
     exit(1)
 PYEOF
 
-elif [[ "$AI_MODE" == "piramyd-api" ]]; then
-  # --- Modo: Piramyd API ---
-  echo "    Usando Piramyd API..."
+elif [[ "$AI_MODE" == "agnes-api" ]]; then
+  # --- Modo: Agnes API (free, OpenAI-compatible) ---
+  echo "    Usando Agnes API..."
 
-  if [[ -z "${PIRAMYD_API_KEY:-}" ]]; then
-    echo "Erro: PIRAMYD_API_KEY não definida" >&2
+  # Chave lida em runtime do projeto agnes-nei — nao duplicamos a key aqui.
+  if [[ -z "${AGNES_API_KEY:-}" ]] && [[ -f /home/nmaldaner/projetos/agnes-nei/.env ]]; then
+    AGNES_API_KEY=$(grep '^AGNES_API_KEY=' /home/nmaldaner/projetos/agnes-nei/.env | cut -d= -f2-)
+    export AGNES_API_KEY
+  fi
+  if [[ -z "${AGNES_API_KEY:-}" ]]; then
+    echo "Erro: AGNES_API_KEY não encontrada (~/projetos/agnes-nei/.env)" >&2
     exit 1
   fi
 
@@ -359,8 +364,8 @@ PROMPTEOF
   python3 << PYEOF
 import json, urllib.request, os, re
 
-api_key = os.environ['PIRAMYD_API_KEY']
-model = os.environ.get('AI_MODEL', 'claude-sonnet-4.5')
+api_key = os.environ['AGNES_API_KEY']
+model = os.environ.get('AI_MODEL', 'agnes-2.5-flash')
 
 with open('$JOB_DIR/prompt.txt') as f:
     prompt_text = f.read()
@@ -372,7 +377,7 @@ payload = {
 }
 
 body = json.dumps(payload).encode()
-req = urllib.request.Request('https://api.piramyd.cloud/v1/chat/completions', data=body)
+req = urllib.request.Request('https://apihub.agnes-ai.com/v1/chat/completions', data=body)
 req.add_header('Content-Type', 'application/json')
 req.add_header('Authorization', f'Bearer {api_key}')
 
