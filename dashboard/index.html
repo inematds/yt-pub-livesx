@@ -336,6 +336,7 @@
   .badge.concluido { background: rgba(34,197,94,0.15); color: var(--green); }
   .badge.pendente { background: rgba(234,179,8,0.15); color: var(--yellow); }
   .badge.erro { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge.semtopicos { background: rgba(148,163,184,0.15); color: var(--muted); }
   .badge.clickable { text-decoration: underline; cursor: pointer; }
   .badge.import { background: rgba(139,92,246,0.15); color: #a78bfa; font-size: 0.7em; vertical-align: middle; }
 
@@ -705,7 +706,7 @@
 
 <div class="container">
   <header>
-    <h1><span>INEMA</span> Lives & Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.30.32</a></small>
+    <h1><span>INEMA</span> Lives & Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.31.32</a></small>
       <span id="headerCanais" style="display:block;font-size:0.4em;font-weight:normal;margin-top:4px"></span>
     </h1>
     <div class="header-actions">
@@ -1848,6 +1849,7 @@
         <option value="aguardando_pub">Aguardando publicacao</option>
         <option value="publicado">Totalmente publicadas</option>
         <option value="erro">Com erro</option>
+        <option value="sem_topicos">Sem topicos (IA nao achou corte)</option>
       </select>
       <span class="toolbar-label">Origem:</span>
       <select id="livesOrigem" onchange="livesPage=1;filterLives()">
@@ -2002,7 +2004,7 @@ function showToast(msg, type = 'success') {
 }
 
 function badge(status, opts = {}) {
-  const cls = status === 'concluido' ? 'concluido' : status === 'erro' ? 'erro' : status === 'transcricao' ? 'concluido' : 'pendente';
+  const cls = status === 'concluido' ? 'concluido' : status === 'erro' ? 'erro' : status === 'sem_topicos' ? 'semtopicos' : status === 'transcricao' ? 'concluido' : 'pendente';
   const clickable = opts.clickable ? ' clickable' : '';
   const onclick = opts.onclick ? ` onclick="${opts.onclick}"` : '';
   const title = opts.title ? ` title="${opts.title}"` : '';
@@ -3117,11 +3119,12 @@ function filterLives() {
     if (search && !l.titulo.toLowerCase().includes(search) && !(l.video_id || '').toLowerCase().includes(search)) return false;
     const qtd = parseInt(l.qtd_clips) || 0;
     const pub = parseInt(l.clips_publicados) || 0;
-    if (status === 'pendente' && (l.status_cortes === 'concluido' || l.status_cortes === 'erro')) return false;
+    if (status === 'pendente' && ['concluido','erro','sem_topicos'].includes(l.status_cortes)) return false;
     if (status === 'concluido' && l.status_cortes !== 'concluido') return false;
     if (status === 'aguardando_pub' && !(l.status_cortes === 'concluido' && qtd > 0 && pub < qtd)) return false;
     if (status === 'publicado' && !(l.status_cortes === 'concluido' && qtd > 0 && pub >= qtd)) return false;
     if (status === 'erro' && l.status_cortes !== 'erro') return false;
+    if (status === 'sem_topicos' && l.status_cortes !== 'sem_topicos') return false;
     const isImport = (l.video_id || '').startsWith('import_');
     if (origem === 'import' && !isImport) return false;
     if (origem === 'live' && isImport) return false;
@@ -4297,7 +4300,7 @@ loadAll();
       <button onclick="closeModal('modalChangelog')" style="background:none;border:none;color:var(--muted);font-size:1.2em;cursor:pointer">X</button>
     </div>
     <div class="modal-body" style="padding:16px;overflow-y:auto;font-size:0.85em;line-height:1.8">
-      <h3 style="color:var(--accent);margin-bottom:8px">v3.30.32</h3>
+      <h3 style="color:var(--accent);margin-bottom:8px">v3.31.32</h3>
       <p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
       <ul style="margin:0 0 16px 20px;color:var(--text)">
         <li>Varios destinatarios por canal (Chat IDs separados por virgula)</li>

@@ -865,7 +865,8 @@ def process_cortes(config):
     max_per_run = int(config.get('corte_max_por_dia', '3'))
     lives = get_pending_lives()
 
-    pendentes = [l for l in lives if l.get('status_cortes') not in ('concluido', 'erro')]
+    pendentes = [l for l in lives
+                 if l.get('status_cortes') not in ('concluido', 'erro', 'sem_topicos')]
     if not pendentes:
         log('  Nenhuma live pendente para cortar')
         return
@@ -892,8 +893,20 @@ def process_cortes(config):
             mp4s = [f for f in os.listdir(clips_dir) if f.endswith('.mp4')] if os.path.isdir(clips_dir) else []
             has_clips = len(mp4s) > 0
 
+            # Rodou, a analise concluiu e nao ha topico para cortar: nao adianta
+            # tentar de novo — o topics.json ja existe e o yt-clip pula a analise.
+            # Sem isso a live volta pra fila toda janela e bloqueia as outras
+            # (aconteceu com uma live de abril, 68 tentativas seguidas).
+            if has_clips:
+                novo_status = 'concluido'
+            elif qtd_clips == 0 and os.path.exists(topics_file):
+                novo_status = 'sem_topicos'
+                log(f'  {vid}: analise nao encontrou topicos — marcado como sem_topicos')
+            else:
+                novo_status = 'pendente'
+
             update_live_status(vid, 'status_transcricao', 'transcricao', {
-                'status_cortes': 'concluido' if has_clips else 'pendente',
+                'status_cortes': novo_status,
                 'qtd_clips': qtd_clips,
                 'clips_disco': str(len(mp4s)),
                 'data_corte': datetime.now().strftime('%Y-%m-%d %H:%M')
