@@ -8,7 +8,7 @@ Roda dentro do master-dashboard (processo unico) e faz duas coisas:
    novas (clip / import / tiktok) e manda a mensagem para o chat_id configurado
    NAQUELA instancia (config `telegram_notify_chat_id`).
 2. updates_loop() — long-poll do getUpdates do bot dedicado, tratando o clique
-   no botao "Enviar o video" (envia o MP4 do disco).
+   no botao "Receber o video" (envia o MP4 do disco).
 
 Por que na master e nao no scheduler de cada canal:
 - um token de bot so pode ser pollado por UM processo (senao 409 Conflict);
@@ -106,6 +106,32 @@ def _inst_state(name):
     return st['instances'].setdefault(name, {'notified': {}})
 
 
+def _record_sent(resp, chat_id, kind, ref=''):
+    """Guarda o message_id do que o bot mandou, pra permitir apagar depois."""
+    try:
+        mid = (resp or {}).get('result', {}).get('message_id')
+    except Exception:
+        mid = None
+    if not mid:
+        return
+    with _state_lock:
+        st = _load_state()
+        sent = st.setdefault('sent', [])
+        sent.append({'chat': str(chat_id), 'mid': mid, 'kind': kind,
+                     'ref': ref, 'at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
+        del sent[:-500]
+        _save_state()
+
+
+def delete_message(chat_id, message_id):
+    try:
+        _api_call('deleteMessage', {'chat_id': str(chat_id), 'message_id': message_id})
+        return True
+    except Exception as e:
+        _log(f'[notifier] deleteMessage {chat_id}/{message_id}: {e}')
+        return False
+
+
 # --------------------------------------------------------- telegram API
 
 def _api_call(method, params):
@@ -139,8 +165,8 @@ def answer_callback(callback_id, text=''):
         _log(f'[notifier] answerCallbackQuery falhou: {e}')
 
 
-def send_video(chat_id, file_path, caption=''):
-    """Upload multipart do MP4."""
+def send_video(chat_id, file_path, caption='', filename=None):
+    """Upload multipart do MP4. `filename` sobrescreve o nome mostrado."""
     boundary = uuid.uuid4().hex
     fields = {'chat_id': str(chat_id), 'caption': caption,
               'parse_mode': 'HTML', 'supports_streaming': 'true'}
@@ -150,7 +176,7 @@ def send_video(chat_id, file_path, caption=''):
         body += f'Content-Disposition: form-data; name="{k}"\r\n\r\n'.encode()
         body += f'{v}\r\n'.encode()
 
-    fname = os.path.basename(file_path)
+    fname = filename or os.path.basename(file_path)
     ctype = mimetypes.guess_type(fname)[0] or 'video/mp4'
     body += f'--{boundary}\r\n'.encode()
     body += (f'Content-Disposition: form-data; name="video"; filename="{fname}"\r\n'
@@ -167,6 +193,11 @@ def send_video(chat_id, file_path, caption=''):
 
 
 # ------------------------------------------------------- leitura do canal
+
+def _short_name(inst):
+    """'yt-pub-lives10' -> 'lives10'."""
+    return (inst.get('name') or '').replace('yt-pub-', '')
+
 
 def _instance_by_id(inst_id):
     for i in _instances:
@@ -356,10 +387,10 @@ def _notify_instance(inst):
         titulo = (r.get('clip_titulo') or '(sem titulo)')[:120]
         url = r.get('clip_url') or f"https://www.youtube.com/watch?v={r.get('clip_video_id')}"
 
-        text = (f"{emoji} <b>{label} publicado</b> — {html.escape(inst['name'])}\n\n"
+        text = (f"{emoji} <b>{label} publicado</b> — {html.escape(_short_name(inst))}\n\n"
                 f"{html.escape(titulo)}\n{url}")
         markup = {'inline_keyboard': [[{
-            'text': '📤 Enviar o video',
+            'text': '📥 Receber o vídeo',
             'callback_data': f"v:{inst['id']}:{r['id']}",
         }]]}
         ok = 0
@@ -367,6 +398,7 @@ def _notify_instance(inst):
             resp = send_message(chat_id, text, markup)
             if resp and resp.get('ok'):
                 ok += 1
+                _record_sent(resp, chat_id, 'aviso', f"{inst['name']}:{r['id']}")
 
         if ok:
             with _state_lock:
@@ -506,27 +538,33 @@ def _handle_send_video(chat_id, inst_id, row_id):
         send_message(chat_id, '❌ Publicacao nao encontrada no banco.')
         return
 
+    canal = html.escape(_short_name(inst))
     titulo = html.escape((row.get('clip_titulo') or '')[:120])
     url = row.get('clip_url') or (f"https://www.youtube.com/watch?v={row['clip_video_id']}"
                                   if row.get('clip_video_id') else '')
     fpath = _resolve_clip_file(inst, row.get('live_video_id'), row.get('filename'))
 
     if not fpath or not os.path.exists(fpath):
-        send_message(chat_id, f'⚠️ Arquivo nao esta mais no disco (limpeza).\n\n{titulo}\n{url}')
+        send_message(chat_id, f'⚠️ [{canal}] Arquivo nao esta mais no disco (limpeza).\n\n{titulo}\n{url}')
         return
 
     size = os.path.getsize(fpath)
     if size > MAX_UPLOAD_BYTES:
         mb = size / (1024 * 1024)
-        send_message(chat_id, f'⚠️ Video de {mb:.0f} MB — acima do limite de 50 MB do Telegram.\n\n{titulo}\n{url}')
+        send_message(chat_id, f'⚠️ [{canal}] Video de {mb:.0f} MB — acima do limite de 50 MB do Telegram.\n\n{titulo}\n{url}')
         return
 
     try:
-        send_video(chat_id, fpath, caption=f'{titulo}\n{url}')
+        base = os.path.basename(fpath)
+        nome = base if base.lower().startswith(canal.lower()) else f'{canal}_{base}'
+        resp = send_video(chat_id, fpath, caption=f'<b>{canal}</b>\n{titulo}\n{url}',
+                          filename=nome)
+        _record_sent(resp, chat_id, 'video', f"{inst['name']}:{row_id}")
         _log(f"[notifier] video enviado: {inst['name']} row {row_id}")
     except Exception as e:
         _log(f'[notifier] sendVideo falhou: {e}')
-        send_message(chat_id, f'❌ Falha ao enviar o video: {html.escape(str(e))}\n\n{titulo}\n{url}')
+        send_message(chat_id, f'❌ [{canal}] Falha ao enviar o video: '
+                              f'{html.escape(str(e))}\n\n{titulo}\n{url}')
 
 
 def _handle_callback(cb):

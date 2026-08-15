@@ -51,6 +51,21 @@ Enquanto estiver aberto, **qualquer pessoa que descubra o bot consegue se
 inscrever num canal e pedir o MP4**. Fechar assim que terminar o cadastro da
 turma.
 
+## Envio por fora do notifier — nao faca
+
+Mandar link/video pro bot com script proprio (curl, sendMessage cru) produz
+mensagem **sem o botao**, porque o botao e o `reply_markup` que so o notifier
+monta. Ja aconteceu: em 14/08 um script do openpcbot mandou 33 links e todos
+chegaram sem botao.
+
+Qualquer disparo manual deve usar `notifier.send_message(chat, texto, markup)`
+com o `callback_data` no formato `v:<instance_id>:<row_id>`, ou
+`notifier._handle_send_video(chat, instance_id, row_id)` pra mandar o MP4
+direto.
+
+Publicacoes fora da janela de 48h nunca sao reenviadas pelo loop — para essas,
+o disparo manual e o unico caminho.
+
 ## Deteccao
 
 Janela deslizante de 48h sobre a tabela `publicados`, usando o mesmo filtro de
