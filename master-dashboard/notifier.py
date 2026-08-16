@@ -242,7 +242,7 @@ def _preparar_arquivo(inst, row):
 
 def _send_video_row(chat_id, inst, row, titulo, url):
     """Envia o MP4 da publicacao. Devolve True se foi."""
-    canal = html.escape(_short_name(inst))
+    canal = html.escape(_canal_label(inst))
     envio, size = _preparar_arquivo(inst, row)
     if not envio:
         return False
@@ -250,7 +250,8 @@ def _send_video_row(chat_id, inst, row, titulo, url):
     nota = f'\n<i>versao reduzida — original tem {size/1048576:.0f} MB</i>' if reduzido else ''
     base = os.path.basename(_resolve_clip_file(inst, row.get('live_video_id'),
                                                row.get('filename')) or envio)
-    nome = base if base.lower().startswith(canal.lower()) else f'{canal}_{base}'
+    curto = _short_name(inst)
+    nome = base if base.lower().startswith(curto.lower()) else f'{curto}_{base}'
     try:
         resp = send_video(chat_id, envio,
                           caption=f'<b>{canal}</b>\n{html.escape(titulo)}\n{url}{nota}',
@@ -328,6 +329,15 @@ def _shrink(path):
 def _short_name(inst):
     """'yt-pub-lives10' -> 'lives10'."""
     return (inst.get('name') or '').replace('yt-pub-', '')
+
+
+def _canal_label(inst, cfg=None):
+    """'lives10 · INEMA Agentes' — instancia + nome do canal no YouTube."""
+    curto = _short_name(inst)
+    if cfg is None:
+        cfg = _read_config(inst)
+    nome = (cfg.get('canal_destino_nome') or '').strip()
+    return f'{curto} · {nome}' if nome else curto
 
 
 def _instance_by_id(inst_id):
@@ -518,7 +528,7 @@ def _notify_instance(inst):
         titulo = (r.get('clip_titulo') or '(sem titulo)')[:120]
         url = r.get('clip_url') or f"https://www.youtube.com/watch?v={r.get('clip_video_id')}"
 
-        text = (f"{emoji} <b>{label} publicado</b> — {html.escape(_short_name(inst))}\n\n"
+        text = (f"{emoji} <b>{label} publicado</b> — {html.escape(_canal_label(inst, cfg))}\n\n"
                 f"{html.escape(titulo)}\n{url}")
         markup = {'inline_keyboard': [[{
             'text': '📥 Receber o vídeo',
@@ -820,7 +830,8 @@ def _handle_send_video(chat_id, inst_id, row_id):
 
     try:
         base = os.path.basename(fpath)
-        nome = base if base.lower().startswith(canal.lower()) else f'{canal}_{base}'
+        curto = _short_name(inst)
+        nome = base if base.lower().startswith(curto.lower()) else f'{curto}_{base}'
         nota = (f'\n<i>versao reduzida — original tem {size/1048576:.0f} MB</i>'
                 if reduzido else '')
         resp = send_video(chat_id, envio, caption=f'<b>{canal}</b>\n{titulo}\n{url}{nota}',
