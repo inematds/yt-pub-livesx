@@ -354,6 +354,48 @@ def _prune_empty_parents(rel):
         parent = os.path.dirname(parent)
 
 
+THUMB_MAX_BYTES = 2 * 1024 * 1024   # limite do thumbnails.set do YouTube
+THUMB_EXTS      = ('.jpg', '.jpeg', '.png')
+
+
+def _copy_manifest_thumb(thumb_name, folder_path, clips_dir, mp4_fname):
+    """
+    Copia a capa declarada no manifest.json para clips_dir.
+    Retorna o caminho de destino, ou None se ausente/invalida (fluxo normal segue).
+    """
+    if not thumb_name:
+        return None
+
+    src = os.path.join(folder_path, os.path.basename(str(thumb_name)))
+    ext = os.path.splitext(src)[1].lower()
+
+    if not os.path.exists(src):
+        log(f'  thumbnail "{thumb_name}" nao encontrada, gerando capa normal')
+        return None
+    if ext not in THUMB_EXTS:
+        log(f'  thumbnail "{thumb_name}" com extensao nao suportada, gerando capa normal')
+        return None
+    size = os.path.getsize(src)
+    if size > THUMB_MAX_BYTES:
+        log(f'  thumbnail "{thumb_name}" acima de 2MB ({size} bytes), gerando capa normal')
+        return None
+
+    # Destino sempre .jpg: o upload do YouTube manda Content-Type image/jpeg fixo
+    dst = os.path.join(clips_dir, os.path.splitext(mp4_fname)[0] + '-thumb.jpg')
+    try:
+        if ext == '.png':
+            from PIL import Image
+            Image.open(src).convert('RGB').save(dst, 'JPEG', quality=92)
+        else:
+            shutil.copy2(src, dst)
+    except Exception as e:
+        log(f'  falha ao copiar thumbnail "{thumb_name}": {e}, gerando capa normal')
+        return None
+
+    log(f'  Capa do manifesto: {os.path.basename(dst)}')
+    return dst
+
+
 def _build_manifest(clips_dir, folder_path, gerar_descricao):
     """
     Constroi a lista de clips para o manifest.
@@ -407,7 +449,7 @@ def _build_manifest(clips_dir, folder_path, gerar_descricao):
                 description = _gerar_descricao_ia(title)
 
         dest_file = os.path.join(clips_dir, fname)
-        clips.append({
+        clip = {
             'index':       i,
             '_src_path':   src_path,   # origem real (pode estar em subdir)
             'file':        dest_file,
@@ -416,7 +458,15 @@ def _build_manifest(clips_dir, folder_path, gerar_descricao):
             'description': description,
             'tags':        tags,
             'duration':    0,
-        })
+        }
+
+        # Capa pronta vinda do manifest.json (campo "thumbnail")
+        thumb_file = _copy_manifest_thumb(m.get('thumbnail'), folder_path,
+                                          clips_dir, fname)
+        if thumb_file:
+            clip['thumb_file'] = thumb_file
+
+        clips.append(clip)
 
     return clips
 

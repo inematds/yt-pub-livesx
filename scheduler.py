@@ -388,16 +388,30 @@ def _apply_saved_preset(preset_name, config, yt_thumb):
     log(f'  [thumb] Preset ativo: {preset_name}')
 
 
-def handle_thumbnail(video_id, title, description, config):
-    """Generate and upload thumbnail based on config thumb_mode."""
+def handle_thumbnail(video_id, title, description, config, thumb_override=None):
+    """
+    Generate and upload thumbnail based on config thumb_mode.
+    thumb_override: caminho de uma capa ja pronta (manifest.json do import).
+    Quando presente, pula a geracao e sobe esse arquivo — inclusive com
+    thumb_mode=none.
+    """
     thumb_mode = config.get('thumb_mode', 'none')
-    if thumb_mode == 'none':
+    use_override = bool(thumb_override) and os.path.exists(thumb_override)
+    if thumb_override and not use_override:
+        log(f'  [thumb] capa do manifesto sumiu ({thumb_override}), gerando normal')
+    if thumb_mode == 'none' and not use_override:
         return
 
     thumb_path = f'/tmp/yt_thumb_{video_id}.jpg'
 
     try:
-        if thumb_mode == 'api':
+        if use_override:
+            # Copia para /tmp: o bloco de upload remove thumb_path no fim
+            import shutil
+            shutil.copy2(thumb_override, thumb_path)
+            log(f'  [thumb] Usando capa do manifesto: {os.path.basename(thumb_override)}')
+
+        elif thumb_mode == 'api':
             # Set API key, model and visual config before importing
             api_key = config.get('thumb_api_key', '')
             model = config.get('thumb_model', 'dreamshaper')
@@ -1061,7 +1075,8 @@ def _publish_import_list(label, lives, max_por_vez, privacy, config):
 
             if new_vid:
                 update_status('publicando', f'[{label}] Thumbnail...', vid, step='thumbnail', clip_id=new_vid)
-                handle_thumbnail(new_vid, clip_title, clip_desc, config)
+                handle_thumbnail(new_vid, clip_title, clip_desc, config,
+                                 thumb_override=clip.get('thumb_file'))
                 db.update_publicado(lock_row_id,
                     clip_video_id=new_vid,
                     clip_titulo=clip_title,

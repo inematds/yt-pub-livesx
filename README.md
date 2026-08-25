@@ -28,6 +28,51 @@ Alem do fluxo principal (cortar lives → gerar clips → publicar), o pipeline 
 2. **Import de videos** → pasta `imports/` vira fila do pipeline → thumbnail → publicacao
 3. **Sync TikTok → YouTube** → scan de canais TikTok → download → fila do pipeline → publicacao no canal YouTube de destino
 
+### Import com metadados prontos (`imports/<lote>/manifest.json`)
+
+Quando a peca ja chega com titulo, descricao e capa definidos, o pipeline **usa o que veio
+e nao gera nada por cima**. Campo ausente = fluxo normal (titulo pelo nome do arquivo,
+descricao por IA, capa pelo `thumb_mode` da config).
+
+```
+imports/stay-kling/
+├── stay-kling.mp4      # nome do arquivo = filename no manifesto
+├── capa-yt.jpg
+└── manifest.json
+```
+
+```json
+{
+  "titulo": "Stay",
+  "clips": [
+    {
+      "filename":    "stay-kling.mp4",
+      "title":       "Stay",
+      "description": "Paragrafo 1...\n\nParagrafo 2...",
+      "tags":        ["cinematic", "power ballad"],
+      "thumbnail":   "capa-yt.jpg"
+    }
+  ]
+}
+```
+
+| campo | efeito quando presente | quando ausente |
+|---|---|---|
+| `title` | sobe exatamente assim | titulo derivado do nome do arquivo |
+| `description` | sobe exatamente assim; **nao passa por IA** | transcricao + IA (se `import_gerar_descricao=true`) |
+| `tags` | sobem como estao | sem tags |
+| `thumbnail` | capa e enviada ao YouTube; o gerador **nao roda**, nem com `thumb_mode=api` ou `none` | capa gerada conforme `thumb_mode` |
+| `privacy` (no clip ou na raiz) | sobrepoe a visibilidade padrao | visibilidade da config do canal |
+| `publish_at` (raiz, `HH:MM`) | respeitado quando `import_fila=false` | entra na fila normal |
+
+Regras da capa: mesma pasta do MP4, `.jpg`/`.jpeg`/`.png` (PNG e convertido para JPEG,
+porque o `thumbnails.set` exige `image/jpeg`), maximo 2 MB. Arquivo faltando ou invalido
+gera log e cai no fluxo normal — **nunca quebra o lote**.
+
+Nao e preciso aplicar faststart no MP4: o `_ensure_faststart` roda em todo video importado.
+
+`clips` aceita varios itens — cada um com seu proprio titulo, descricao, tags e capa.
+
 ## Estrutura
 
 ```
