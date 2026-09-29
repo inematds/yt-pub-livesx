@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<html lang="pt-BR">
+<html lang="es">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>yt-pub-livesx — corta lives do YouTube em clips e publica</title>
-<meta content="yt-pub-livesx: pipeline que corta lives do YouTube em clips por tópico com IA e publica em outro canal. Master-dashboard + N instâncias, FFmpeg, yt-dlp, SQLite e OAuth." name="description"/>
+<title>yt-pub-livesx — recorta transmisiones en vivo de YouTube en clips y los publica</title>
+<meta content="yt-pub-livesx: pipeline que recorta transmisiones en vivo de YouTube en clips por tema con IA y los publica en otro canal. Panel de control principal + N instancias, FFmpeg, yt-dlp, SQLite y OAuth." name="description"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
@@ -89,18 +89,18 @@
   .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:.3em .8em;font-size:.78rem;color:var(--mut);margin:0 4px}
 </style>
 <link href="https://inematds.github.io/yt-pub-livesx/" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/yt-pub-livesx/en/" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/yt-pub-livesx/es/" hreflang="es" rel="alternate"/></head>
-<body><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="./" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">PT</a><a href="en/" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="es/" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<body><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="../en/" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="./" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">ES</a></div>
 <nav><div class="wrap">
 <a class="brand" href="#top"><span class="emoji">✂️</span> yt-pub-livesx</a>
 <span class="sep">|</span>
 <a class="inema" href="https://inema.club" rel="noopener" target="_blank">INEMA.CLUB</a>
 <div class="links">
-<a class="sec" href="#oque">O que é</a>
-<a class="sec" href="#fluxo">Como funciona</a>
-<a class="sec" href="#guia">Guia de uso</a>
-<a class="sec" href="#exemplos">Exemplos</a>
-<a class="sec" href="#roadmap">Roadmap</a>
-<button aria-label="Alternar tema" class="tgl" id="themeToggle" title="Alternar tema">🌙</button>
+<a class="sec" href="#oque">Qué es</a>
+<a class="sec" href="#fluxo">Cómo funciona</a>
+<a class="sec" href="#guia">Guía de uso</a>
+<a class="sec" href="#exemplos">Ejemplos</a>
+<a class="sec" href="#roadmap">Hoja de ruta</a>
+<button aria-label="Cambiar tema" class="tgl" id="themeToggle" title="Cambiar tema">🌙</button>
 <a class="btn" href="https://github.com/inematds/yt-pub-livesx" rel="noopener" target="_blank">GitHub</a>
 </div>
 </div></nav>
@@ -108,127 +108,127 @@
 <div class="glow"></div>
 <div class="wrap">
 <div>
-<span class="chip">Pipeline YouTube · IA · multi-canal</span>
-<h1>Corta lives do YouTube em clips e <span class="amb">publica</span> sozinho</h1>
-<p class="lead">Sincroniza lives, transcreve, analisa tópicos com IA, corta com FFmpeg, gera thumbnail e publica no canal de destino — tudo orquestrado por um master-dashboard e N instâncias.</p>
+<span class="chip">Pipeline YouTube · IA · multicanal</span>
+<h1>Corta transmisiones en vivo de YouTube en clips y <span class="amb">publica</span> por sí solo</h1>
+<p class="lead">Sincroniza las lives, las transcribe, analiza temas con IA, recorta con FFmpeg, genera una miniatura y publica en el canal de destino: todo orquestado por un master-dashboard y N instancias.</p>
 <div class="cta">
-<a class="btn" href="#guia">Começar o guia</a>
-<a class="btn ghost" href="https://github.com/inematds/yt-pub-livesx" rel="noopener" target="_blank">Ver no GitHub</a>
+<a class="btn" href="#guia">Empezar la guía</a>
+<a class="btn ghost" href="https://github.com/inematds/yt-pub-livesx" rel="noopener" target="_blank">Ver en GitHub</a>
 </div>
 </div>
-<figure><pre><span class="c"># Parte 1: sobe o master-dashboard (porta 8090)</span>
+<figure><pre><span class="c"># Parte 1: inicia el master-dashboard (puerto 8090)</span>
 <span class="k">git clone</span> <span class="s">https://github.com/inematds/yt-pub-livesx.git</span>
 <span class="k">cd</span> yt-pub-livesx
 <span class="k">./setup.sh</span>  <span class="c"># http://localhost:8090</span></pre></figure>
 </div>
 </header>
 <section id="oque"><div class="wrap">
-<span class="chip">O que é</span>
-<h2>Uma fábrica de clips a partir das suas lives</h2>
-<p class="sub">Pega as lives de um canal de origem, identifica tópicos com IA e publica os recortes num canal de destino com título, descrição, tags e thumbnail. Pensado para rodar como template multi-canal, isolando credenciais e cotas por instância.</p>
+<span class="chip">Qué es</span>
+<h2>Una fábrica de clips a partir de tus lives</h2>
+<p class="sub">Toma las lives de un canal de origen, identifica temas con IA y publica los recortes en un canal de destino con título, descripción, etiquetas y miniatura. Diseñado para ejecutarse como plantilla multicanal, aislando las credenciales y las cuotas por instancia.</p>
 <div class="grid g3">
-<div class="card"><h3>✂️ Corte por tópico com IA</h3><p>Transcrição automática (legendas do YouTube) → análise de tópicos com Piramyd / Claude / OpenRouter → timestamps → corte com FFmpeg.</p></div>
-<div class="card"><h3>✂️ Três fontes de vídeo</h3><p>Lives do YouTube, import de vídeos da pasta <code>imports/</code> e sync de canais do TikTok para o YouTube — todos caem no mesmo pipeline.</p></div>
-<div class="card"><h3>✂️ Master + N instâncias</h3><p>1 master-dashboard agrega tudo na porta 8090; cada canal é uma cópia do template numa porta 809N, com SQLite, OAuth e projeto GCP próprios.</p></div>
+<div class="card"><h3>✂️ Recorte por tema con IA</h3><p>Transcripción automática (subtítulos de YouTube) → análisis de temas con Piramyd / Claude / OpenRouter → marcas de tiempo → corte con FFmpeg.</p></div>
+<div class="card"><h3>✂️ Tres fuentes de video</h3><p>Lives de YouTube, importación de videos de la carpeta <code>imports/</code> y sincronización de canales de TikTok a YouTube: todos pasan por el mismo pipeline.</p></div>
+<div class="card"><h3>✂️ Instancia principal + N instancias</h3><p>1 master-dashboard reúne todo en el puerto 8090; cada canal es una copia de la plantilla en un puerto 809N, con SQLite, OAuth y un proyecto de GCP propios.</p></div>
 </div>
 </div></section>
 <section id="fluxo"><div class="wrap">
-<span class="chip">Como funciona</span>
-<h2>Da live ao clip publicado</h2>
-<p class="sub">O scheduler de cada canal baixa as lives novas, transcreve, analisa, corta, gera thumbnail e publica via OAuth, registrando tudo no SQLite local. O dashboard controla e o master agrega.</p>
+<span class="chip">Cómo funciona</span>
+<h2>De la transmisión en vivo al clip publicado</h2>
+<p class="sub">El scheduler de cada canal descarga las lives nuevas, las transcribe, analiza, recorta, genera una miniatura y publica mediante OAuth, registrando todo en el SQLite local. El dashboard controla y el master agrega.</p>
 <div class="flow">
-<span>Lives (canal origem)</span><span class="arr">→</span>
-<span>Transcrição</span><span class="arr">→</span>
-<span>Análise IA</span><span class="arr">→</span>
+<span>Lives (canal de origen)</span><span class="arr">→</span>
+<span>Transcripción</span><span class="arr">→</span>
+<span>Análisis con IA</span><span class="arr">→</span>
 <span>Corte (FFmpeg)</span><span class="arr">→</span>
-<span>Thumbnail (IA)</span><span class="arr">→</span>
-<span>Publicação (canal destino)</span>
+<span>Miniatura (IA)</span><span class="arr">→</span>
+<span>Publicación (canal de destino)</span>
 </div>
 <div class="grid g3" style="margin-top:26px">
-<div class="card"><h3>1 canal = 1 instância</h3><p>OAuth é por canal e a cota da YouTube Data API é por projeto GCP — separar instâncias garante cotas independentes e isolamento de falhas.</p></div>
-<div class="card"><h3>Systemd por canal</h3><p>Cada par <code>yt-dashboard&lt;N&gt;</code> + <code>yt-scheduler&lt;N&gt;</code> é independente: se um canal cai, os outros seguem.</p></div>
-<div class="card"><h3>Dashboard de controle</h3><p>Stats clicáveis, horários, tabela de lives por status, aba de clips unificada, reprocessar erros e status do scheduler em tempo real.</p></div>
+<div class="card"><h3>1 canal = 1 instancia</h3><p>OAuth es por canal y la cuota de YouTube Data API es por proyecto de GCP: separar las instancias garantiza cuotas independientes y aislamiento de fallas.</p></div>
+<div class="card"><h3>Systemd por canal</h3><p>Cada par <code>yt-dashboard&lt;N&gt;</code> + <code>yt-scheduler&lt;N&gt;</code> es independiente: si un canal se cae, los demás siguen funcionando.</p></div>
+<div class="card"><h3>Dashboard de control</h3><p>Estadísticas interactivas, horarios, tabla de lives por estado, pestaña unificada de clips, reprocesamiento de errores y estado del scheduler en tiempo real.</p></div>
 </div>
 </div></section>
 <section id="pre"><div class="wrap">
-<span class="chip">Pré-requisitos</span>
-<h2>O que você precisa antes de subir</h2>
-<p class="sub">Python 3.10+ e algumas ferramentas de linha de comando. Cada canal precisa de um projeto Google Cloud próprio com a YouTube Data API v3 ativa.</p>
+<span class="chip">Requisitos previos</span>
+<h2>Lo que necesitas antes de subir</h2>
+<p class="sub">Python 3.10+ y algunas herramientas de línea de comandos. Cada canal necesita su propio proyecto de Google Cloud con YouTube Data API v3 activada.</p>
 <div class="grid g3">
-<div class="card"><h3>Ferramentas do sistema</h3><p>Python 3.10+, ffmpeg, yt-dlp, deno (runtime JS do yt-dlp), curl e Pillow.</p><pre><span class="c"># ubuntu/debian</span>
+<div class="card"><h3>Herramientas del sistema</h3><p>Python 3.10+, ffmpeg, yt-dlp, deno (runtime de JS de yt-dlp), curl y Pillow.</p><pre><span class="c"># ubuntu/debian</span>
 <span class="k">sudo apt-get install</span> -y python3 ffmpeg curl git
 <span class="k">pipx install</span> yt-dlp</pre></div>
-<div class="card"><h3>Deno</h3><p>Usado internamente pelo yt-dlp para alguns extratores.</p><pre><span class="k">curl -fsSL</span> <span class="s">https://deno.land/install.sh</span> | sh</pre></div>
-<div class="card"><h3>Projeto GCP por canal</h3><p>YouTube Data API v3 ativada, OAuth Consent (External / Testing) e OAuth Client (Desktop App) com <code>CLIENT_ID</code> + <code>CLIENT_SECRET</code> + API Key.</p><pre><span class="c"># scopes necessários</span>
+<div class="card"><h3>Deno</h3><p>Usado internamente por yt-dlp para algunos extractores.</p><pre><span class="k">curl -fsSL</span> <span class="s">https://deno.land/install.sh</span> | sh</pre></div>
+<div class="card"><h3>Proyecto de GCP por canal</h3><p>YouTube Data API v3 activada, OAuth Consent (External / Testing) y OAuth Client (Desktop App) con <code>CLIENT_ID</code> + <code>CLIENT_SECRET</code> + API Key.</p><pre><span class="c"># scopes necesarios</span>
 <span class="s">youtube</span>, <span class="s">youtube.upload</span></pre></div>
 </div>
 </div></section>
 <section id="guia"><div class="wrap">
-<span class="chip">Guia de uso · passo a passo</span>
-<h2>Do master ao primeiro canal publicando</h2>
-<p class="sub">A instalação é dividida em duas partes: Parte 1 sobe o master (1x por máquina); Parte 2 cria uma instância por canal a partir deste template.</p>
+<span class="chip">Guía de uso · paso a paso</span>
+<h2>Del master al primer canal publicando</h2>
+<p class="sub">La instalación se divide en dos partes: la Parte 1 inicia el master (1 vez por máquina); la Parte 2 crea una instancia por canal a partir de esta plantilla.</p>
 <div class="step"><div class="b">1</div><div>
-<h3>Parte 1 — Setup do sistema</h3>
-<p>Verifica dependências, instala pacotes Python e sobe o master-dashboard como systemd user service na porta 8090.</p>
+<h3>Parte 1 — Configuración del sistema</h3>
+<p>Verifica las dependencias, instala los paquetes de Python e inicia el master-dashboard como servicio de usuario de systemd en el puerto 8090.</p>
 <pre><span class="k">git clone https://github.com/inematds/yt-pub-livesx.git</span>
 <span class="k">cd</span> yt-pub-livesx
 <span class="k">./setup.sh</span>  <span class="c"># http://localhost:8090</span></pre>
 </div></div>
 <div class="step"><div class="b">2</div><div>
-<h3>Parte 2 — Adicionar um canal</h3>
-<p>Faz as perguntas (ENTER aceita o default), copia o template para <code>~/projetos/&lt;nome&gt;</code>, gera o <code>.env</code> e cria os services systemd da instância.</p>
+<h3>Parte 2 — Agregar un canal</h3>
+<p>Hace las preguntas (ENTER acepta el valor predeterminado), copia la plantilla en <code>~/projetos/&lt;nome&gt;</code>, genera el <code>.env</code> y crea los servicios systemd de la instancia.</p>
 <pre><span class="k">./scripts/setup-canal</span></pre>
 </div></div>
 <div class="step"><div class="b">3</div><div>
-<h3>Autenticar via OAuth</h3>
-<p>Quando o <code>setup-canal</code> pausar, rode o <code>yt-auth</code> em outro terminal, abra o link gerado e autorize com a conta dona do canal de destino.</p>
+<h3>Autenticar mediante OAuth</h3>
+<p>Cuando el <code>setup-canal</code> para pausar, ejecuta el <code>yt-auth</code> en otra terminal, abre el enlace generado y autoriza con la cuenta propietaria del canal de destino.</p>
 <pre><span class="k">GWS_CONFIG_DIR</span>=~/projetos/&lt;nome&gt;/config \
   <span class="k">python3</span> ~/projetos/&lt;nome&gt;/scripts/yt-auth
-<span class="c"># callback salva os tokens em config/credentials.enc</span></pre>
+<span class="c"># el callback guarda los tokens en config/credentials.enc</span></pre>
 </div></div>
 <div class="step"><div class="b">4</div><div>
-<h3>Cortar uma live</h3>
-<p>Manual gera o prompt; com <code>--ai piramyd-api</code> roda automático; <code>--dry-run</code> só mostra os tópicos; <code>--publish</code> corta e publica.</p>
-<pre><span class="k">yt-clip</span> &lt;video_id&gt; --dry-run        <span class="c"># só mostra tópicos</span>
+<h3>Cortar una transmisión en vivo</h3>
+<p>Manual genera el prompt; con <code>--ai piramyd-api</code> se ejecuta automáticamente; <code>--dry-run</code> solo muestra los temas; <code>--publish</code> recorta y publica.</p>
+<pre><span class="k">yt-clip</span> &lt;video_id&gt; --dry-run        <span class="c"># solo muestra temas</span>
 <span class="k">yt-clip</span> &lt;video_id&gt; --ai piramyd-api  <span class="c"># automático</span>
-<span class="k">yt-clip</span> &lt;video_id&gt; --publish        <span class="c"># corta e publica</span></pre>
+<span class="k">yt-clip</span> &lt;video_id&gt; --publish        <span class="c"># corta y publica</span></pre>
 </div></div>
 <div class="step"><div class="b">5</div><div>
-<h3>Gerar thumbnail e publicar avulso</h3>
-<p>Os scripts <code>yt-thumbnail</code> e <code>yt-publish</code> funcionam fora do fluxo automático.</p>
+<h3>Generar una miniatura y publicar por separado</h3>
+<p>Los scripts <code>yt-thumbnail</code> e <code>yt-publish</code> funcionan fuera del flujo automático.</p>
 <pre><span class="k">yt-thumbnail</span> --title <span class="s">"Título do clip"</span> --output thumb.jpg
 <span class="k">yt-publish</span> video.mp4 --title <span class="s">"Título"</span> --description <span class="s">"Desc"</span></pre>
 </div></div>
 <div class="step"><div class="b">6</div><div>
-<h3>Operar pelo dashboard</h3>
-<p>Cada canal tem painel próprio na porta 809N (senha default <code>Inema2026$$$</code>, em <code>config/.env</code>). O master agrega todos em 8090.</p>
+<h3>Operar desde el dashboard</h3>
+<p>Cada canal tiene su propio panel en el puerto 809N (contraseña predeterminada <code>Inema2026$$$</code>, en <code>config/.env</code>). El master los reúne todos en 8090.</p>
 <pre><span class="k">python3</span> dashboard/server.py 8091  <span class="c"># http://localhost:8091</span></pre>
 </div></div>
 </div></section>
 <section id="exemplos"><div class="wrap">
-<span class="chip">Exemplos</span>
+<span class="chip">Ejemplos</span>
 <h2>Casos de uso</h2>
-<p class="sub">Pensado para operar vários canais de uma vez, com sync de código opcional entre as instâncias.</p>
+<p class="sub">Diseñado para operar varios canales a la vez, con sincronización opcional de código entre las instancias.</p>
 <div class="grid g2">
-<div class="card"><h3>Múltiplos canais em paralelo</h3><p>Instâncias lives1..livesN, cada uma numa porta 809N, com scheduler e dashboard independentes e projeto GCP próprio por canal de destino.</p></div>
-<div class="card"><h3>Sync TikTok → YouTube</h3><p>O <code>tiktok_scanner</code> varre canais do TikTok, baixa os vídeos e os joga na fila do pipeline para publicar no canal YouTube de destino.</p></div>
-<div class="card"><h3>Import de vídeos prontos</h3><p>Largue arquivos em <code>imports/</code> e o <code>import_worker</code> os transforma em fila do pipeline — thumbnail e publicação inclusos.</p></div>
-<div class="card"><h3>Deploy em VPS com SSH tunnel</h3><p>Habilite lingering, rode as duas partes e acesse os dashboards via <code>ssh -L</code> sem expor portas publicamente.</p></div>
+<div class="card"><h3>Varios canales en paralelo</h3><p>Instancias lives1..livesN, cada una en un puerto 809N, con scheduler y dashboard independientes y un proyecto de GCP propio para cada canal de destino.</p></div>
+<div class="card"><h3>Sincronización TikTok → YouTube</h3><p>O <code>tiktok_scanner</code> recorre canales de TikTok, descarga los videos y los pone en la cola del pipeline para publicarlos en el canal de YouTube de destino.</p></div>
+<div class="card"><h3>Importación de videos listos</h3><p>Deja archivos en <code>imports/</code> e o <code>import_worker</code> los convierte en una cola del pipeline — incluye miniatura y publicación.</p></div>
+<div class="card"><h3>Deploy en VPS con túnel SSH</h3><p>Habilita lingering, ejecuta las dos partes y accede a los dashboards mediante <code>ssh -L</code> sin exponer puertos públicamente.</p></div>
 </div>
 </div></section>
 <section id="roadmap"><div class="wrap">
-<span class="chip">Roadmap</span>
-<h2>Estado e endurecimento</h2>
-<p class="sub">O pipeline está funcional para uso interno via SSH tunnel; o foco de melhoria é segurança do dashboard antes de qualquer exposição pública.</p>
-<div class="phase"><div class="tag">Funciona</div><div class="d"><strong>Pipeline completo multi-canal</strong><span>Lives, import e TikTok → corte por tópico → thumbnail → publicação, com master + N instâncias e SQLite por canal.</span></div></div>
-<div class="phase"><div class="tag">Em uso</div><div class="d"><strong>Operação em VPS</strong><span>Systemd user services com lingering, backups de <code>credentials.enc</code> + <code>.encryption_key</code> + <code>lives.db</code> e cleanup de <code>lives/</code>.</span></div></div>
-<div class="phase"><div class="tag">A revisar</div><div class="d"><strong>Segurança do dashboard</strong><span>Sem rate limit no login, senha em texto puro no .env, sem TLS nem 2FA — recomendado reverse proxy com HTTPS antes de expor.</span></div></div>
-<div class="phase"><div class="tag">Contínuo</div><div class="d"><strong>Sync de código entre instâncias</strong><span><code>scripts/sync-instances</code> propaga o template para as instâncias opt-in.</span></div></div>
+<span class="chip">Hoja de ruta</span>
+<h2>Estado y endurecimiento</h2>
+<p class="sub">El pipeline funciona para uso interno mediante túnel SSH; el foco de mejora es la seguridad del dashboard antes de cualquier exposición pública.</p>
+<div class="phase"><div class="tag">Funciona</div><div class="d"><strong>Pipeline multicanal completo</strong><span>Lives, importación y TikTok → corte por tema → miniatura → publicación, con master + N instancias y SQLite por canal.</span></div></div>
+<div class="phase"><div class="tag">En uso</div><div class="d"><strong>Operación en VPS</strong><span>Servicios de usuario de Systemd con lingering, copias de seguridad de <code>credentials.enc</code> + <code>.encryption_key</code> + <code>lives.db</code> y limpieza de <code>lives/</code>.</span></div></div>
+<div class="phase"><div class="tag">Por revisar</div><div class="d"><strong>Seguridad del dashboard</strong><span>Sin límite de solicitudes en el inicio de sesión, contraseña en texto plano en .env, sin TLS ni 2FA; se recomienda un proxy inverso con HTTPS antes de exponerlo.</span></div></div>
+<div class="phase"><div class="tag">Continuo</div><div class="d"><strong>Sincronización de código entre instancias</strong><span><code>scripts/sync-instances</code> propaga la plantilla a las instancias que aceptaron participar.</span></div></div>
 </div></section>
 <footer>
 <div class="wrap">
 <div class="pill">Python 3 · SQLite</div><div class="pill">FFmpeg · yt-dlp</div><div class="pill">YouTube Data API · OAuth</div>
-<p style="margin-top:18px">yt-pub-livesx · corta lives em clips e publica ·
+<p style="margin-top:18px">yt-pub-livesx · recorta transmisiones en vivo en clips y los publica ·
       <a href="https://github.com/inematds/yt-pub-livesx">github.com/inematds/yt-pub-livesx</a> ·
       <a href="https://inema.club">INEMA.CLUB</a></p>
 </div>
