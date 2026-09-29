@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 
-<html lang="pt-BR">
+<html lang="es">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Lives &amp; Clips Dashboard</title>
+<title>Panel de transmisiones en vivo y clips</title>
 <style>
   :root {
     --bg: #0f1117;
@@ -703,51 +703,51 @@
 
 </style>
 <link href="https://inematds.github.io/yt-pub-livesx/dashboard/" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/yt-pub-livesx/en/dashboard/" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/yt-pub-livesx/es/dashboard/" hreflang="es" rel="alternate"/></head>
-<body><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="./" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">PT</a><a href="../en/dashboard/" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="../es/dashboard/" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<body><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../dashboard/" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="../../en/dashboard/" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="./" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">ES</a></div>
 <div class="container">
 <header>
-<h1><span>INEMA</span> Lives &amp; Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.32.32</a></small>
+<h1><span>INEMA</span> Transmisiones en vivo y clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.32.32</a></small>
 <span id="headerCanais" style="display:block;font-size:0.4em;font-weight:normal;margin-top:4px"></span>
 </h1>
 <div class="header-actions">
-<button class="danger small" id="btnCortes" onclick="togglePipeline('cortes')">Parar Cortes</button>
-<button class="danger small" id="btnPub" onclick="togglePipeline('pub')">Parar Publicacao</button>
-<button class="danger small" id="btnImports" onclick="togglePipeline('imports')">Parar Imports</button>
-<button class="secondary" onclick="toggleConfig()">Configuracoes</button>
-<button id="btnSync" onclick="toggleSyncPanel()">Sincronizar Lives</button>
+<button class="danger small" id="btnCortes" onclick="togglePipeline('cortes')">Detener cortes</button>
+<button class="danger small" id="btnPub" onclick="togglePipeline('pub')">Detener publicación</button>
+<button class="danger small" id="btnImports" onclick="togglePipeline('imports')">Detener importaciones</button>
+<button class="secondary" onclick="toggleConfig()">Configuraciones</button>
+<button id="btnSync" onclick="toggleSyncPanel()">Sincronizar transmisiones en vivo</button>
 </div>
 </header>
 <!-- Sync Panel -->
 <div class="config-panel" id="syncPanel" style="display:none;margin-bottom:16px">
 <div class="config-section">
-<h3>Sincronizar Lives do Canal de Origem</h3>
+<h3>Sincronizar transmisiones en vivo del canal de origen</h3>
 <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
-<button id="btnQuickSync" onclick="quickSync()">Sync Rapido (tudo que falta)</button>
-<button class="small" id="btnAutoSync" onclick="toggleAutoSync()" title="Sync automatico a meia-noite">Auto-sync: -</button>
+<button id="btnQuickSync" onclick="quickSync()">Sincronización rápida (todo lo que falta)</button>
+<button class="small" id="btnAutoSync" onclick="toggleAutoSync()" title="Sincronización automática a medianoche">Sincronización automática: -</button>
 <label style="font-size:0.85em;color:var(--muted);display:flex;align-items:center;gap:6px">
           A partir de:
-          <input id="syncAutoDateFrom" maxlength="10" onchange="saveSyncAutoDateFrom()" pattern="\d{4}-\d{2}-\d{2}" placeholder="YYYY-MM-DD" style="width:120px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85em" title="Auto-sync so considera lives publicadas a partir desta data. Vazio = sem filtro (pega tudo)." type="text"/>
+          <input id="syncAutoDateFrom" maxlength="10" onchange="saveSyncAutoDateFrom()" pattern="\d{4}-\d{2}-\d{2}" placeholder="YYYY-MM-DD" style="width:120px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85em" title="La sincronización automática solo considera las lives publicadas a partir de esta fecha. Vacío = sin filtro (obtiene todo)." type="text"/>
 </label>
 </div>
-<h4 style="color:var(--muted);margin-bottom:8px;font-size:0.85em">Sync avancado com filtros</h4>
+<h4 style="color:var(--muted);margin-bottom:8px;font-size:0.85em">Sincronización avanzada con filtros</h4>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr auto;">
 <div class="config-field">
 <label>Modo</label>
 <select id="syncMode">
-<option value="novas">So pendentes (novas)</option>
-<option value="todas">Todas no periodo</option>
+<option value="novas">Solo pendientes (nuevas)</option>
+<option value="todas">Todas en el período</option>
 </select>
 </div>
 <div class="config-field">
-<label>Data inicio</label>
+<label>Fecha de inicio</label>
 <input id="syncDateFrom" maxlength="10" pattern="\d{4}-\d{2}-\d{2}" placeholder="YYYY-MM-DD" type="text"/>
 </div>
 <div class="config-field">
-<label>Data fim</label>
+<label>Fecha de fin</label>
 <input id="syncDateTo" maxlength="10" pattern="\d{4}-\d{2}-\d{2}" placeholder="YYYY-MM-DD" type="text"/>
 </div>
 <div class="config-field">
-<label>Max lives</label>
+<label>Máximo de transmisiones en vivo</label>
 <select id="syncMaxLives">
 <option value="10">10</option>
 <option selected="" value="50">50</option>
@@ -762,7 +762,7 @@
 </div>
 <div id="syncResult" style="margin-top:8px;color:var(--muted);font-size:0.9em"></div>
 <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-<button onclick="syncFromUrl(this)" style="background:var(--accent);white-space:nowrap">Importar Video</button>
+<button onclick="syncFromUrl(this)" style="background:var(--accent);white-space:nowrap">Importar video</button>
 <input id="syncUrlInput" placeholder="https://www.youtube.com/watch?v=..." style="flex:1;min-width:280px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85em" type="text"/>
 </div>
 <span id="syncUrlMsg" style="color:var(--muted);font-size:0.78em;margin-top:4px;display:block"></span>
@@ -776,7 +776,7 @@
 <span class="health-item"><span class="health-dot loading" id="hDotIa"></span> API IA</span>
 <span class="health-item"><span class="health-dot loading" id="hDotThumb"></span> API Thumb</span>
 <span class="health-item"><span class="health-dot loading" id="hDotYoutube"></span> YouTube</span>
-<span class="health-item"><span class="health-dot loading" id="hDotScheduler"></span> Scheduler</span>
+<span class="health-item"><span class="health-dot loading" id="hDotScheduler"></span> Programador</span>
 <button class="health-refresh" onclick="checkHealth()">verificar</button>
 </div>
 <!-- Stats -->
@@ -784,11 +784,11 @@
 <div style="display:grid;grid-template-columns:80px repeat(5, 1fr);gap:0;font-size:0.92rem;margin-bottom:8px">
 <div style="padding:4px 6px;color:var(--muted)"></div>
 <div style="padding:4px 6px;color:var(--muted);text-align:center">Total</div>
-<div style="padding:4px 6px;color:var(--muted);text-align:center">Pend</div>
+<div style="padding:4px 6px;color:var(--muted);text-align:center">Pend.</div>
 <div style="padding:4px 6px;color:var(--muted);text-align:center">Pub</div>
-<div style="padding:4px 6px;color:var(--muted);text-align:center">Erros</div>
+<div style="padding:4px 6px;color:var(--muted);text-align:center">Errores</div>
 <div style="padding:4px 6px;color:var(--blue);text-align:center">24h</div>
-<div onclick="filterByStatus('')" style="padding:4px 6px;cursor:pointer">Lives</div>
+<div onclick="filterByStatus('')" style="padding:4px 6px;cursor:pointer">Transmisiones en vivo</div>
 <div id="statLives" style="padding:4px 6px;text-align:center">-</div>
 <div id="statPendentes" style="padding:4px 6px;text-align:center;color:var(--yellow)">-</div>
 <div id="statCortadas" style="padding:4px 6px;text-align:center;color:var(--green)">-</div>
@@ -800,7 +800,7 @@
 <div id="statPublicados" style="padding:4px 6px;text-align:center;color:var(--green)">-</div>
 <div id="statClipsErro" style="padding:4px 6px;text-align:center;color:#ef4444">-</div>
 <div id="statClips24h" style="padding:4px 6px;text-align:center;color:var(--blue)">-</div>
-<div onclick="showImportFilter('')" style="padding:4px 6px;color:#a78bfa;cursor:pointer;border-top:1px solid rgba(167,139,250,0.3)">Imports</div>
+<div onclick="showImportFilter('')" style="padding:4px 6px;color:#a78bfa;cursor:pointer;border-top:1px solid rgba(167,139,250,0.3)">Importaciones</div>
 <div id="statImports" style="padding:4px 6px;text-align:center;color:#a78bfa;border-top:1px solid rgba(167,139,250,0.3)">-</div>
 <div id="statImportsPend" style="padding:4px 6px;text-align:center;color:var(--yellow);border-top:1px solid rgba(167,139,250,0.3)">-</div>
 <div id="statImportsPub" style="padding:4px 6px;text-align:center;color:var(--green);border-top:1px solid rgba(167,139,250,0.3)">-</div>
@@ -814,18 +814,18 @@
 <div id="statTiktok24h" style="padding:4px 6px;text-align:center;color:var(--blue);border-top:1px solid rgba(244,114,182,0.3)">-</div>
 </div>
 <div id="statImportMotivo" style="display:none;font-size:0.82em;color:var(--muted);margin-bottom:8px">
-<span id="statImportMotivoLabel">Imports inativo</span>: <span id="statImportMotivoVal">-</span>
+<span id="statImportMotivoLabel">Imports inactivo</span>: <span id="statImportMotivoVal">-</span>
 </div>
 </div>
 <!-- Schedule Info -->
 <div class="health-bar" id="scheduleInfo" style="gap:12px;flex-wrap:wrap">
-<span class="health-label">Corte:</span>
+<span class="health-label">Recorte:</span>
 <span id="nextCorte" style="color:var(--blue)">-</span>
 <span style="color:var(--border)">|</span>
 <span class="health-label">Clip:</span>
 <span id="nextPub" style="color:var(--green)">-</span>
 <span style="color:var(--border)">|</span>
-<span class="health-label" style="color:#a78bfa">Import:</span>
+<span class="health-label" style="color:#a78bfa">Importación:</span>
 <span id="nextImport" style="color:#a78bfa">-</span>
 <span style="color:var(--border)">|</span>
 <span class="health-label" style="color:#f472b6">TikTok:</span>
@@ -834,7 +834,7 @@
 <!-- Scheduler Status -->
 <div class="scheduler-bar" id="schedulerBar">
 <span class="scheduler-dot" id="schedulerDot"></span>
-<span><strong>Scheduler:</strong></span>
+<span><strong>Programador:</strong></span>
 <span class="scheduler-detail" id="schedulerDetail">Verificando...</span>
 <span class="scheduler-time" id="schedulerTime"></span>
 </div>
@@ -843,73 +843,73 @@
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
 <div class="config-tabs">
 <button class="config-tab active" onclick="showConfigTab('horarios', this)">Horarios</button>
-<button class="config-tab" onclick="showConfigTab('apis', this)">APIs &amp; IA</button>
+<button class="config-tab" onclick="showConfigTab('apis', this)">APIs e IA</button>
 <button class="config-tab" onclick="showConfigTab('prompts', this)">Prompts</button>
-<button class="config-tab" onclick="showConfigTab('manutencao', this)">Manutencao</button>
-<button class="config-tab" onclick="showConfigTab('design', this)">Design Thumb</button>
-<button class="config-tab" onclick="showConfigTab('planilha', this)">Planilha</button>
-<button class="config-tab" onclick="showConfigTab('imports', this)">Imports</button>
+<button class="config-tab" onclick="showConfigTab('manutencao', this)">Mantenimiento</button>
+<button class="config-tab" onclick="showConfigTab('design', this)">Diseño Thumb</button>
+<button class="config-tab" onclick="showConfigTab('planilha', this)">Hoja de cálculo</button>
+<button class="config-tab" onclick="showConfigTab('imports', this)">Importaciones</button>
 <button class="config-tab" onclick="showConfigTab('enrich', this)">Enrich Lives</button>
 <button class="config-tab" onclick="showConfigTab('tiktok', this)">TikTok</button>
 </div>
-<button id="btnSaveTop" onclick="saveActiveTab(this)" style="padding:6px 20px;">Salvar</button>
+<button id="btnSaveTop" onclick="saveActiveTab(this)" style="padding:6px 20px;">Guardar</button>
 </div>
 <!-- Tab: Horarios -->
 <div class="config-tab-content active" id="cfgTab_horarios">
 <!-- Canais -->
 <div class="config-section">
-<h3>Canais</h3>
+<h3>Canales</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Canal de Origem (lives)</label>
+<label>Canal de origen (lives)</label>
 <div id="cfgCanalOrigem" style="padding:8px 0;color:var(--text)">-</div>
 </div>
 <div class="config-field">
-<label>Canal de Destino (clips)</label>
+<label>Canal de destino (clips)</label>
 <div id="cfgCanalDestino" style="padding:8px 0;color:var(--text)">-</div>
 </div>
 </div>
 </div>
 <!-- Corte / Producao -->
 <div class="config-section">
-<h3>Producao de Cortes</h3>
+<h3>Producción de clips</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Corte automatico</label>
+<label>Recorte automático</label>
 <select id="cfgCorteAuto">
-<option value="true">Sim</option>
-<option value="false">Nao</option>
+<option value="true">Sí</option>
+<option value="false">No</option>
 </select>
 </div>
 <div class="config-field">
-<label>Lives por execucao</label>
+<label>Transmisiones en vivo por ejecución</label>
 <input id="cfgCorteMax" max="50" min="1" type="number" value="3"/>
-<div class="hint">Quantas lives processar por vez</div>
+<div class="hint">Cuántos lives procesar a la vez</div>
 </div>
 </div>
 <div style="margin-top: 14px;">
 <div class="hour-picker-header">
-<label>Horarios de corte (clique para ativar/desativar)</label>
+<label>Horarios de recorte (haz clic para activar/desactivar)</label>
 <div class="hour-picker-actions">
 <button onclick="hourPickerSelectAll('corte')">Todas</button>
-<button onclick="hourPickerClearAll('corte')">Limpar</button>
+<button onclick="hourPickerClearAll('corte')">Limpiar</button>
 </div>
 </div>
 <div class="hour-picker" id="corteHourPicker"></div>
 <div class="hour-summary" id="corteSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Minuto exacto:</label>
 <input id="cfgCorteMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
-<span style="font-size:0.8em;color:var(--muted)">Ex: 30 → roda em HH:30</span>
+<span style="font-size:0.8em;color:var(--muted)">Ej.: 30 → se ejecuta a las HH:30</span>
 </div>
 </div>
 </div>
 <!-- Publicacao -->
 <div class="config-section">
-<h3>Publicacao de Clips</h3>
+<h3>Publicación de clips</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Privacidade padrao</label>
+<label>Privacidad predeterminada</label>
 <select id="cfgPrivacy">
 <option value="unlisted">Unlisted</option>
 <option value="public">Public</option>
@@ -917,76 +917,76 @@
 </select>
 </div>
 <div class="config-field">
-<label>Clips por publicacao</label>
+<label>Clips por publicación</label>
 <input id="cfgPubMax" max="50" min="1" type="number" value="2"/>
-<div class="hint">Quantos clips publicar por vez</div>
+<div class="hint">Cuántos clips publicar a la vez</div>
 </div>
 <div class="config-field">
-<label>Link da live na descricao</label>
+<label>Enlace de la transmisión en vivo en la descripción</label>
 <select id="cfgPubLinkLive">
-<option value="true">Sim</option>
-<option value="false">Nao</option>
+<option value="true">Sí</option>
+<option value="false">No</option>
 </select>
-<div class="hint">Inclui link da live original</div>
+<div class="hint">Incluye el enlace de la transmisión en vivo original</div>
 </div>
 </div>
 <div style="margin-top: 14px;">
 <div class="hour-picker-header">
-<label>Horarios de publicacao (clique para ativar/desativar)</label>
+<label>Horarios de publicación (haz clic para activar/desactivar)</label>
 <div class="hour-picker-actions">
 <button onclick="hourPickerSelectAll('pub')">Todas</button>
-<button onclick="hourPickerClearAll('pub')">Limpar</button>
+<button onclick="hourPickerClearAll('pub')">Limpiar</button>
 </div>
 </div>
 <div class="hour-picker" id="pubHourPicker"></div>
 <div class="hour-summary" id="pubSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Minuto exacto:</label>
 <input id="cfgPubMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
-<span style="font-size:0.8em;color:var(--muted)">Ex: 15 → roda em HH:15</span>
+<span style="font-size:0.8em;color:var(--muted)">Ej.: 15 → se ejecuta a las HH:15</span>
 </div>
 </div>
 </div>
 <!-- Notificacao Telegram -->
 <div class="config-section">
-<h3>Notificacao Telegram</h3>
+<h3>Notificación de Telegram</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 2fr;">
 <div class="config-field">
-<label>Notificar publicacoes</label>
+<label>Notificar publicaciones</label>
 <select id="cfgTelegramNotifyEnabled">
-<option value="false">Nao</option>
-<option value="true">Sim</option>
+<option value="false">No</option>
+<option value="true">Sí</option>
 </select>
-<div class="hint">Avisa a cada video publicado (clip, import ou TikTok)</div>
+<div class="hint">Avisa cada vez que se publica un video (clip, import o TikTok)</div>
 </div>
 <div class="config-field">
-<label>Chat IDs do Telegram</label>
+<label>IDs de chat de Telegram</label>
 <input id="cfgTelegramNotifyChatId" placeholder="123456789,987654321" type="text"/>
 <div class="hint">
-              Um ou mais IDs separados por virgula (grupo comeca com -). Cada
-              destinatario precisa dar /start no bot uma vez. O envio e feito
-              pelo master-dashboard. Tambem pode ser preenchido por cadastro:
-              o usuario manda "meu canal e o livesN" pro bot.
+              Uno o más IDs separados por comas (el grupo empieza con -). Cada
+              destinatario debe enviar /start al bot una vez. El envío se realiza
+              mediante el master-dashboard. También se puede completar mediante el registro:
+              el usuario envía "mi canal es livesN" al bot.
             </div>
 </div>
 </div>
 </div>
 <div style="margin-top: 8px;">
-<button onclick="saveHorarios(this)">Salvar Horarios</button>
+<button onclick="saveHorarios(this)">Guardar horarios</button>
 </div>
 </div>
 <!-- Tab: APIs & IA -->
 <div class="config-tab-content" id="cfgTab_apis">
 <!-- Analise IA -->
 <div class="config-section">
-<h3>Analise de Cortes (IA)</h3>
+<h3>Análisis de clips (IA)</h3>
 <div class="config-grid" style="grid-template-columns: 1fr;">
 <div class="config-field">
-<label>Modo de Analise</label>
+<label>Modo de análisis</label>
 <select id="cfgAiMode" onchange="updateAiFields()">
 <option value="claude-api">Claude CLI (OAuth)</option>
 <option value="anthropic-api">Anthropic API Key</option>
-<option value="openrouter-api">OpenRouter API</option>
+<option value="openrouter-api">API de OpenRouter</option>
 <option value="agnes-api">Agnes API (free)</option>
 </select>
 </div>
@@ -995,19 +995,19 @@
 </div>
 <!-- Thumbnails -->
 <div class="config-section">
-<h3>Thumbnails <span id="thumbPresetLabel" style="font-size:0.7em;color:var(--accent);margin-left:8px;"></span></h3>
+<h3>Miniaturas <span id="thumbPresetLabel" style="font-size:0.7em;color:var(--accent);margin-left:8px;"></span></h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Modo Thumbnail</label>
+<label>Modo miniatura</label>
 <select id="cfgThumbMode">
 <option value="api">IA (API)</option>
-<option value="local">Local (frame do video)</option>
-<option value="fallback">Fallback (gradiente + texto)</option>
-<option value="none">Sem thumbnail</option>
+<option value="local">Local (fotograma del video)</option>
+<option value="fallback">Alternativa (degradado + texto)</option>
+<option value="none">Sin miniatura</option>
 </select>
 </div>
 <div class="config-field">
-<label>Provider de Imagem</label>
+<label>Proveedor de imágenes</label>
 <select id="cfgThumbImageProvider" onchange="updateThumbFields()">
 <option value="agnes">Agnes (free)</option>
 <option value="kie">Kie.ai</option>
@@ -1026,7 +1026,7 @@
 <input id="cfgInemaimgUrl" type="hidden"/>
 <input id="cfgAiModel" type="hidden"/>
 <div style="margin-top:12px;padding:10px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:8px;">
-<label style="font-weight:600;font-size:0.8rem;margin-bottom:8px;display:block;">LLM para gerar prompt (tenta na ordem, fallback local se todos falharem)</label>
+<label style="font-weight:600;font-size:0.8rem;margin-bottom:8px;display:block;">LLM para generar el prompt (intenta en orden; usa la alternativa local si todos fallan)</label>
 <div class="config-grid" style="grid-template-columns: auto 1fr auto 1fr auto 1fr; gap:8px; align-items:center;">
 <span style="font-size:0.75rem;color:var(--muted);font-weight:600;">1.</span>
 <select id="cfgThumbLlm1Provider" style="padding:4px 8px;font-size:0.8rem;">
@@ -1053,7 +1053,7 @@
 <option value="agnes">Agnes (free)</option>
 </select>
 <span></span>
-<input id="cfgThumbLlm1Model" placeholder="(nao precisa para OAuth)" style="padding:4px 8px;font-size:0.8rem;" type="text"/>
+<input id="cfgThumbLlm1Model" placeholder="(no se necesita para OAuth)" style="padding:4px 8px;font-size:0.8rem;" type="text"/>
 <span></span>
 <input id="cfgThumbLlm2Model" placeholder="google/gemini-2.5-flash-lite" style="padding:4px 8px;font-size:0.8rem;" type="text" value="google/gemini-2.5-flash-lite"/>
 <span></span>
@@ -1062,45 +1062,45 @@
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top:12px;">
 <div class="config-field">
-<label>Posicao do Titulo</label>
+<label>Posición del título</label>
 <select id="cfgThumbTextPosition">
-<option value="top-left">Topo Esquerda</option>
-<option value="top-center">Topo Centro</option>
-<option value="top-right">Topo Direita</option>
-<option value="center-left">Centro Esquerda</option>
+<option value="top-left">Parte superior izquierda</option>
+<option value="top-center">Parte superior central</option>
+<option value="top-right">Parte superior derecha</option>
+<option value="center-left">Centro izquierda</option>
 <option value="center">Centro</option>
-<option value="center-right">Centro Direita</option>
-<option value="bottom-left">Base Esquerda</option>
-<option value="bottom-center">Base Centro</option>
-<option value="bottom-right">Base Direita</option>
+<option value="center-right">Centro derecha</option>
+<option value="bottom-left">Base izquierda</option>
+<option value="bottom-center">Base central</option>
+<option value="bottom-right">Base derecha</option>
 </select>
 </div>
 <div class="config-field">
-<label>Tamanho da Fonte</label>
+<label>Tamaño de fuente</label>
 <input id="cfgThumbFontSize" max="120" min="30" step="2" type="number" value="78"/>
 </div>
 <div class="config-field">
-<label>Texto da Marca</label>
+<label>Texto de la marca</label>
 <input id="cfgThumbBrand" placeholder="INEMA TDS" type="text" value="INEMA TDS"/>
 </div>
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top:8px;">
 <div class="config-field">
-<label>Cor do Titulo</label>
+<label>Color del Título</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgThumbTextColor" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--bg);cursor:pointer;" type="color" value="#FFFFFF"/>
 <input id="cfgThumbTextColorHex" oninput="document.getElementById('cfgThumbTextColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#FFFFFF"/>
 </div>
 </div>
 <div class="config-field">
-<label>Cor do Accent</label>
+<label>Color del Accent</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgThumbAccentColor" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--bg);cursor:pointer;" type="color" value="#00D4FF"/>
 <input id="cfgThumbAccentColorHex" oninput="document.getElementById('cfgThumbAccentColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#00D4FF"/>
 </div>
 </div>
 <div class="config-field">
-<label>Cor da Marca</label>
+<label>Color de la marca</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgThumbBrandColor" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--bg);cursor:pointer;" type="color" value="#6366F1"/>
 <input id="cfgThumbBrandColorHex" oninput="document.getElementById('cfgThumbBrandColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#6366F1"/>
@@ -1109,58 +1109,58 @@
 </div>
 <div style="margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-<label style="font-weight:600;">Thumbnails Pendentes</label>
+<label style="font-weight:600;">Miniaturas pendientes</label>
 <div style="display:flex;gap:8px;">
-<button class="small secondary" onclick="loadPendingThumbs()">Atualizar</button>
-<button class="small" id="btnUploadThumbs" onclick="uploadPendingThumbs()" style="background:var(--green);">Enviar para YouTube</button>
+<button class="small secondary" onclick="loadPendingThumbs()">Actualizar</button>
+<button class="small" id="btnUploadThumbs" onclick="uploadPendingThumbs()" style="background:var(--green);">Enviar a YouTube</button>
 </div>
 </div>
-<div id="thumbsPendingInfo" style="color:var(--muted);font-size:0.85em;">Clique em Atualizar para verificar</div>
+<div id="thumbsPendingInfo" style="color:var(--muted);font-size:0.85em;">Haz clic en Actualizar para verificar</div>
 <div id="thumbsPendingList" style="max-height:200px;overflow-y:auto;margin-top:8px;display:none;"></div>
 </div>
 </div>
 <div style="margin-top: 8px;">
-<button onclick="saveApis(this)">Salvar APIs &amp; IA</button>
+<button onclick="saveApis(this)">Guardar APIs &amp; IA</button>
 </div>
 </div>
 <!-- Tab: Prompts -->
 <div class="config-tab-content" id="cfgTab_prompts">
 <div style="margin-bottom: 12px;">
-<button onclick="savePrompts(this)">Salvar Prompts</button>
+<button onclick="savePrompts(this)">Guardar prompts</button>
 </div>
 <div class="config-section">
 <h3>Prompts</h3>
 <div class="config-field">
-<label>Prompt Analise de Cortes (Claude analisa a transcricao e identifica topicos)</label>
+<label>Prompt de análisis de clips (Claude analiza la transcripción e identifica temas)</label>
 <textarea id="cfgPromptCortes" rows="12" style="width:100%;font-family:monospace;font-size:0.8rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px;resize:vertical"></textarea>
 </div>
 <div class="config-field" style="margin-top:12px">
-<label>Prompt Publicacao (refina titulo e descricao antes de publicar no YouTube)</label>
+<label>Prompt de publicación (perfecciona el título y la descripción antes de publicar en YouTube)</label>
 <textarea id="cfgPromptPub" rows="10" style="width:100%;font-family:monospace;font-size:0.8rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px;resize:vertical"></textarea>
 </div>
 <div class="config-field" style="margin-top:12px">
-<label>Prompt Thumbnail (LLM gera prompt estruturado para o gerador de imagem)</label>
+<label>Prompt de miniatura (LLM genera un prompt estructurado para el generador de imágenes)</label>
 <textarea id="cfgPromptThumb" rows="12" style="width:100%;font-family:monospace;font-size:0.8rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px;resize:vertical"></textarea>
 </div>
 </div>
 <div style="margin-top: 8px;">
-<button onclick="savePrompts(this)">Salvar Prompts</button>
+<button onclick="savePrompts(this)">Guardar prompts</button>
 </div>
 </div>
 <!-- Tab: Manutencao -->
 <div class="config-tab-content" id="cfgTab_manutencao">
 <div class="config-section">
-<h3>Limpeza de Disco</h3>
+<h3>Limpieza del disco</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Clips (mp4 cortados)</label>
-<button id="btnCleanClips" onclick="cleanupClips()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Limpar Clips</button>
-<div class="hint">Remove todos os mp4 da pasta clips/. Mantem manifest e planilha.</div>
+<label>Clips (MP4 recortados)</label>
+<button id="btnCleanClips" onclick="cleanupClips()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Limpiar clips</button>
+<div class="hint">Elimina todos los mp4 de la carpeta clips/. Mantiene el manifest y la hoja de cálculo.</div>
 </div>
 <div class="config-field">
-<label>Videos Originais (source.mp4)</label>
-<button id="btnCleanSources" onclick="cleanupSources()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Limpar Originais</button>
-<div class="hint">Remove os source.mp4 (videos completos baixados). Mantem clips.</div>
+<label>Videos originales (source.mp4)</label>
+<button id="btnCleanSources" onclick="cleanupSources()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Limpiar originales</button>
+<div class="hint">Elimina los source.mp4 (videos completos descargados). Mantiene los clips.</div>
 </div>
 </div>
 <div id="cleanupResult" style="margin-top:8px;color:var(--muted);font-size:0.85em;"></div>
@@ -1169,13 +1169,13 @@
 <!-- Tab: Design Thumb -->
 <div class="config-tab-content" id="cfgTab_design">
 <div class="config-section">
-<h3>Presets <span id="activePresetLabel" style="font-size:0.7em;color:var(--accent);margin-left:8px;"></span></h3>
+<h3>Preajustes <span id="activePresetLabel" style="font-size:0.7em;color:var(--accent);margin-left:8px;"></span></h3>
 <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px;">
 <button class="small preset-btn" data-preset="premium" onclick="applyThumbPreset('premium')" style="padding:4px 10px;font-size:0.75em;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#D9B65B;border:1px solid #D9B65B;">Premium</button>
 <button class="small preset-btn" data-preset="youtube" onclick="applyThumbPreset('youtube')" style="padding:4px 10px;font-size:0.75em;background:#ff0000;color:#fff;border:1px solid #ff0000;">YouTube</button>
 <button class="small preset-btn" data-preset="clean" onclick="applyThumbPreset('clean')" style="padding:4px 10px;font-size:0.75em;background:#222;color:#fff;border:1px solid #555;">Clean</button>
-<button class="small preset-btn" data-preset="neon" onclick="applyThumbPreset('neon')" style="padding:4px 10px;font-size:0.75em;background:#0a0a1a;color:#00f5ff;border:1px solid #00f5ff;">Neon</button>
-<button class="small preset-btn" data-preset="fallback" onclick="applyThumbPreset('fallback')" style="padding:4px 10px;font-size:0.75em;background:#1a1a2a;color:#ccc;border:1px dashed #666;">Fallback</button>
+<button class="small preset-btn" data-preset="neon" onclick="applyThumbPreset('neon')" style="padding:4px 10px;font-size:0.75em;background:#0a0a1a;color:#00f5ff;border:1px solid #00f5ff;">Neón</button>
+<button class="small preset-btn" data-preset="fallback" onclick="applyThumbPreset('fallback')" style="padding:4px 10px;font-size:0.75em;background:#1a1a2a;color:#ccc;border:1px dashed #666;">Alternativa</button>
 <button class="small preset-btn" data-preset="mrbeast" onclick="applyThumbPreset('mrbeast')" style="padding:4px 10px;font-size:0.75em;background:#ffd700;color:#000;border:1px solid #ffd700;">MrBeast</button>
 <button class="small preset-btn" data-preset="techreview" onclick="applyThumbPreset('techreview')" style="padding:4px 10px;font-size:0.75em;background:#1e3a5f;color:#4fc3f7;border:1px solid #4fc3f7;">Tech</button>
 <button class="small preset-btn" data-preset="tutorial" onclick="applyThumbPreset('tutorial')" style="padding:4px 10px;font-size:0.75em;background:#2e7d32;color:#fff;border:1px solid #4caf50;">Tutorial</button>
@@ -1185,7 +1185,7 @@
 <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
 <button class="small preset-btn" data-preset="cinematic" onclick="applyThumbPreset('cinematic')" style="padding:4px 10px;font-size:0.75em;background:#0D0D1A;color:#F5A623;border:1px solid #F5A623;">Cinematic</button>
 <button class="small preset-btn" data-preset="gradient" onclick="applyThumbPreset('gradient')" style="padding:4px 10px;font-size:0.75em;background:#0F0F0F;color:#BF00FF;border:1px solid #8B00FF;">Gradient</button>
-<button class="small preset-btn" data-preset="splitscreen" onclick="applyThumbPreset('splitscreen')" style="padding:4px 10px;font-size:0.75em;background:linear-gradient(90deg,#E63946 50%,#1D3557 50%);color:#fff;border:1px solid #fff;">Split</button>
+<button class="small preset-btn" data-preset="splitscreen" onclick="applyThumbPreset('splitscreen')" style="padding:4px 10px;font-size:0.75em;background:linear-gradient(90deg,#E63946 50%,#1D3557 50%);color:#fff;border:1px solid #fff;">División</button>
 <button class="small preset-btn" data-preset="colorpop" onclick="applyThumbPreset('colorpop')" style="padding:4px 10px;font-size:0.75em;background:#222;color:#FF1C1C;border:1px solid #FF1C1C;">ColorPop</button>
 <button class="small preset-btn" data-preset="retro" onclick="applyThumbPreset('retro')" style="padding:4px 10px;font-size:0.75em;background:#F2E8D5;color:#C45E26;border:1px solid #C45E26;">Retro</button>
 <button class="small preset-btn" data-preset="3dextrude" onclick="applyThumbPreset('3dextrude')" style="padding:4px 10px;font-size:0.75em;background:#1a0a2e;color:#FFD700;border:1px solid #FFD700;">3D Gold</button>
@@ -1194,15 +1194,15 @@
 <button class="small preset-btn" data-preset="boldoutline" onclick="applyThumbPreset('boldoutline')" style="padding:4px 10px;font-size:0.75em;background:#000;color:#fff;border:2px solid #fff;">BoldOutline</button>
 <button class="small preset-btn" data-preset="elegantdark" onclick="applyThumbPreset('elegantdark')" style="padding:4px 10px;font-size:0.75em;background:#0a0a14;color:#C9B37E;border:1px solid #C9B37E;">Elegant</button>
 <button class="small preset-btn" data-preset="tiktok" onclick="applyThumbPreset('tiktok')" style="padding:4px 10px;font-size:0.75em;background:#010101;color:#FE2C55;border:1px solid #25F4EE;">TikTok</button>
-<button class="small preset-btn" data-preset="stories" onclick="applyThumbPreset('stories')" style="padding:4px 10px;font-size:0.75em;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border:1px solid #fff;">Stories</button>
+<button class="small preset-btn" data-preset="stories" onclick="applyThumbPreset('stories')" style="padding:4px 10px;font-size:0.75em;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border:1px solid #fff;">Historias</button>
 </div>
-<div class="hint" style="margin-top:4px;">Clique num preset para carregar. Alteracoes sao salvas no preset ativo.</div>
+<div class="hint" style="margin-top:4px;">Haz clic en un preset para cargarlo. Los cambios se guardan en el preset activo.</div>
 </div>
 <div class="config-section">
-<h3>Tipografia do Titulo</h3>
+<h3>Tipografía del título</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Fonte do titulo</label>
+<label>Fuente del título</label>
 <select id="cfgDesignFont">
 <option value="montserrat-extrabold">Montserrat ExtraBold</option>
 <option value="montserrat-black">Montserrat Black</option>
@@ -1210,210 +1210,210 @@
 <option value="anton">Anton</option>
 <option value="dejavu">DejaVu Sans Bold</option>
 </select>
-<div class="hint">Fonte usada no texto principal da thumbnail</div>
+<div class="hint">Fuente usada en el texto principal de la miniatura</div>
 </div>
 <div class="config-field">
-<label>Tamanho do titulo (px)</label>
+<label>Tamaño del título (px)</label>
 <input id="cfgDesignFontSize" max="140" min="40" step="2" type="number" value="78"/>
-<div class="hint">Tamanho em pixels da frase principal</div>
+<div class="hint">Tamaño en píxeles de la frase principal</div>
 </div>
 <div class="config-field">
-<label>Ultima linha maior (%)</label>
+<label>Porcentaje mayor para la última línea</label>
 <input id="cfgDesignLastLineScale" max="50" min="0" step="5" type="number" value="0"/>
-<div class="hint">0 = mesmo tamanho. 15 = ultima linha 15% maior para destaque</div>
+<div class="hint">0 = mismo tamaño. 15 = la última línea es 15% más grande para destacarla</div>
 </div>
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top:8px;">
 <div class="config-field">
-<label>Entrelinha (px)</label>
+<label>Interlineado (px)</label>
 <input id="cfgDesignLineHeight" max="140" min="50" step="2" type="number" value="94"/>
-<div class="hint">Espaco entre linhas do titulo. Menor = mais compacto</div>
+<div class="hint">Espacio entre líneas del título. Menor = más compacto</div>
 </div>
 <div class="config-field">
-<label>Tracking (espaco entre letras)</label>
+<label>Tracking (espacio entre letras)</label>
 <select id="cfgDesignTracking">
 <option value="normal">Normal</option>
-<option value="tight">Apertado (-2px)</option>
-<option value="very-tight">Muito apertado (-4px)</option>
+<option value="tight">Ajustado (-2px)</option>
+<option value="very-tight">Muy ajustado (-4px)</option>
 </select>
-<div class="hint">Letras mais juntas = visual mais compacto e forte</div>
+<div class="hint">Letras más juntas = aspecto más compacto y contundente</div>
 </div>
 <div class="config-field">
-<label>Caixa do texto</label>
+<label>Caja de texto</label>
 <select id="cfgDesignCase">
-<option value="upper">MAIUSCULAS</option>
+<option value="upper">MAYÚSCULAS</option>
 <option value="original">Original</option>
 </select>
-<div class="hint">Maiusculas tem mais impacto em thumbnails</div>
+<div class="hint">Las mayúsculas tienen más impacto en las miniaturas</div>
 </div>
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr; margin-top:8px;">
 <div class="config-field">
-<label>Posicao do titulo</label>
+<label>Posición del título</label>
 <select id="cfgDesignPosition">
-<option value="top-left">Topo Esquerda</option>
-<option value="top-center">Topo Centro</option>
-<option value="top-right">Topo Direita</option>
-<option value="center-left">Centro Esquerda</option>
+<option value="top-left">Parte superior izquierda</option>
+<option value="top-center">Parte superior central</option>
+<option value="top-right">Parte superior derecha</option>
+<option value="center-left">Centro izquierda</option>
 <option value="center">Centro</option>
-<option value="center-right">Centro Direita</option>
-<option value="bottom-left">Base Esquerda</option>
-<option value="bottom-center">Base Centro</option>
-<option value="bottom-right">Base Direita</option>
+<option value="center-right">Centro derecha</option>
+<option value="bottom-left">Base izquierda</option>
+<option value="bottom-center">Base central</option>
+<option value="bottom-right">Base derecha</option>
 </select>
-<div class="hint">Onde o titulo aparece na thumbnail</div>
+<div class="hint">Dónde aparece el título en la miniatura</div>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Cores do Titulo</h3>
+<h3>Colores del Título</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Cor do titulo</label>
+<label>Color del título</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgDesignTextColor" oninput="document.getElementById('cfgDesignTextColorHex').value=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#F5F3EE"/>
 <input id="cfgDesignTextColorHex" oninput="document.getElementById('cfgDesignTextColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#F5F3EE"/>
 </div>
-<div class="hint">Cor principal do texto</div>
+<div class="hint">Color principal del texto</div>
 </div>
 <div class="config-field">
-<label>Cor destaque (ultima linha)</label>
+<label>Color de destaque (última línea)</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgDesignHighlightColor" oninput="document.getElementById('cfgDesignHighlightColorHex').value=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#D9B65B"/>
 <input id="cfgDesignHighlightColorHex" oninput="document.getElementById('cfgDesignHighlightColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#D9B65B"/>
 </div>
-<div class="hint">Cor diferenciada da ultima linha para dar enfase</div>
+<div class="hint">Color diferenciado de la última línea para darle énfasis</div>
 </div>
 <div class="config-field">
-<label>Usar destaque?</label>
+<label>¿Usar resaltado?</label>
 <select id="cfgDesignHighlightEnabled">
-<option value="true">Sim</option>
-<option value="false">Nao</option>
+<option value="true">Sí</option>
+<option value="false">No</option>
 </select>
-<div class="hint">Ativa cor diferente na ultima linha</div>
+<div class="hint">Activa un color diferente en la última línea</div>
 </div>
 <div class="config-field">
-<label>Cor do accent</label>
+<label>Color del accent</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgDesignAccentColor" oninput="document.getElementById('cfgDesignAccentColorHex').value=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#00D4FF"/>
 <input id="cfgDesignAccentColorHex" oninput="document.getElementById('cfgDesignAccentColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#00D4FF"/>
 </div>
-<div class="hint">Cor da linha decorativa abaixo do titulo</div>
+<div class="hint">Color de la línea decorativa debajo del título</div>
 </div>
 <div class="config-field">
-<label>Largura accent (px)</label>
+<label>Ancho del accent (px)</label>
 <input id="cfgDesignAccentWidth" max="800" min="50" step="10" type="number" value="250"/>
-<div class="hint">Comprimento da linha accent</div>
+<div class="hint">Longitud de la línea accent</div>
 </div>
 <div class="config-field">
-<label>Espessura accent (px)</label>
+<label>Grosor del acento (px)</label>
 <input id="cfgDesignAccentHeight" max="20" min="1" step="1" type="number" value="5"/>
-<div class="hint">Grossura da linha accent</div>
+<div class="hint">Grosor de la línea accent</div>
 </div>
 <div class="config-field">
-<label>Distancia accent (px)</label>
+<label>Distancia del acento (px)</label>
 <input id="cfgDesignAccentGap" max="60" min="0" step="2" type="number" value="30"/>
-<div class="hint">Espaco entre o titulo e a linha accent</div>
+<div class="hint">Espacio entre el título y la línea de acento</div>
 </div>
 <div class="config-field">
-<label>Exibir accent</label>
+<label>Mostrar acento</label>
 <select id="cfgDesignAccentEnabled">
-<option value="true">Sim</option>
-<option value="false">Nao</option>
+<option value="true">Sí</option>
+<option value="false">No</option>
 </select>
-<div class="hint">Desativa a linha accent</div>
+<div class="hint">Desactiva la línea accent</div>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Sombra e Contorno</h3>
+<h3>Sombra y contorno</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
 <div class="config-field">
 <label>Tipo de sombra</label>
 <select id="cfgDesignShadowType">
 <option value="blur">Difusa (blur)</option>
-<option value="outline">Contorno duro</option>
-<option value="none">Nenhuma</option>
+<option value="outline">Contorno marcado</option>
+<option value="none">Ninguna</option>
 </select>
-<div class="hint">Blur = elegante e suave. Outline = forte e legivel em tamanho pequeno</div>
+<div class="hint">Blur = elegante y suave. Outline = marcado y legible en tamaño pequeño</div>
 </div>
 <div class="config-field">
-<label>Cor da sombra</label>
+<label>Color de la sombra</label>
 <input id="cfgDesignShadowColor" oninput="this.title=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#000000"/>
-<div class="hint">Geralmente preto. Neon usa cor do texto</div>
+<div class="hint">Generalmente negro. Neon usa el color del texto</div>
 </div>
 <div class="config-field">
-<label>Blur / Espessura (px)</label>
+<label>Desenfoque / Grosor (px)</label>
 <input id="cfgDesignShadowSize" max="15" min="1" step="1" type="number" value="5"/>
-<div class="hint">Maior = sombra mais espalhada ou contorno mais grosso</div>
+<div class="hint">Mayor = sombra más difuminada o contorno más grueso</div>
 </div>
 <div class="config-field">
-<label>Opacidade sombra</label>
+<label>Opacidad de la sombra</label>
 <input id="cfgDesignShadowOpacity" max="255" min="0" step="10" type="number" value="180"/>
-<div class="hint">0 = transparente, 255 = opaco total</div>
+<div class="hint">0 = transparente, 255 = totalmente opaco</div>
 </div>
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr; margin-top:8px;">
 <div class="config-field">
-<label>Borda do titulo</label>
+<label>Borde del título</label>
 <select id="cfgDesignStrokeEnabled">
-<option value="false">Sem borda</option>
-<option value="true">Com borda</option>
+<option value="false">Sin borde</option>
+<option value="true">Con borde</option>
 </select>
-<div class="hint">Borda/stroke ao redor das letras do titulo</div>
+<div class="hint">Borde/stroke alrededor de las letras del título</div>
 </div>
 <div class="config-field">
-<label>Cor da borda</label>
+<label>Color del borde</label>
 <input id="cfgDesignStrokeColor" oninput="this.title=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#000000"/>
-<div class="hint">Cor do contorno ao redor do texto</div>
+<div class="hint">Color del contorno alrededor del texto</div>
 </div>
 <div class="config-field">
-<label>Espessura borda (px)</label>
+<label>Grosor del borde (px)</label>
 <input id="cfgDesignStrokeSize" max="10" min="1" step="1" type="number" value="2"/>
-<div class="hint">Grossura da borda em pixels</div>
+<div class="hint">Grosor del borde en píxeles</div>
 </div>
 <div class="config-field">
 <label></label>
-<div class="hint" style="padding-top:8px;">Borda é diferente de sombra: contorna cada letra individualmente</div>
+<div class="hint" style="padding-top:8px;">El borde es diferente de la sombra: contornea cada letra individualmente</div>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Fundo do Texto</h3>
+<h3>Fondo del texto</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Degrade escuro</label>
+<label>Degradado oscuro</label>
 <select id="cfgDesignGradient">
-<option value="none">Nenhum</option>
-<option value="left">Esquerda</option>
-<option value="top-left">Topo esquerdo</option>
-<option value="top">Topo</option>
+<option value="none">Ninguno</option>
+<option value="left">Izquierda</option>
+<option value="top-left">Parte superior izquierda</option>
+<option value="top">Parte superior</option>
 <option value="full-bottom">Base completa</option>
 </select>
-<div class="hint">Escurece parte da imagem para o texto se destacar</div>
+<div class="hint">Oscurece parte de la imagen para que el texto destaque</div>
 </div>
 <div class="config-field">
-<label>Opacidade do degrade</label>
+<label>Opacidad del degradado</label>
 <input id="cfgDesignGradientOpacity" max="255" min="0" step="10" type="number" value="140"/>
-<div class="hint">0 = invisivel, 255 = preto total</div>
+<div class="hint">0 = invisible, 255 = negro total</div>
 </div>
 <div class="config-field">
 <label>Cobertura (%)</label>
 <input id="cfgDesignGradientCoverage" max="80" min="10" step="5" type="number" value="40"/>
-<div class="hint">Percentual da imagem coberta pelo degrade</div>
+<div class="hint">Porcentaje de la imagen cubierto por el degradado</div>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Marca (watermark)</h3>
+<h3>Marca (marca de agua)</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Texto da marca</label>
+<label>Texto de la marca</label>
 <input id="cfgDesignBrand" placeholder="INEMA TDS" type="text" value="INEMA TDS"/>
-<div class="hint">Nome exibido no canto da thumbnail</div>
+<div class="hint">Nombre que aparece en la esquina de la miniatura</div>
 </div>
 <div class="config-field">
-<label>Fonte da marca</label>
+<label>Fuente de la marca</label>
 <select id="cfgDesignBrandFont">
 <option value="montserrat-extrabold">Montserrat ExtraBold</option>
 <option value="montserrat-black">Montserrat Black</option>
@@ -1421,176 +1421,176 @@
 <option value="anton">Anton</option>
 <option value="dejavu">DejaVu Sans Bold</option>
 </select>
-<div class="hint">Fonte usada na marca</div>
+<div class="hint">Fuente usada en la marca</div>
 </div>
 <div class="config-field">
-<label>Tamanho da marca (px)</label>
+<label>Tamaño de la marca (px)</label>
 <input id="cfgDesignBrandSize" max="48" min="14" step="2" type="number" value="26"/>
-<div class="hint">Tamanho do texto da marca</div>
+<div class="hint">Tamaño del texto de la marca</div>
 </div>
 <div class="config-field">
-<label>Cor da marca</label>
+<label>Color de la marca</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgDesignBrandColor" oninput="document.getElementById('cfgDesignBrandColorHex').value=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#6366F1"/>
 <input id="cfgDesignBrandColorHex" oninput="document.getElementById('cfgDesignBrandColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#6366F1"/>
 </div>
-<div class="hint">Cor do nome da marca</div>
+<div class="hint">Color del nombre de la marca</div>
 </div>
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr; margin-top:8px;">
 <div class="config-field">
-<label>Posicao da marca</label>
+<label>Posición de la marca</label>
 <select id="cfgDesignBrandPosition">
-<option value="bottom-left">Base Esquerda</option>
-<option value="bottom-center">Base Centro</option>
-<option value="bottom-right">Base Direita</option>
-<option value="top-left">Topo Esquerda</option>
-<option value="top-right">Topo Direita</option>
+<option value="bottom-left">Base izquierda</option>
+<option value="bottom-center">Base central</option>
+<option value="bottom-right">Base derecha</option>
+<option value="top-left">Parte superior izquierda</option>
+<option value="top-right">Parte superior derecha</option>
 </select>
-<div class="hint">Onde a marca aparece na thumbnail. Default: base esquerda</div>
+<div class="hint">Dónde aparece la marca en la miniatura. Predeterminado: base izquierda</div>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Preview</h3>
+<h3>Vista previa</h3>
 <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;">
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="premium" onclick="applyThumbPreset('premium')" style="padding:3px 8px;font-size:0.7em;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#D9B65B;border:1px solid #D9B65B;">Premium</button><input class="random-preset" data-preset="premium" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="youtube" onclick="applyThumbPreset('youtube')" style="padding:3px 8px;font-size:0.7em;background:#ff0000;color:#fff;border:1px solid #ff0000;">YouTube</button><input class="random-preset" data-preset="youtube" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="clean" onclick="applyThumbPreset('clean')" style="padding:3px 8px;font-size:0.7em;background:#222;color:#fff;border:1px solid #555;">Clean</button><input class="random-preset" data-preset="clean" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="neon" onclick="applyThumbPreset('neon')" style="padding:3px 8px;font-size:0.7em;background:#0a0a1a;color:#00f5ff;border:1px solid #00f5ff;">Neon</button><input class="random-preset" data-preset="neon" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="fallback" onclick="applyThumbPreset('fallback')" style="padding:3px 8px;font-size:0.7em;background:#1a1a2a;color:#ccc;border:1px dashed #666;">Fallback</button><input class="random-preset" data-preset="fallback" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="mrbeast" onclick="applyThumbPreset('mrbeast')" style="padding:3px 8px;font-size:0.7em;background:#ffd700;color:#000;border:1px solid #ffd700;">MrBeast</button><input class="random-preset" data-preset="mrbeast" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="techreview" onclick="applyThumbPreset('techreview')" style="padding:3px 8px;font-size:0.7em;background:#1e3a5f;color:#4fc3f7;border:1px solid #4fc3f7;">Tech</button><input class="random-preset" data-preset="techreview" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="tutorial" onclick="applyThumbPreset('tutorial')" style="padding:3px 8px;font-size:0.7em;background:#2e7d32;color:#fff;border:1px solid #4caf50;">Tutorial</button><input class="random-preset" data-preset="tutorial" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="breaking" onclick="applyThumbPreset('breaking')" style="padding:3px 8px;font-size:0.7em;background:#b71c1c;color:#ffeb3b;border:1px solid #ffeb3b;">Breaking</button><input class="random-preset" data-preset="breaking" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="minimal" onclick="applyThumbPreset('minimal')" style="padding:3px 8px;font-size:0.7em;background:#fafafa;color:#222;border:1px solid #ccc;">Minimal</button><input class="random-preset" data-preset="minimal" title="Random" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="premium" onclick="applyThumbPreset('premium')" style="padding:3px 8px;font-size:0.7em;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#D9B65B;border:1px solid #D9B65B;">Premium</button><input class="random-preset" data-preset="premium" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="youtube" onclick="applyThumbPreset('youtube')" style="padding:3px 8px;font-size:0.7em;background:#ff0000;color:#fff;border:1px solid #ff0000;">YouTube</button><input class="random-preset" data-preset="youtube" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="clean" onclick="applyThumbPreset('clean')" style="padding:3px 8px;font-size:0.7em;background:#222;color:#fff;border:1px solid #555;">Clean</button><input class="random-preset" data-preset="clean" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="neon" onclick="applyThumbPreset('neon')" style="padding:3px 8px;font-size:0.7em;background:#0a0a1a;color:#00f5ff;border:1px solid #00f5ff;">Neón</button><input class="random-preset" data-preset="neon" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="fallback" onclick="applyThumbPreset('fallback')" style="padding:3px 8px;font-size:0.7em;background:#1a1a2a;color:#ccc;border:1px dashed #666;">Alternativa</button><input class="random-preset" data-preset="fallback" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="mrbeast" onclick="applyThumbPreset('mrbeast')" style="padding:3px 8px;font-size:0.7em;background:#ffd700;color:#000;border:1px solid #ffd700;">MrBeast</button><input class="random-preset" data-preset="mrbeast" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="techreview" onclick="applyThumbPreset('techreview')" style="padding:3px 8px;font-size:0.7em;background:#1e3a5f;color:#4fc3f7;border:1px solid #4fc3f7;">Tech</button><input class="random-preset" data-preset="techreview" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="tutorial" onclick="applyThumbPreset('tutorial')" style="padding:3px 8px;font-size:0.7em;background:#2e7d32;color:#fff;border:1px solid #4caf50;">Tutorial</button><input class="random-preset" data-preset="tutorial" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="breaking" onclick="applyThumbPreset('breaking')" style="padding:3px 8px;font-size:0.7em;background:#b71c1c;color:#ffeb3b;border:1px solid #ffeb3b;">Breaking</button><input class="random-preset" data-preset="breaking" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="minimal" onclick="applyThumbPreset('minimal')" style="padding:3px 8px;font-size:0.7em;background:#fafafa;color:#222;border:1px solid #ccc;">Minimal</button><input class="random-preset" data-preset="minimal" title="Aleatorio" type="checkbox"/></div>
 </div>
 <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px;">
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="cinematic" onclick="applyThumbPreset('cinematic')" style="padding:3px 8px;font-size:0.7em;background:#0D0D1A;color:#F5A623;border:1px solid #F5A623;">Cinematic</button><input class="random-preset" data-preset="cinematic" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="gradient" onclick="applyThumbPreset('gradient')" style="padding:3px 8px;font-size:0.7em;background:#0F0F0F;color:#BF00FF;border:1px solid #8B00FF;">Gradient</button><input class="random-preset" data-preset="gradient" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="splitscreen" onclick="applyThumbPreset('splitscreen')" style="padding:3px 8px;font-size:0.7em;background:linear-gradient(90deg,#E63946 50%,#1D3557 50%);color:#fff;border:1px solid #fff;">Split</button><input class="random-preset" data-preset="splitscreen" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="colorpop" onclick="applyThumbPreset('colorpop')" style="padding:3px 8px;font-size:0.7em;background:#222;color:#FF1C1C;border:1px solid #FF1C1C;">ColorPop</button><input class="random-preset" data-preset="colorpop" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="retro" onclick="applyThumbPreset('retro')" style="padding:3px 8px;font-size:0.7em;background:#F2E8D5;color:#C45E26;border:1px solid #C45E26;">Retro</button><input class="random-preset" data-preset="retro" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="3dextrude" onclick="applyThumbPreset('3dextrude')" style="padding:3px 8px;font-size:0.7em;background:#1a0a2e;color:#FFD700;border:1px solid #FFD700;">3D Gold</button><input class="random-preset" data-preset="3dextrude" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="glassmorphism" onclick="applyThumbPreset('glassmorphism')" style="padding:3px 8px;font-size:0.7em;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);">Glass</button><input class="random-preset" data-preset="glassmorphism" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="darkacademia" onclick="applyThumbPreset('darkacademia')" style="padding:3px 8px;font-size:0.7em;background:#2C1810;color:#D4A574;border:1px solid #D4A574;">Academia</button><input class="random-preset" data-preset="darkacademia" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="boldoutline" onclick="applyThumbPreset('boldoutline')" style="padding:3px 8px;font-size:0.7em;background:#000;color:#fff;border:2px solid #fff;">BoldOutline</button><input class="random-preset" data-preset="boldoutline" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="elegantdark" onclick="applyThumbPreset('elegantdark')" style="padding:3px 8px;font-size:0.7em;background:#0a0a14;color:#C9B37E;border:1px solid #C9B37E;">Elegant</button><input class="random-preset" data-preset="elegantdark" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="tiktok" onclick="applyThumbPreset('tiktok')" style="padding:3px 8px;font-size:0.7em;background:#010101;color:#FE2C55;border:1px solid #25F4EE;">TikTok</button><input class="random-preset" data-preset="tiktok" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="stories" onclick="applyThumbPreset('stories')" style="padding:3px 8px;font-size:0.7em;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border:1px solid #fff;">Stories</button><input class="random-preset" data-preset="stories" title="Random" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="cinematic" onclick="applyThumbPreset('cinematic')" style="padding:3px 8px;font-size:0.7em;background:#0D0D1A;color:#F5A623;border:1px solid #F5A623;">Cinematic</button><input class="random-preset" data-preset="cinematic" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="gradient" onclick="applyThumbPreset('gradient')" style="padding:3px 8px;font-size:0.7em;background:#0F0F0F;color:#BF00FF;border:1px solid #8B00FF;">Gradient</button><input class="random-preset" data-preset="gradient" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="splitscreen" onclick="applyThumbPreset('splitscreen')" style="padding:3px 8px;font-size:0.7em;background:linear-gradient(90deg,#E63946 50%,#1D3557 50%);color:#fff;border:1px solid #fff;">División</button><input class="random-preset" data-preset="splitscreen" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="colorpop" onclick="applyThumbPreset('colorpop')" style="padding:3px 8px;font-size:0.7em;background:#222;color:#FF1C1C;border:1px solid #FF1C1C;">ColorPop</button><input class="random-preset" data-preset="colorpop" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="retro" onclick="applyThumbPreset('retro')" style="padding:3px 8px;font-size:0.7em;background:#F2E8D5;color:#C45E26;border:1px solid #C45E26;">Retro</button><input class="random-preset" data-preset="retro" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="3dextrude" onclick="applyThumbPreset('3dextrude')" style="padding:3px 8px;font-size:0.7em;background:#1a0a2e;color:#FFD700;border:1px solid #FFD700;">3D Gold</button><input class="random-preset" data-preset="3dextrude" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="glassmorphism" onclick="applyThumbPreset('glassmorphism')" style="padding:3px 8px;font-size:0.7em;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);">Glass</button><input class="random-preset" data-preset="glassmorphism" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="darkacademia" onclick="applyThumbPreset('darkacademia')" style="padding:3px 8px;font-size:0.7em;background:#2C1810;color:#D4A574;border:1px solid #D4A574;">Academia</button><input class="random-preset" data-preset="darkacademia" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="boldoutline" onclick="applyThumbPreset('boldoutline')" style="padding:3px 8px;font-size:0.7em;background:#000;color:#fff;border:2px solid #fff;">BoldOutline</button><input class="random-preset" data-preset="boldoutline" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="elegantdark" onclick="applyThumbPreset('elegantdark')" style="padding:3px 8px;font-size:0.7em;background:#0a0a14;color:#C9B37E;border:1px solid #C9B37E;">Elegant</button><input class="random-preset" data-preset="elegantdark" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="tiktok" onclick="applyThumbPreset('tiktok')" style="padding:3px 8px;font-size:0.7em;background:#010101;color:#FE2C55;border:1px solid #25F4EE;">TikTok</button><input class="random-preset" data-preset="tiktok" title="Aleatorio" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="stories" onclick="applyThumbPreset('stories')" style="padding:3px 8px;font-size:0.7em;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border:1px solid #fff;">Historias</button><input class="random-preset" data-preset="stories" title="Aleatorio" type="checkbox"/></div>
 </div>
-<div class="hint" style="margin-bottom:6px;">Checkboxes = modo random (cada publicacao sorteia um)</div>
+<div class="hint" style="margin-bottom:6px;">Checkboxes = modo aleatorio (cada publicación elige uno al azar)</div>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:8px;">
 <div class="config-field">
-<label>Texto de exemplo</label>
-<input id="cfgDesignPreviewText" placeholder="Texto para preview" type="text" value="MULTIPLIQUE SEU LUCRO"/>
-<div class="hint">Texto que aparece na preview (simula a frase_curta)</div>
+<label>Texto de ejemplo</label>
+<input id="cfgDesignPreviewText" placeholder="Texto para la vista previa" type="text" value="MULTIPLIQUE SEU LUCRO"/>
+<div class="hint">Texto que aparece en la vista previa (simula la frase_curta)</div>
 </div>
 <div style="display:flex;gap:8px;align-items:flex-end;">
-<button onclick="previewDesign(this, 'dark')" style="padding:8px 16px;background:var(--accent);">Preview Escuro</button>
-<button onclick="previewDesign(this, 'light')" style="padding:8px 16px;background:#ccc;color:#222;">Preview Claro</button>
-<button onclick="saveDesign(this)">Salvar Design</button>
+<button onclick="previewDesign(this, 'dark')" style="padding:8px 16px;background:var(--accent);">Vista previa oscura</button>
+<button onclick="previewDesign(this, 'light')" style="padding:8px 16px;background:#ccc;color:#222;">Vista previa clara</button>
+<button onclick="saveDesign(this)">Guardar diseño</button>
 </div>
 </div>
 <div id="designPreviewBox" style="display:none;margin-top:8px;border:1px solid var(--border);border-radius:8px;overflow:hidden;max-width:640px;">
-<img alt="Preview" id="designPreviewImg" style="width:100%;display:block;"/>
+<img alt="Vista previa" id="designPreviewImg" style="width:100%;display:block;"/>
 </div>
 </div>
 </div>
 <!-- Tab: Planilha -->
 <div class="config-tab-content" id="cfgTab_planilha">
 <div class="config-section">
-<h3>Planilha</h3>
+<h3>Hoja de cálculo</h3>
 <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
 <select id="sheetSelector" style="padding:6px 12px;font-size:0.85em;">
 <option value="CONFIG">CONFIG</option>
-<option value="LIVES">LIVES</option>
+<option value="LIVES">TRANSMISIONES EN VIVO</option>
 <option value="PUBLICADOS">PUBLICADOS</option>
 </select>
-<button class="small" onclick="loadSheet()">Carregar</button>
-<button class="small" onclick="saveSheet(this)" style="background:var(--green);">Salvar</button>
-<button class="small secondary" onclick="downloadSheetCSV()">Download CSV</button>
+<button class="small" onclick="loadSheet()">Cargar</button>
+<button class="small" onclick="saveSheet(this)" style="background:var(--green);">Guardar</button>
+<button class="small secondary" onclick="downloadSheetCSV()">Descargar CSV</button>
 <label class="small secondary" style="display:inline-flex;align-items:center;padding:4px 10px;cursor:pointer;border:1px solid var(--border);border-radius:6px;font-size:0.75rem;">
-            Upload CSV <input accept=".csv" onchange="uploadSheetCSV(event)" style="display:none;" type="file"/>
+            Subir CSV <input accept=".csv" onchange="uploadSheetCSV(event)" style="display:none;" type="file"/>
 </label>
-<button class="small secondary" onclick="addSheetRow()">+ Linha</button>
+<button class="small secondary" onclick="addSheetRow()">+ Línea</button>
 <span id="sheetInfo" style="color:var(--muted);font-size:0.8em;margin-left:8px;"></span>
 </div>
 <div id="sheetTableContainer" style="overflow:auto;max-height:65vh;border:1px solid var(--border);border-radius:6px;">
-<div style="padding:20px;color:var(--muted);text-align:center;">Selecione uma aba e clique Carregar</div>
+<div style="padding:20px;color:var(--muted);text-align:center;">Selecciona una pestaña y haz clic en Cargar</div>
 </div>
 </div>
 </div>
 <div class="config-tab-content" id="cfgTab_imports">
 <div class="config-section">
-<h3>Import de Clips</h3>
+<h3>Importación de clips</h3>
 <p style="color:var(--muted);font-size:0.82em;margin-bottom:14px;">
-          Coloque pastas com MP4s em <code>imports/</code> na raiz do projeto. O sistema detecta e move automaticamente para a fila de publicacao.
+          Coloca carpetas con MP4 en <code>imports/</code> en la raíz del proyecto. El sistema lo detecta y lo mueve automáticamente a la cola de publicación.
         </p>
 <div class="config-grid">
 <div class="config-field">
-<label>Verificacao automatica (horaria)</label>
+<label>Verificación automática (cada hora)</label>
 <select name="import_auto">
-<option value="false">Desativado</option>
-<option value="true">Ativado</option>
+<option value="false">Desactivado</option>
+<option value="true">Activado</option>
 </select>
-<span class="hint">Varre imports/ a cada hora automaticamente</span>
+<span class="hint">Revisa automáticamente imports/ cada hora</span>
 </div>
 <div class="config-field">
-<label>Gerar descricao via IA</label>
+<label>Generar descripción con IA</label>
 <select name="import_gerar_descricao">
-<option value="false">Nao gerar</option>
-<option value="true">Gerar com Claude</option>
+<option value="false">No generar</option>
+<option value="true">Generar con Claude</option>
 </select>
-<span class="hint">Quando o manifest nao tem descricao, usa IA para gerar</span>
+<span class="hint">Cuando el manifest no tiene descripción, usa IA para generarla</span>
 </div>
 <div class="config-field">
-<label>Max clips por rodada</label>
+<label>Máximo de clips por ronda</label>
 <input id="cfgImportPubMax" max="10" min="1" style="width:60px" type="number" value="1"/>
-<span class="hint">Quantos clips de import publicar por horario</span>
+<span class="hint">Cuántos clips importados publicar por horario</span>
 </div>
 <div class="config-field">
-<label>Privacidade imports</label>
+<label>Privacidad de las importaciones</label>
 <select id="cfgImportPrivacy">
-<option value="">Usar padrao</option>
+<option value="">Usar predeterminado</option>
 <option value="unlisted">Unlisted</option>
 <option value="public">Public</option>
 <option value="private">Private</option>
 </select>
 </div>
 <div class="config-field">
-<label>Agendamento de publicacao</label>
+<label>Programación de publicación</label>
 <select name="import_fila_global" onchange="toggleImportHorarios(this.value)">
-<option value="true">Fila global (pub_horarios)</option>
-<option value="false">Horarios proprios</option>
+<option value="true">Cola global (pub_horarios)</option>
+<option value="false">Horarios propios</option>
 </select>
-<span class="hint">Fila global: segue pub_horarios. Horarios proprios: define abaixo quantas vezes por dia</span>
+<span class="hint">Cola global: sigue pub_horarios. Horarios propios: define abajo cuántas veces al día</span>
 </div>
 </div>
 </div>
 <div class="config-section" id="importHorariosSection" style="display:none">
-<h3>Horarios de Publicacao de Imports</h3>
+<h3>Horarios de Publicación de Importaciones</h3>
 <div class="hour-picker-header">
-<label>Selecione os horarios (clique para ativar/desativar)</label>
+<label>Selecciona los horarios (haz clic para activar o desactivar)</label>
 <div class="hour-picker-actions">
 <button onclick="hourPickerSelectAll('import')">Todas</button>
-<button onclick="hourPickerClearAll('import')">Limpar</button>
+<button onclick="hourPickerClearAll('import')">Limpiar</button>
 </div>
 </div>
 <div class="hour-picker" id="importHourPicker"></div>
 <div class="hour-summary" id="importSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Minuto exacto:</label>
 <input id="cfgImportMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
-<span style="font-size:0.8em;color:var(--muted)">Ex: 30 → publica em HH:30</span>
+<span style="font-size:0.8em;color:var(--muted)">Ej.: 30 → se publica a las HH:30</span>
 </div>
 </div>
 <div class="config-section">
-<h3>Acoes</h3>
+<h3>Acciones</h3>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-<button onclick="importScan(this)" style="background:var(--green);">Processar imports/ agora</button>
-<button class="secondary" onclick="importClean('imports', this)">Limpar imports/ (residuos)</button>
-<button class="secondary" onclick="importClean('clips', this)">Limpar clips/ (publicados)</button>
+<button onclick="importScan(this)" style="background:var(--green);">Procesar imports/ ahora</button>
+<button class="secondary" onclick="importClean('imports', this)">Limpiar imports/ (residuos)</button>
+<button class="secondary" onclick="importClean('clips', this)">Limpiar clips/ (publicados)</button>
 <span id="importActionMsg" style="color:var(--muted);font-size:0.82em;margin-left:8px;"></span>
 </div>
 <div id="importScanResult" style="margin-top:12px;font-size:0.82em;display:none;"></div>
@@ -1599,22 +1599,22 @@
 <!-- Tab: Enrich Lives -->
 <div class="config-tab-content" id="cfgTab_enrich">
 <div class="config-section">
-<h3>Enriquecer Lives</h3>
-<p style="color:var(--muted);font-size:0.82em;margin-bottom:12px">Lives com titulo generico "INEMA" recebem titulo, descricao e thumbnail automaticamente via IA.</p>
+<h3>Enriquecer directos</h3>
+<p style="color:var(--muted);font-size:0.82em;margin-bottom:12px">Las transmisiones en vivo con el título genérico "INEMA" reciben título, descripción y miniatura automáticamente mediante IA.</p>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Enrich automatico</label>
+<label>Enriquecimiento automático</label>
 <select id="cfgEnrichAuto">
-<option value="false">Nao</option>
-<option value="true">Sim</option>
+<option value="false">No</option>
+<option value="true">Sí</option>
 </select>
 </div>
 <div class="config-field">
-<label>Max lives por rodada</label>
+<label>Máximo de transmisiones en vivo por ronda</label>
 <input id="cfgEnrichMax" max="50" min="1" type="number" value="3"/>
 </div>
 <div class="config-field">
-<label>Lives pendentes</label>
+<label>Transmisiones en vivo pendientes</label>
 <div id="enrichPendingCount" style="padding:8px 0;color:var(--accent);font-weight:bold">-</div>
 </div>
 </div>
@@ -1622,36 +1622,36 @@
 <div class="config-section">
 <h3>Horarios de Enrich</h3>
 <div class="hour-picker-header">
-<label>Selecione os horarios (clique para ativar/desativar)</label>
+<label>Selecciona los horarios (haz clic para activar o desactivar)</label>
 <div class="hour-picker-actions">
 <button onclick="hourPickerSelectAll('enrich')">Todas</button>
-<button onclick="hourPickerClearAll('enrich')">Limpar</button>
+<button onclick="hourPickerClearAll('enrich')">Limpiar</button>
 </div>
 </div>
 <div class="hour-picker" id="enrichHourPicker"></div>
 <div class="hour-summary" id="enrichSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Minuto exacto:</label>
 <input id="cfgEnrichMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
-<span style="font-size:0.8em;color:var(--muted)">Ex: 15 → roda em HH:15</span>
+<span style="font-size:0.8em;color:var(--muted)">Ej.: 15 → se ejecuta a las HH:15</span>
 </div>
 </div>
 <div class="config-section">
-<h3>Prompt para Titulo + Descricao</h3>
+<h3>Prompt para título + descripción</h3>
 <textarea id="cfgEnrichPrompt" rows="8" style="width:100%;font-family:monospace;font-size:0.82em;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;resize:vertical"></textarea>
-<span class="hint">Prompt enviado a IA para gerar titulo e descricao da live. Deve retornar JSON: { "title": "...", "description": "..." }</span>
+<span class="hint">Prompt enviado a la IA para generar el título y la descripción del live. Debe devolver JSON: { "title": "...", "description": "..." }</span>
 </div>
 <div class="config-section">
-<h3>Imagem de Fundo (Thumbnail)</h3>
-<p style="color:var(--muted);font-size:0.82em;margin-bottom:8px">Imagem usada como fundo da thumbnail das lives enriquecidas. Se nao definida, usa gradiente escuro.</p>
+<h3>Imagen de fondo (miniatura)</h3>
+<p style="color:var(--muted);font-size:0.82em;margin-bottom:8px">Imagen usada como fondo de la miniatura de las transmisiones en vivo enriquecidas. Si no está definida, se usa un degradado oscuro.</p>
 <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
 <div>
 <img id="enrichBgPreview" src="" style="max-width:320px;max-height:180px;border-radius:8px;border:1px solid var(--border);display:none"/>
-<div id="enrichBgPlaceholder" style="width:320px;height:180px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.82em">Nenhuma imagem</div>
+<div id="enrichBgPlaceholder" style="width:320px;height:180px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.82em">Ninguna imagen</div>
 </div>
 <div style="display:flex;flex-direction:column;gap:8px">
 <label style="background:var(--accent);color:#fff;padding:6px 16px;border-radius:6px;cursor:pointer;text-align:center;font-size:0.85em">
-              Escolher imagem
+              Elegir imagen
               <input accept="image/*" id="enrichBgFile" onchange="enrichUploadBg(this)" style="display:none" type="file"/>
 </label>
 <span id="enrichBgMsg" style="color:var(--muted);font-size:0.78em"></span>
@@ -1659,13 +1659,13 @@
 </div>
 </div>
 <div class="config-section">
-<h3>Acoes</h3>
+<h3>Acciones</h3>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-<button onclick="enrichRunNow(this)" style="background:var(--accent);">Enriquecer Agora</button>
+<button onclick="enrichRunNow(this)" style="background:var(--accent);">Enriquecer ahora</button>
 <span id="enrichActionMsg" style="color:var(--muted);font-size:0.82em;margin-left:8px;"></span>
 </div>
 <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-<button onclick="enrichFromUrl(this)" style="background:#a78bfa;white-space:nowrap">Importar e Enriquecer</button>
+<button onclick="enrichFromUrl(this)" style="background:#a78bfa;white-space:nowrap">Importar y enriquecer</button>
 <input id="enrichUrlInput" placeholder="https://www.youtube.com/watch?v=..." style="flex:1;min-width:280px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85em" type="text"/>
 </div>
 <span id="enrichUrlMsg" style="color:var(--muted);font-size:0.78em;margin-top:4px;display:block"></span>
@@ -1674,17 +1674,17 @@
 <!-- Tab: TikTok -->
 <div class="config-tab-content" id="cfgTab_tiktok">
 <div class="config-section">
-<h3>Publicacao TikTok</h3>
+<h3>Publicación en TikTok</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Max clips por rodada</label>
+<label>Máximo de clips por ronda</label>
 <input id="cfgTiktokPubMax" max="10" min="1" style="width:60px" type="number" value="1"/>
-<span class="hint">Quantos clips de TikTok publicar por horario</span>
+<span class="hint">Cuántos clips de TikTok publicar por horario</span>
 </div>
 <div class="config-field">
-<label>Privacidade TikTok</label>
+<label>Privacidad de TikTok</label>
 <select id="cfgTiktokPrivacy">
-<option value="">Usar padrao</option>
+<option value="">Usar predeterminado</option>
 <option value="unlisted">Unlisted</option>
 <option value="public">Public</option>
 <option value="private">Private</option>
@@ -1693,30 +1693,30 @@
 </div>
 </div>
 <div class="config-section">
-<h3>Horarios de Publicacao</h3>
+<h3>Horarios de Publicación</h3>
 <div class="hour-picker-header">
-<label>Selecione os horarios de publicacao (clique para ativar/desativar)</label>
+<label>Selecciona los horarios de publicación (haz clic para activar o desactivar)</label>
 <div class="hour-picker-actions">
 <button onclick="hourPickerSelectAll('tiktokPub')">Todas</button>
-<button onclick="hourPickerClearAll('tiktokPub')">Limpar</button>
+<button onclick="hourPickerClearAll('tiktokPub')">Limpiar</button>
 </div>
 </div>
 <div class="hour-picker" id="tiktokPubHourPicker"></div>
 <div class="hour-summary" id="tiktokPubSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Minuto exacto:</label>
 <input id="cfgTiktokPubMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
 </div>
 </div>
 <div class="config-section">
-<h3>Scanner TikTok</h3>
-<p style="color:var(--muted);font-size:0.82em;margin-bottom:12px">Importa videos de canais TikTok automaticamente.</p>
+<h3>Escáner de TikTok</h3>
+<p style="color:var(--muted);font-size:0.82em;margin-bottom:12px">Importa videos de canales de TikTok automáticamente.</p>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Scan automatico</label>
+<label>Escaneo automático</label>
 <select id="cfgTiktokAuto">
-<option value="false">Nao</option>
-<option value="true">Sim</option>
+<option value="false">No</option>
+<option value="true">Sí</option>
 </select>
 </div>
 </div>
@@ -1724,57 +1724,57 @@
 <div class="config-section">
 <h3>Horarios de Scan</h3>
 <div class="hour-picker-header">
-<label>Selecione os horarios de scan (clique para ativar/desativar)</label>
+<label>Selecciona los horarios de escaneo (haz clic para activar o desactivar)</label>
 <div class="hour-picker-actions">
 <button onclick="hourPickerSelectAll('tiktok')">Todas</button>
-<button onclick="hourPickerClearAll('tiktok')">Limpar</button>
+<button onclick="hourPickerClearAll('tiktok')">Limpiar</button>
 </div>
 </div>
 <div class="hour-picker" id="tiktokHourPicker"></div>
 <div class="hour-summary" id="tiktokSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Minuto exacto:</label>
 <input id="cfgTiktokMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
 </div>
 </div>
 <div class="config-section">
-<h3>Canais Cadastrados</h3>
+<h3>Canales registrados</h3>
 <table id="tiktokChannelsTable" style="width:100%;font-size:0.82em;border-collapse:collapse">
 <thead>
 <tr style="border-bottom:1px solid var(--border);text-align:left">
 <th style="padding:6px">Handle</th>
-<th style="padding:6px">Nome</th>
-<th style="padding:6px">Ativo</th>
+<th style="padding:6px">Nombre</th>
+<th style="padding:6px">Activo</th>
 <th style="padding:6px">Desde</th>
-<th style="padding:6px">Max/scan</th>
-<th style="padding:6px">Ultimo scan</th>
-<th style="padding:6px" title="Pendentes na fila / Baixados / Pulados / Erros">Fila (P/B/X/E)</th>
-<th style="padding:6px">Acoes</th>
+<th style="padding:6px">Máximo/escaneo</th>
+<th style="padding:6px">Último escaneo</th>
+<th style="padding:6px" title="Pendientes en la cola / Descargados / Omitidos / Errores">Cola (P/B/X/E)</th>
+<th style="padding:6px">Acciones</th>
 </tr>
 </thead>
 <tbody id="tiktokChannelsBody">
-<tr><td colspan="8" style="padding:12px;color:var(--muted)">Carregando...</td></tr>
+<tr><td colspan="8" style="padding:12px;color:var(--muted)">Cargando...</td></tr>
 </tbody>
 </table>
 <div style="margin-top:12px;display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
 <div><label style="font-size:0.78em;color:var(--muted)">Handle</label><br/><input id="tiktokNewHandle" placeholder="@usuario" style="width:140px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="text"/></div>
-<div><label style="font-size:0.78em;color:var(--muted)">Nome</label><br/><input id="tiktokNewNome" placeholder="Nome amigavel" style="width:140px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="text"/></div>
+<div><label style="font-size:0.78em;color:var(--muted)">Nombre</label><br/><input id="tiktokNewNome" placeholder="Nombre amigable" style="width:140px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="text"/></div>
 <div><label style="font-size:0.78em;color:var(--muted)">Desde</label><br/><input id="tiktokNewDesde" style="width:140px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="date"/></div>
-<div><label style="font-size:0.78em;color:var(--muted)">Max/scan</label><br/><input id="tiktokNewMax" max="20" min="1" style="width:60px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="number" value="2"/></div>
-<button onclick="tiktokAddChannel()" style="background:var(--accent);padding:5px 14px">Adicionar</button>
+<div><label style="font-size:0.78em;color:var(--muted)">Máximo/escaneo</label><br/><input id="tiktokNewMax" max="20" min="1" style="width:60px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="number" value="2"/></div>
+<button onclick="tiktokAddChannel()" style="background:var(--accent);padding:5px 14px">Agregar</button>
 </div>
 </div>
 <div class="config-section">
-<h3>Acoes</h3>
+<h3>Acciones</h3>
 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-<button onclick="tiktokScanAll(this, 'full')" style="background:#a78bfa" title="Scan completo em todos os canais ativos (ate 5000 videos cada)">Scan completo</button>
-<button onclick="tiktokScanAll(this, 'latest')" style="background:#38bdf8" title="Scan incremental: pega os videos mais novos que a ultima upload_date conhecida">Pegar novos</button>
-<button onclick="tiktokDownloadNow(this)" style="background:#22c55e" title="Dispara download da fila ja populada, sem fazer scan">Download da fila</button>
-<label style="font-size:0.82em;color:var(--muted);margin-left:6px"><input id="tiktokIncludeInactive" type="checkbox"/> incluir inativos</label>
+<button onclick="tiktokScanAll(this, 'full')" style="background:#a78bfa" title="Escaneo completo en todos los canales activos (hasta 5000 videos cada uno)">Escaneo completo</button>
+<button onclick="tiktokScanAll(this, 'latest')" style="background:#38bdf8" title="Escaneo incremental: obtiene los videos más nuevos que la última upload_date conocida">Obtener nuevos</button>
+<button onclick="tiktokDownloadNow(this)" style="background:#22c55e" title="Inicia la descarga de la cola ya poblada, sin hacer un escaneo">Descargar la cola</button>
+<label style="font-size:0.82em;color:var(--muted);margin-left:6px"><input id="tiktokIncludeInactive" type="checkbox"/> incluir inactivos</label>
 <span id="tiktokScanMsg" style="color:var(--muted);font-size:0.82em"></span>
 </div>
 <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-<button onclick="tiktokDownloadUrl(this)" style="background:#f472b6;white-space:nowrap">Baixar Video</button>
+<button onclick="tiktokDownloadUrl(this)" style="background:#f472b6;white-space:nowrap">Descargar video</button>
 <input id="tiktokUrlInput" placeholder="https://www.tiktok.com/@user/video/123..." style="flex:1;min-width:280px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85em" type="text"/>
 </div>
 <span id="tiktokUrlMsg" style="color:var(--muted);font-size:0.78em;margin-top:4px;display:block"></span>
@@ -1783,41 +1783,41 @@
 </div>
 <!-- Tabs -->
 <div class="tabs" id="tabsBar">
-<button class="tab active" data-tab="lives" onclick="showTab('lives', this); showLivesView('todas')">Lives</button>
-<button class="tab" data-tab="lives" onclick="showTab('lives', this); showLivesView('ultimas')">Ultimas Lives</button>
-<button class="tab" data-tab="lives" onclick="showTab('lives', this); showLivesView('proximas')">Proximas Lives</button>
-<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, '')">Todos Clips</button>
-<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'publicado')">Clips Publicados <span id="tabCountPub" style="font-size:0.8em;opacity:0.6"></span></button>
-<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'pendente')">Clips Pendentes <span id="tabCountPend" style="font-size:0.8em;opacity:0.6"></span></button>
-<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'erro')">Clips Erros <span id="tabCountErro" style="font-size:0.8em;opacity:0.6"></span></button>
+<button class="tab active" data-tab="lives" onclick="showTab('lives', this); showLivesView('todas')">Transmisiones en vivo</button>
+<button class="tab" data-tab="lives" onclick="showTab('lives', this); showLivesView('ultimas')">Últimas transmisiones en vivo</button>
+<button class="tab" data-tab="lives" onclick="showTab('lives', this); showLivesView('proximas')">Próximos lives</button>
+<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, '')">Todos los clips</button>
+<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'publicado')">Clips publicados <span id="tabCountPub" style="font-size:0.8em;opacity:0.6"></span></button>
+<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'pendente')">Clips pendientes <span id="tabCountPend" style="font-size:0.8em;opacity:0.6"></span></button>
+<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'erro')">Clips con errores <span id="tabCountErro" style="font-size:0.8em;opacity:0.6"></span></button>
 </div>
 <!-- Lives Toolbar + Table -->
 <div id="tabLives">
 <div class="toolbar">
-<input id="livesSearch" oninput="livesPage=1;filterLives()" placeholder="Pesquisar por titulo..." type="text"/>
-<span class="toolbar-label">Situacao:</span>
+<input id="livesSearch" oninput="livesPage=1;filterLives()" placeholder="Buscar por título..." type="text"/>
+<span class="toolbar-label">Situación:</span>
 <select id="livesStatus" onchange="livesPage=1;filterLives()">
 <option value="">Todas</option>
-<option value="pendente">Pendentes (sem corte)</option>
-<option value="concluido">Cortadas</option>
-<option value="aguardando_pub">Aguardando publicacao</option>
+<option value="pendente">Pendientes (sin cortar)</option>
+<option value="concluido">Recortadas</option>
+<option value="aguardando_pub">Esperando publicación</option>
 <option value="publicado">Totalmente publicadas</option>
-<option value="erro">Com erro</option>
-<option value="sem_topicos">Sem topicos (IA nao achou corte)</option>
+<option value="erro">Con error</option>
+<option value="sem_topicos">Sin temas (la IA no encontró un recorte)</option>
 </select>
-<span class="toolbar-label">Origem:</span>
+<span class="toolbar-label">Origen:</span>
 <select id="livesOrigem" onchange="livesPage=1;filterLives()">
 <option value="">Todas</option>
-<option value="live">Apenas Lives</option>
-<option value="import">Apenas Imports</option>
+<option value="live">Solo Lives</option>
+<option value="import">Solo Imports</option>
 </select>
-<span class="toolbar-label">Ordem:</span>
+<span class="toolbar-label">Orden:</span>
 <select id="livesOrder" onchange="livesPage=1;filterLives()">
-<option value="oldest">Mais antigas</option>
-<option value="newest">Mais recentes</option>
-<option value="title">Titulo A-Z</option>
-<option value="duration-desc">Maior duracao</option>
-<option value="duration-asc">Menor duracao</option>
+<option value="oldest">Más antiguas</option>
+<option value="newest">Más recientes</option>
+<option value="title">Título A-Z</option>
+<option value="duration-desc">Mayor duración</option>
+<option value="duration-asc">Menor duración</option>
 </select>
 <span class="result-count" id="livesCount"></span>
 </div>
@@ -1826,18 +1826,18 @@
 <thead>
 <tr>
 <th>Video</th>
-<th>Data Live</th>
-<th>Titulo</th>
-<th>Duracao</th>
-<th>Cortes</th>
-<th>Data Corte</th>
+<th>Fecha Live</th>
+<th>Título</th>
+<th>Duración</th>
+<th>Recortes</th>
+<th>Fecha de recorte</th>
 <th>Clips</th>
 <th>Publicados</th>
 <th></th>
 </tr>
 </thead>
 <tbody id="livesBody">
-<tr><td class="empty" colspan="9">Carregando...</td></tr>
+<tr><td class="empty" colspan="9">Cargando...</td></tr>
 </tbody>
 </table>
 <div class="pagination" id="livesPagination"></div>
@@ -1846,14 +1846,14 @@
 <!-- Publicados Toolbar + Table -->
 <div id="tabPublicados" style="display:none">
 <div class="toolbar">
-<input id="pubSearch" oninput="clipsPage=1;filterPubs()" placeholder="Pesquisar por titulo ou tags..." type="text"/>
-<span class="toolbar-label">Status:</span>
+<input id="pubSearch" oninput="clipsPage=1;filterPubs()" placeholder="Buscar por título o etiquetas..." type="text"/>
+<span class="toolbar-label">Estado:</span>
 <select id="pubStatus" onchange="clipsPage=1;filterPubs()">
 <option value="">Todos</option>
 <option value="publicado">Publicados</option>
-<option value="erro">Erros</option>
-<option value="pendente">Pendentes</option>
-<option value="parado">Parados</option>
+<option value="erro">Errores</option>
+<option value="pendente">Pendientes</option>
+<option value="parado">Detenidos</option>
 </select>
 <span class="toolbar-label">Privacy:</span>
 <select id="pubPrivacy" onchange="clipsPage=1;filterPubs()">
@@ -1862,42 +1862,42 @@
 <option value="public">Public</option>
 <option value="private">Private</option>
 </select>
-<span class="toolbar-label">Origem:</span>
+<span class="toolbar-label">Origen:</span>
 <select id="pubOrigem" onchange="clipsPage=1;filterPubs()">
 <option value="">Todas</option>
-<option value="live">Apenas Lives</option>
-<option value="import">Apenas Imports</option>
-<option value="tiktok">Apenas TikTok</option>
+<option value="live">Solo Lives</option>
+<option value="import">Solo Imports</option>
+<option value="tiktok">Solo TikTok</option>
 </select>
-<span class="toolbar-label">Ordem:</span>
+<span class="toolbar-label">Orden:</span>
 <select id="pubOrder" onchange="clipsPage=1;filterPubs()">
-<option value="newest">Mais recentes</option>
-<option value="oldest">Mais antigos</option>
-<option value="title">Titulo A-Z</option>
-<option value="duration-desc">Maior duracao</option>
+<option value="newest">Más recientes</option>
+<option value="oldest">Más antiguos</option>
+<option value="title">Título A-Z</option>
+<option value="duration-desc">Mayor duración</option>
 </select>
 <span class="result-count" id="pubCount"></span>
 </div>
 <div class="table-container">
 <div class="filter-bar" id="pubFilter" style="display:none">
-<span class="filter-text">Filtrando clips da live: <strong id="pubFilterId"></strong></span>
-<button onclick="clearPubFilter()">Limpar filtro</button>
+<span class="filter-text">Filtrando clips del directo: <strong id="pubFilterId"></strong></span>
+<button onclick="clearPubFilter()">Limpiar filtro</button>
 </div>
 <table>
 <thead>
 <tr>
-<th>Status</th>
-<th>Titulo</th>
-<th>Live</th>
-<th>Data / Tempo</th>
+<th>Estado</th>
+<th>Título</th>
+<th>Transmisión en vivo</th>
+<th>Fecha / Hora</th>
 <th>Privacy</th>
-<th>Link</th>
-<th>Arquivo</th>
-<th>Tags</th>
+<th>Enlace</th>
+<th>Archivo</th>
+<th>Etiquetas</th>
 </tr>
 </thead>
 <tbody id="pubBody">
-<tr><td class="empty" colspan="8">Carregando...</td></tr>
+<tr><td class="empty" colspan="8">Cargando...</td></tr>
 </tbody>
 </table>
 <div class="pagination" id="clipsPagination"></div>
@@ -1908,11 +1908,11 @@
 <div class="modal-overlay" id="modalTranscript" onclick="if(event.target===this)closeModal('modalTranscript')">
 <div class="modal">
 <div class="modal-header">
-<h2 id="modalTranscriptTitle">Transcricao</h2>
+<h2 id="modalTranscriptTitle">Transcripción</h2>
 <button class="modal-close" onclick="closeModal('modalTranscript')">x</button>
 </div>
 <div class="modal-body">
-<div id="modalTranscriptContent">Carregando...</div>
+<div id="modalTranscriptContent">Cargando...</div>
 </div>
 </div>
 </div>
@@ -1924,7 +1924,7 @@
 <button class="modal-close" onclick="closeModal('modalClips')">x</button>
 </div>
 <div class="modal-body">
-<div id="modalClipsContent">Carregando...</div>
+<div id="modalClipsContent">Cargando...</div>
 </div>
 </div>
 </div>
@@ -4249,238 +4249,238 @@ loadAll();
 </div>
 <div class="modal-body" style="padding:16px;overflow-y:auto;font-size:0.85em;line-height:1.8">
 <h3 style="color:var(--accent);margin-bottom:8px">v3.32.32</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidad:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Varios destinatarios por canal (Chat IDs separados por virgula)</li>
-<li>Cadastro pelo proprio bot: usuario manda "meu canal e o livesN"</li>
-<li>Cadastro tem interruptor liga/desliga controlado na master</li>
+<li>Varios destinatarios por canal (Chat IDs separados por comas)</li>
+<li>Registro desde el propio bot: el usuario envía "meu canal e o livesN"</li>
+<li>El registro tiene un interruptor de encendido/apagado controlado desde master</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.28.32</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidad:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Notificacao Telegram por canal: novo Chat ID + liga/desliga na aba Horarios</li>
-<li>Cada video publicado (clip / import / TikTok) gera aviso com o link do YouTube</li>
-<li>Botao "Enviar o video" na mensagem manda o MP4 (ate 50 MB)</li>
-<li>Deteccao e envio rodam no master-dashboard, com bot dedicado</li>
+<li>Notificación de Telegram por canal: nuevo Chat ID + activar/desactivar en la pestaña Horarios</li>
+<li>Cada video publicado (clip / import / TikTok) genera una notificación con el enlace de YouTube</li>
+<li>El botón "Enviar o video" del mensaje envía el MP4 (hasta 50 MB)</li>
+<li>La detección y el envío se ejecutan en el master-dashboard, con un bot dedicado</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.27.32</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Bug:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Preview do designer (e geracao de thumbnail no scheduler) quebrava em maquina nova com "No module named 'PIL'": o Pillow nao era instalado. O setup-system agora instala python3-pil via apt (jeito correto no Ubuntu 24/PEP 668) e a verificacao final checa import PIL.</li>
+<li>La vista previa del diseñador (y la generación de miniaturas en el scheduler) fallaba en una máquina nueva con "No module named 'PIL'": Pillow no estaba instalado. setup-system ahora instala python3-pil mediante apt (la forma correcta en Ubuntu 24/PEP 668) y la verificación final comprueba la importación de PIL.</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.27.31</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Bug:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Scheduler: video_ids que comecam com '-' (ex: -I2kOs0_GCk) eram interpretados como flag pelo yt-clip e davam "opcao desconhecida". Agora scheduler invoca com separador '--' e yt-clip aceita '--' antes do video_id.</li>
-<li>Scheduler: melhor captura de erro no corte. Antes guardava so 5 ultimas linhas (engolia o erro real quando yt-dlp cuspia muito '[download]%'). Agora filtra linhas de download, mantem 30 ultimas linhas relevantes e salva output completo em data/last_corte_error_&lt;video_id&gt;.log.</li>
+<li>Programador: los video_ids que empiezan con '-' (ej.: -I2kOs0_GCk) se interpretaban como flags en yt-clip y mostraban "opción desconocida". Ahora el programador invoca el comando con el separador '--' y yt-clip acepta '--' antes del video_id.</li>
+<li>Programador: mejor captura de errores al recortar. Antes solo guardaba las últimas 5 líneas (se tragaba el error real cuando yt-dlp generaba muchas '[download]%'). Ahora filtra las líneas de descarga, conserva las últimas 30 líneas relevantes y guarda el output completo en data/last_corte_error_&lt;video_id&gt;.log.</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.27.30</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Bug:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix imports_clips_pend no dashboard: contava por set de titulos do manifest, e manifests com titulos duplicados (ex: todos 'Video') colapsavam para 1 e zeravam pendentes. Agora compara quantidade (len(manifest) - publicados_count).</li>
+<li>Corrección de imports_clips_pend en el panel: contaba usando el conjunto de títulos del manifiesto, y los manifiestos con títulos duplicados (p. ej., todos 'Video') se reducían a 1 y dejaban los pendientes en cero. Ahora compara la cantidad (len(manifest) - publicados_count).</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.27.29</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidad:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Nova instancia lives12 (porta 8402) registrada no master dashboard e no script de sync. Services systemd yt-scheduler12/yt-dashboard12 instalados. Aguarda config/.env + credenciais OAuth.</li>
+<li>Nueva instancia lives12 (puerto 8402) registrada en el panel principal y en el script de sincronización. Servicios systemd yt-scheduler12/yt-dashboard12 instalados. A la espera de config/.env + credenciales OAuth.</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.26.29</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidad:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Novo provider de imagem "Local (inemaimg)": usa API local (FastAPI) com modelos flux2-klein/flux2-dev/qwen-edit-2511/ernie/sdxl/sd15. URL configuravel por instancia (default http://localhost:8000). Mesmo padrao do imkt4/timesmkt3.</li>
+<li>Nuevo proveedor de imágenes "Local (inemaimg)": usa API local (FastAPI) con modelos flux2-klein/flux2-dev/qwen-edit-2511/ernie/sdxl/sd15. URL configurable por instancia (predeterminada: http://localhost:8000). Mismo patrón que imkt4/timesmkt3.</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.25.28</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix critico: scheduler.acquire_lock tinha race que permitia 2 schedulers rodando em paralelo → publicava 2 clips por slot em vez de 1. Agora abre lock sem truncar e so grava PID apos flock.</li>
+<li>Corrección crítica: scheduler.acquire_lock tenía una condición de carrera que permitía ejecutar 2 schedulers en paralelo → publicaba 2 clips por intervalo en lugar de 1. Ahora abre el archivo de bloqueo sin truncarlo y solo escribe el PID después de flock.</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.25.27</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>"Pegar novos" agora usa scan incremental com early-break: cutoff = MAX(upload_date) conhecida; yt-dlp para assim que ve video antigo. Rapido mesmo em canais grandes.</li>
-<li>Flag "incluir inativos" no dashboard para scan global tambem em canais desativados</li>
+<li>"Obtener nuevos" ahora usa un escaneo incremental con early-break: cutoff = MAX(upload_date) conocida; yt-dlp se detiene en cuanto ve un video antiguo. Rápido incluso en canales grandes.</li>
+<li>Opción «incluir inactivos» en el dashboard para hacer un scan global también en canales desactivados</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.24.27</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features (refactor TikTok):</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades (refactor de TikTok):</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Nova tabela tiktok_videos com status (pendente/baixado/pulado/erro) e migracao automatica do tiktok_downloaded legacy</li>
-<li>Scan separado do download: scan popula fila (ate 5000 videos por canal), download consome da fila oldest-first</li>
-<li>Scheduler agora faz so download da fila no horario (rapido); scan manual via dashboard</li>
-<li>UI: coluna Fila (P/B/X/E) por canal; botoes Scan/Novos por canal + Scan completo/Pegar novos/Download da fila globais</li>
-<li>Novos endpoints: /api/tiktok/fetch-latest, /api/tiktok/download, /api/tiktok/queue</li>
+<li>Nueva tabla tiktok_videos con estado (pendiente/descargado/omitido/error) y migración automática de tiktok_downloaded legacy</li>
+<li>Escaneo separado de la descarga: el escaneo llena la cola (hasta 5000 videos por canal), la descarga consume la cola oldest-first</li>
+<li>El programador ahora solo descarga de la cola según el horario (rápido); el escaneo se hace manualmente desde el dashboard</li>
+<li>UI: columna Cola (P/B/X/E) por canal; botones Scan/Nuevos por canal + Scan completo/Tomar nuevos/Descargar la cola globales</li>
+<li>Nuevos endpoints: /api/tiktok/fetch-latest, /api/tiktok/download, /api/tiktok/queue</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.23.27</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>yt-clip: valida source.mp4 com ffprobe antes de cortar; remove e re-baixa se corrompido (quebrava loop de cortes vazios silenciosos)</li>
-<li>yt-clip: checa returncode do ffmpeg em cada clip; aborta com erro se todos falharem (antes reportava "concluido" falsamente)</li>
+<li>yt-clip: valida source.mp4 con ffprobe antes de cortar; lo elimina y lo vuelve a descargar si está dañado (rompía el ciclo de cortes vacíos silenciosos)</li>
+<li>yt-clip: verifica returncode de ffmpeg en cada clip; aborta con error si todos fallan (antes informaba falsamente «completado»)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.23.26</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>TikTok Scanner: photo-posts/slideshows (somente audio, sem video) eram re-baixados infinitamente e deixavam pastas orfas sem manifest</li>
-<li>Agora detectados no scan via duration=0 e marcados como baixados; pastas orfas anteriores limpas</li>
+<li>TikTok Scanner: las publicaciones con fotos y presentaciones de diapositivas (solo audio, sin video) se volvían a descargar infinitamente y dejaban carpetas huérfanas sin manifest</li>
+<li>Ahora se detectan en el escaneo mediante duration=0 y se marcan como descargados; se limpiaron las carpetas huérfanas anteriores</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.23.25</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix: clips_pendentes nunca decrementava apos publicacao (imports mostravam pendentes fantasma)</li>
-<li>Recalculo de clips_publicados e clips_pendentes com base na tabela publicados real</li>
+<li>Fix: clips_pendentes nunca se decrementaba después de la publicación (las importaciones mostraban pendientes fantasma)</li>
+<li>Recalcula clips_publicados y clips_pendentes con base en la tabla real de publicados</li>
 </ul>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Auto-sync com filtro de data: novo campo "A partir de" ao lado do botao Auto-sync</li>
-<li>Auto-sync a meia-noite so considera lives publicadas a partir da data configurada (evita reimportacao de todo o historico do canal)</li>
+<li>Sincronización automática con filtro de fecha: nuevo campo "A partir de" junto al botón de sincronización automática</li>
+<li>La sincronización automática a medianoche solo considera las lives publicadas a partir de la fecha configurada (evita reimportar todo el historial del canal)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.21.25</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>TikTok Scanner: importa videos de canais TikTok automaticamente para fila de imports</li>
-<li>Nova aba "TikTok" na Config: cadastro de canais, toggle ativo/inativo, data desde, max por scan</li>
-<li>Horarios configuraveis para scan automatico</li>
-<li>Botao "Escanear Agora" para scan manual</li>
+<li>TikTok Scanner: importa automáticamente videos de canales de TikTok a la cola de importaciones</li>
+<li>Nueva pestaña "TikTok" en Config: registro de canales, activar/desactivar, fecha desde, máximo por escaneo</li>
+<li>Horarios configurables para el scan automático</li>
+<li>Botón "Escanear Agora" para hacer un scan manual</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.20.25</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Enrich Lives: lives com titulo generico "INEMA" recebem titulo, descricao e thumbnail via IA automaticamente</li>
-<li>Nova aba "Enrich Lives" na Config: toggle, horarios, max por rodada, prompt editavel, botao "Enriquecer Agora"</li>
-<li>Prompt configuravel para geracao de titulo e descricao (config/prompt_enrich.txt)</li>
-<li>Thumbnail gerada com imagem padrao + texto overlay (mesmo estilo dos clips)</li>
+<li>Enrich Lives: los directos con el título genérico "INEMA" reciben automáticamente un título, una descripción y una miniatura mediante IA</li>
+<li>Nueva pestaña "Enrich Lives" en Config: activar/desactivar, horarios, máximo por ronda, prompt editable, botón "Enriquecer ahora"</li>
+<li>Prompt configurable para generar el título y la descripción (config/prompt_enrich.txt)</li>
+<li>Miniatura generada con imagen predeterminada + texto superpuesto (mismo estilo que los clips)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.19.25</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Stats imports alinhados sob os 3 cards de clips</li>
-<li>Botao "Distribuir p/ 7 Canais": distribui MP4s de imports/ round-robin para as 7 instancias e dispara scan em cada uma</li>
+<li>Las estadísticas de importación están alineadas debajo de las 3 tarjetas de clips</li>
+<li>Botón "Distribuir p/ 7 Canais": distribuye los MP4 de imports/ round-robin entre las 7 instancias e inicia un scan en cada una</li>
 </ul>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Imports: descricao vazia causava erro_upload no yt-publish (fallback para titulo)</li>
+<li>Imports: la descripción vacía causaba un error_upload en yt-publish (alternativa: título)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.18.24</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Aba Planilha: visualizar, editar, download CSV e upload CSV das abas CONFIG/LIVES/PUBLICADOS</li>
-<li>Presets editaveis: customizacoes salvas por preset (persistem no banco local)</li>
-<li>Novos presets TikTok e Stories</li>
+<li>Pestaña Planilla: visualizar, editar, descargar CSV y subir CSV de las pestañas CONFIG/LIVES/PUBLICADOS</li>
+<li>Preajustes editables: personalizaciones guardadas por preajuste (persisten en la base de datos local)</li>
+<li>Nuevos ajustes preestablecidos para TikTok y Stories</li>
 </ul>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Simplificacao fallback: sempre usa preset "fallback" (removido seletor separado)</li>
+<li>Simplificación del fallback: siempre usa el preset "fallback" (se eliminó el selector separado)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.15.23</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Design Thumb: aba completa com 20 presets (Premium, YouTube, Clean, Neon, MrBeast, Cinematic, Gradient, etc)</li>
-<li>Design Thumb: preview ao vivo (escuro/claro) com texto customizavel</li>
-<li>Design Thumb: random presets com checkbox (sorteia estilo a cada publicacao)</li>
-<li>Design Thumb: borda/stroke no titulo (cor, espessura, toggle)</li>
-<li>Design Thumb: accent configuravel (cor, largura, espessura, distancia, toggle)</li>
-<li>Design Thumb: marca com fonte, tamanho e posicao independente (default: base esquerda)</li>
-<li>Dashboard: tabs Ultimas Lives, Proximas Lives, Todos Clips, Clips Publicados/Pendentes/Erros</li>
-<li>Dashboard: config em 5 abas (Horarios, APIs, Prompts, Design Thumb, Manutencao) com save independente</li>
-<li>Dashboard: stats Lives Erro e Clips Erro</li>
-<li>Dashboard: campos dinamicos por provider + nome instancia dinamico</li>
-<li>Dashboard: coluna Data Live e Data Corte na tabela de lives</li>
-<li>Providers de imagem: MiniMax, Google Imagen, Kie.ai z-image</li>
-<li>Refinamento de titulo usa Claude CLI (OAuth)</li>
+<li>Diseño Thumb: pestaña completa con 20 presets (Premium, YouTube, Clean, Neon, MrBeast, Cinematic, Gradient, etc.)</li>
+<li>Diseño Thumb: vista previa en vivo (oscura/clara) con texto personalizable</li>
+<li>Diseño Thumb: presets aleatorios con casilla de verificación (elige un estilo al azar en cada publicación)</li>
+<li>Diseño Thumb: borde/stroke en el título (color, grosor, activación/desactivación)</li>
+<li>Diseño Thumb: accent configurable (color, ancho, grosor, distancia, activación/desactivación)</li>
+<li>Diseño Thumb: marca con fuente, tamaño y posición independientes (predeterminado: abajo a la izquierda)</li>
+<li>Dashboard: pestañas Últimas Lives, Próximas Lives, Todos los Clips, Clips publicados/pendientes/errores</li>
+<li>Dashboard: configuración en 5 pestañas (Horarios, APIs, Prompts, Diseño Thumb, Mantenimiento) con guardado independiente</li>
+<li>Dashboard: estadísticas Lives con error y Clips con error</li>
+<li>Dashboard: campos dinámicos por provider + nombre de instancia dinámico</li>
+<li>Dashboard: columnas Fecha Live y Fecha de recorte en la tabla de lives</li>
+<li>Proveedores de imágenes: MiniMax, Google Imagen, Kie.ai z-image</li>
+<li>El refinamiento del título usa Claude CLI (OAuth)</li>
 </ul>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Fix publicacao duplicada: dashboard rodava scheduler embutido</li>
-<li>Fix yt-dlp: fallback sem cookies</li>
-<li>Fix re-publicacao: clips com erro nao re-tentados</li>
-<li>Fix Kie.ai z-image: endpoint /jobs/createTask + prompt truncado 400 chars</li>
-<li>Fix prompt imagem: instrucao NO TEXT no inicio e fim</li>
-<li>Fix health check thumb: testa provider configurado</li>
-<li>Fix preset: seta todos os campos ao trocar (accent, stroke)</li>
-<li>Fix JS: protecao contra null em loadConfig</li>
-<li>Fix validacao de data no sync</li>
+<li>Fix de publicación duplicada: el dashboard ejecutaba el scheduler integrado</li>
+<li>Fix de yt-dlp: alternativa sin cookies</li>
+<li>Fix de republicación: los clips con errores no se volvían a intentar</li>
+<li>Corrección de Kie.ai z-image: endpoint /jobs/createTask + prompt truncado a 400 caracteres</li>
+<li>Fix del prompt de imagen: instrucción NO TEXT al inicio y al final</li>
+<li>Corrección de la verificación de salud de la miniatura: prueba el proveedor configurado</li>
+<li>Fix de preset: completa todos los campos al cambiar (accent, stroke)</li>
+<li>Corrección de JS: protección contra null en loadConfig</li>
+<li>Fix de validación de fecha en la sincronización</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.9.14</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>LLM chain: 3 providers em cadeia para gerar prompt de thumbnail (fallback automatico)</li>
-<li>Multi-provider de imagem: Piramyd + Kie.ai (GPT-4o, Flux Kontext)</li>
-<li>Kie.ai API key no painel + campo modelo de imagem como texto livre</li>
-<li>Config append: novas chaves sao adicionadas automaticamente na planilha</li>
+<li>Cadena LLM: 3 proveedores en cadena para generar el prompt de la miniatura (alternativa automática)</li>
+<li>Multi proveedor de imágenes: Piramyd + Kie.ai (GPT-4o, Flux Kontext)</li>
+<li>Clave de API de Kie.ai en el panel + campo del modelo de imagen como texto libre</li>
+<li>Config append: las nuevas claves se agregan automáticamente a la hoja de cálculo</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.9.13</h3>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Painel clips: coluna Link mostra URL real da publicacao no YouTube</li>
-<li>Botao excluir ao lado da privacy (sempre visivel)</li>
-<li>Icone arquivo mudou de pasta para play (▶)</li>
-<li>Excluir clips pendentes (remove do manifest)</li>
+<li>Panel de clips: la columna Link muestra la URL real de la publicación en YouTube</li>
+<li>Botón para eliminar junto a privacy (siempre visible)</li>
+<li>El ícono de archivo cambió de carpeta a play (▶)</li>
+<li>Excluir clips pendientes (elimina del manifiesto)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.9.12</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Lock na planilha: marca "publicando" antes de enviar, evita duplicatas entre processos</li>
-<li>Health bar - status do sistema (yt-dlp, Database, APIs, YouTube, Scheduler)</li>
-<li>Proximos horarios de corte/pub visiveis no dashboard</li>
-<li>Toggle "Link da live na descricao" nas configuracoes</li>
-<li>Corte roda em thread separada - nao bloqueia publicacao</li>
-<li>Changelog acessivel pelo numero da versao</li>
-<li>Sync rapido com 1 clique (sem filtros) + sync avancado separado</li>
-<li>Auto-sync: toggle ON/OFF, sincroniza lives faltantes a meia-noite</li>
+<li>Bloqueo en la hoja de cálculo: marca "publicando" antes de enviar; evita duplicados entre procesos</li>
+<li>Barra de estado: estado del sistema (yt-dlp, Database, APIs, YouTube, Scheduler)</li>
+<li>Próximos horarios de edición/publicación visibles en el dashboard</li>
+<li>Opción "Enlace de la transmisión en vivo en la descripción" en la configuración</li>
+<li>El recorte se ejecuta en un hilo separado: no bloquea la publicación</li>
+<li>Changelog accesible mediante el número de versión</li>
+<li>Sincronización rápida con 1 clic (sin filtros) + sincronización avanzada por separado</li>
+<li>Sincronización automática: activar/desactivar, sincroniza las lives faltantes a medianoche</li>
 </ul>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corrigidos:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corregidos:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix contador clips_publicados contando em dobro</li>
-<li>Fix crash no startup (UnboundLocalError config)</li>
-<li>Fix flood de log do yt-dlp travando terminal (filtro a cada 10%)</li>
-<li>Fix link da live na descricao retornando {video_id} literal</li>
-<li>Fix minuto do horario nao carregando no dashboard</li>
-<li>Fix publicacao perdida quando corte demorava</li>
-<li>Services systemd apontando para diretorio correto</li>
+<li>Corrección del contador clips_publicados que contaba dos veces</li>
+<li>Corrección del fallo al iniciar (UnboundLocalError config)</li>
+<li>Corrección del exceso de registros de yt-dlp que bloqueaba el terminal (filtro cada 10%)</li>
+<li>Corrección del enlace del directo en la descripción, que devolvía {video_id} literalmente</li>
+<li>Corrección del minuto del horario que no se cargaba en el panel</li>
+<li>Fix de publicación perdida cuando el recorte tardaba</li>
+<li>Services de systemd apuntando al directorio correcto</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.2.0</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Canais no header + painel de sync com filtros</li>
-<li>Campo minuto exato no hour picker (cortes e publicacao)</li>
-<li>Refina titulo/descricao com IA antes de publicar</li>
-<li>Server multi-thread</li>
+<li>Canales en el header + panel de sync con filtros</li>
+<li>Campo de minuto exacto en el hour picker (cortes y publicación)</li>
+<li>Perfecciona el título y la descripción con IA antes de publicar</li>
+<li>Servidor multihilo</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.1.0</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Config isolado por projeto</li>
-<li>Canal destino INEMA TIA + yt-auth</li>
-<li>Thumbnails doc</li>
+<li>Config aislada por proyecto</li>
+<li>Canal de destino INEMA TIA + yt-auth</li>
+<li>Documentación de miniaturas</li>
 </ul>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corrigidos:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corregidos:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix carregamento .env</li>
+<li>Corrección de la carga de .env</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v2.1.0</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Multi-provider IA (Anthropic, Piramyd, OpenRouter)</li>
+<li>Multi proveedor de IA (Anthropic, Piramyd, OpenRouter)</li>
 </ul>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corrigidos:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corregidos:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix publicacao scheduler</li>
+<li>Fix del scheduler de publicación</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v2.0.0</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Funcionalidades:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Prompts editaveis no dashboard</li>
-<li>Paginacao de lives</li>
-<li>Geracao de thumbnails com IA</li>
-<li>Limite de clips por publicacao + status bar</li>
-<li>Scheduler automatico com horarios configuraveis</li>
+<li>Prompts editables en el dashboard</li>
+<li>Paginación de lives</li>
+<li>Generación de miniaturas con IA</li>
+<li>Límite de clips por publicación + barra de estado</li>
+<li>Programador automático con horarios configurables</li>
 </ul>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corrigidos:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corregidos:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix corte duplicado</li>
+<li>Corrección del corte duplicado</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v1.0.0</h3>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Dashboard web + server para pipeline de Lives &amp; Clips</li>
+<li>Dashboard web + servidor para pipeline de Lives &amp; Clips</li>
 <li>Scripts CLI (yt-clip, yt-publish)</li>
-<li>Docker support</li>
+<li>Compatibilidad con Docker</li>
 </ul>
 </div>
 </div>

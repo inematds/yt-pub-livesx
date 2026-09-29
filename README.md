@@ -1,5 +1,7 @@
 # yt-pub-livesx
 
+**🇧🇷 [Português](README.md) · 🇺🇸 [English](README.en.md) · 🇪🇸 [Español](README.es.md)**
+
 ![YouTube Live Clips — Fabrica de Videos](assets/banner.jpg)
 
 Pipeline automatizado para cortar lives do YouTube em clips por topico e publicar em outro canal.

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Lives &amp; Clips Dashboard</title>
+<title>Livestreams &amp; Clips Dashboard</title>
 <style>
   :root {
     --bg: #0f1117;
@@ -703,51 +703,51 @@
 
 </style>
 <link href="https://inematds.github.io/yt-pub-livesx/dashboard/" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/yt-pub-livesx/en/dashboard/" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/yt-pub-livesx/es/dashboard/" hreflang="es" rel="alternate"/></head>
-<body><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="./" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">PT</a><a href="../en/dashboard/" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="../es/dashboard/" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<body><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../dashboard/" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="./" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../../es/dashboard/" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
 <div class="container">
 <header>
-<h1><span>INEMA</span> Lives &amp; Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.32.32</a></small>
+<h1><span>INEMA</span> Livestreams &amp; Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="View changelog">v3.32.32</a></small>
 <span id="headerCanais" style="display:block;font-size:0.4em;font-weight:normal;margin-top:4px"></span>
 </h1>
 <div class="header-actions">
-<button class="danger small" id="btnCortes" onclick="togglePipeline('cortes')">Parar Cortes</button>
-<button class="danger small" id="btnPub" onclick="togglePipeline('pub')">Parar Publicacao</button>
-<button class="danger small" id="btnImports" onclick="togglePipeline('imports')">Parar Imports</button>
-<button class="secondary" onclick="toggleConfig()">Configuracoes</button>
-<button id="btnSync" onclick="toggleSyncPanel()">Sincronizar Lives</button>
+<button class="danger small" id="btnCortes" onclick="togglePipeline('cortes')">Stop Clips</button>
+<button class="danger small" id="btnPub" onclick="togglePipeline('pub')">Stop Publishing</button>
+<button class="danger small" id="btnImports" onclick="togglePipeline('imports')">Stop Imports</button>
+<button class="secondary" onclick="toggleConfig()">Settings</button>
+<button id="btnSync" onclick="toggleSyncPanel()">Sync Lives</button>
 </div>
 </header>
 <!-- Sync Panel -->
 <div class="config-panel" id="syncPanel" style="display:none;margin-bottom:16px">
 <div class="config-section">
-<h3>Sincronizar Lives do Canal de Origem</h3>
+<h3>Sync Lives from the Source Channel</h3>
 <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
-<button id="btnQuickSync" onclick="quickSync()">Sync Rapido (tudo que falta)</button>
-<button class="small" id="btnAutoSync" onclick="toggleAutoSync()" title="Sync automatico a meia-noite">Auto-sync: -</button>
+<button id="btnQuickSync" onclick="quickSync()">Quick Sync (everything missing)</button>
+<button class="small" id="btnAutoSync" onclick="toggleAutoSync()" title="Automatic sync at midnight">Auto-sync: -</button>
 <label style="font-size:0.85em;color:var(--muted);display:flex;align-items:center;gap:6px">
-          A partir de:
-          <input id="syncAutoDateFrom" maxlength="10" onchange="saveSyncAutoDateFrom()" pattern="\d{4}-\d{2}-\d{2}" placeholder="YYYY-MM-DD" style="width:120px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85em" title="Auto-sync so considera lives publicadas a partir desta data. Vazio = sem filtro (pega tudo)." type="text"/>
+          Starting from:
+          <input id="syncAutoDateFrom" maxlength="10" onchange="saveSyncAutoDateFrom()" pattern="\d{4}-\d{2}-\d{2}" placeholder="YYYY-MM-DD" style="width:120px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85em" title="Auto-sync only considers live streams published on or after this date. Blank = no filter (fetch everything)." type="text"/>
 </label>
 </div>
-<h4 style="color:var(--muted);margin-bottom:8px;font-size:0.85em">Sync avancado com filtros</h4>
+<h4 style="color:var(--muted);margin-bottom:8px;font-size:0.85em">Advanced sync with filters</h4>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr auto;">
 <div class="config-field">
-<label>Modo</label>
+<label>Mode</label>
 <select id="syncMode">
-<option value="novas">So pendentes (novas)</option>
-<option value="todas">Todas no periodo</option>
+<option value="novas">Pending only (new)</option>
+<option value="todas">All in period</option>
 </select>
 </div>
 <div class="config-field">
-<label>Data inicio</label>
+<label>Start date</label>
 <input id="syncDateFrom" maxlength="10" pattern="\d{4}-\d{2}-\d{2}" placeholder="YYYY-MM-DD" type="text"/>
 </div>
 <div class="config-field">
-<label>Data fim</label>
+<label>End date</label>
 <input id="syncDateTo" maxlength="10" pattern="\d{4}-\d{2}-\d{2}" placeholder="YYYY-MM-DD" type="text"/>
 </div>
 <div class="config-field">
-<label>Max lives</label>
+<label>Max livestreams</label>
 <select id="syncMaxLives">
 <option value="10">10</option>
 <option selected="" value="50">50</option>
@@ -757,12 +757,12 @@
 </select>
 </div>
 <div class="config-field" style="display:flex;align-items:flex-end">
-<button id="btnSyncRun" onclick="syncLives()">Sincronizar</button>
+<button id="btnSyncRun" onclick="syncLives()">Sync</button>
 </div>
 </div>
 <div id="syncResult" style="margin-top:8px;color:var(--muted);font-size:0.9em"></div>
 <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-<button onclick="syncFromUrl(this)" style="background:var(--accent);white-space:nowrap">Importar Video</button>
+<button onclick="syncFromUrl(this)" style="background:var(--accent);white-space:nowrap">Import Video</button>
 <input id="syncUrlInput" placeholder="https://www.youtube.com/watch?v=..." style="flex:1;min-width:280px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85em" type="text"/>
 </div>
 <span id="syncUrlMsg" style="color:var(--muted);font-size:0.78em;margin-top:4px;display:block"></span>
@@ -770,14 +770,14 @@
 </div>
 <!-- Health Status -->
 <div class="health-bar" id="healthBar">
-<span class="health-label">Sistema:</span>
+<span class="health-label">System:</span>
 <span class="health-item"><span class="health-dot loading" id="hDotYtdlp"></span> yt-dlp</span>
 <span class="health-item"><span class="health-dot loading" id="hDotDatabase"></span> Database</span>
-<span class="health-item"><span class="health-dot loading" id="hDotIa"></span> API IA</span>
-<span class="health-item"><span class="health-dot loading" id="hDotThumb"></span> API Thumb</span>
+<span class="health-item"><span class="health-dot loading" id="hDotIa"></span> AI API</span>
+<span class="health-item"><span class="health-dot loading" id="hDotThumb"></span> Thumbnail API</span>
 <span class="health-item"><span class="health-dot loading" id="hDotYoutube"></span> YouTube</span>
 <span class="health-item"><span class="health-dot loading" id="hDotScheduler"></span> Scheduler</span>
-<button class="health-refresh" onclick="checkHealth()">verificar</button>
+<button class="health-refresh" onclick="checkHealth()">check</button>
 </div>
 <!-- Stats -->
 <div class="stats" id="stats">
@@ -786,9 +786,9 @@
 <div style="padding:4px 6px;color:var(--muted);text-align:center">Total</div>
 <div style="padding:4px 6px;color:var(--muted);text-align:center">Pend</div>
 <div style="padding:4px 6px;color:var(--muted);text-align:center">Pub</div>
-<div style="padding:4px 6px;color:var(--muted);text-align:center">Erros</div>
+<div style="padding:4px 6px;color:var(--muted);text-align:center">Errors</div>
 <div style="padding:4px 6px;color:var(--blue);text-align:center">24h</div>
-<div onclick="filterByStatus('')" style="padding:4px 6px;cursor:pointer">Lives</div>
+<div onclick="filterByStatus('')" style="padding:4px 6px;cursor:pointer">Livestreams</div>
 <div id="statLives" style="padding:4px 6px;text-align:center">-</div>
 <div id="statPendentes" style="padding:4px 6px;text-align:center;color:var(--yellow)">-</div>
 <div id="statCortadas" style="padding:4px 6px;text-align:center;color:var(--green)">-</div>
@@ -814,12 +814,12 @@
 <div id="statTiktok24h" style="padding:4px 6px;text-align:center;color:var(--blue);border-top:1px solid rgba(244,114,182,0.3)">-</div>
 </div>
 <div id="statImportMotivo" style="display:none;font-size:0.82em;color:var(--muted);margin-bottom:8px">
-<span id="statImportMotivoLabel">Imports inativo</span>: <span id="statImportMotivoVal">-</span>
+<span id="statImportMotivoLabel">Inactive Imports</span>: <span id="statImportMotivoVal">-</span>
 </div>
 </div>
 <!-- Schedule Info -->
 <div class="health-bar" id="scheduleInfo" style="gap:12px;flex-wrap:wrap">
-<span class="health-label">Corte:</span>
+<span class="health-label">Cut:</span>
 <span id="nextCorte" style="color:var(--blue)">-</span>
 <span style="color:var(--border)">|</span>
 <span class="health-label">Clip:</span>
@@ -835,81 +835,81 @@
 <div class="scheduler-bar" id="schedulerBar">
 <span class="scheduler-dot" id="schedulerDot"></span>
 <span><strong>Scheduler:</strong></span>
-<span class="scheduler-detail" id="schedulerDetail">Verificando...</span>
+<span class="scheduler-detail" id="schedulerDetail">Checking...</span>
 <span class="scheduler-time" id="schedulerTime"></span>
 </div>
 <!-- Config Panel -->
 <div class="config-panel" id="configPanel">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
 <div class="config-tabs">
-<button class="config-tab active" onclick="showConfigTab('horarios', this)">Horarios</button>
-<button class="config-tab" onclick="showConfigTab('apis', this)">APIs &amp; IA</button>
+<button class="config-tab active" onclick="showConfigTab('horarios', this)">Schedules</button>
+<button class="config-tab" onclick="showConfigTab('apis', this)">APIs &amp; AI</button>
 <button class="config-tab" onclick="showConfigTab('prompts', this)">Prompts</button>
-<button class="config-tab" onclick="showConfigTab('manutencao', this)">Manutencao</button>
-<button class="config-tab" onclick="showConfigTab('design', this)">Design Thumb</button>
-<button class="config-tab" onclick="showConfigTab('planilha', this)">Planilha</button>
+<button class="config-tab" onclick="showConfigTab('manutencao', this)">Maintenance</button>
+<button class="config-tab" onclick="showConfigTab('design', this)">Thumbnail Design</button>
+<button class="config-tab" onclick="showConfigTab('planilha', this)">Spreadsheet</button>
 <button class="config-tab" onclick="showConfigTab('imports', this)">Imports</button>
 <button class="config-tab" onclick="showConfigTab('enrich', this)">Enrich Lives</button>
 <button class="config-tab" onclick="showConfigTab('tiktok', this)">TikTok</button>
 </div>
-<button id="btnSaveTop" onclick="saveActiveTab(this)" style="padding:6px 20px;">Salvar</button>
+<button id="btnSaveTop" onclick="saveActiveTab(this)" style="padding:6px 20px;">Save</button>
 </div>
 <!-- Tab: Horarios -->
 <div class="config-tab-content active" id="cfgTab_horarios">
 <!-- Canais -->
 <div class="config-section">
-<h3>Canais</h3>
+<h3>Channels</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Canal de Origem (lives)</label>
+<label>Source Channel (live streams)</label>
 <div id="cfgCanalOrigem" style="padding:8px 0;color:var(--text)">-</div>
 </div>
 <div class="config-field">
-<label>Canal de Destino (clips)</label>
+<label>Destination Channel (clips)</label>
 <div id="cfgCanalDestino" style="padding:8px 0;color:var(--text)">-</div>
 </div>
 </div>
 </div>
 <!-- Corte / Producao -->
 <div class="config-section">
-<h3>Producao de Cortes</h3>
+<h3>Clip Production</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Corte automatico</label>
+<label>Automatic cutting</label>
 <select id="cfgCorteAuto">
-<option value="true">Sim</option>
-<option value="false">Nao</option>
+<option value="true">Yes</option>
+<option value="false">No</option>
 </select>
 </div>
 <div class="config-field">
-<label>Lives por execucao</label>
+<label>Livestreams per run</label>
 <input id="cfgCorteMax" max="50" min="1" type="number" value="3"/>
-<div class="hint">Quantas lives processar por vez</div>
+<div class="hint">How many livestreams to process at a time</div>
 </div>
 </div>
 <div style="margin-top: 14px;">
 <div class="hour-picker-header">
-<label>Horarios de corte (clique para ativar/desativar)</label>
+<label>Clipping schedules (click to enable/disable)</label>
 <div class="hour-picker-actions">
-<button onclick="hourPickerSelectAll('corte')">Todas</button>
-<button onclick="hourPickerClearAll('corte')">Limpar</button>
+<button onclick="hourPickerSelectAll('corte')">All</button>
+<button onclick="hourPickerClearAll('corte')">Clear</button>
 </div>
 </div>
 <div class="hour-picker" id="corteHourPicker"></div>
 <div class="hour-summary" id="corteSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Exact minute:</label>
 <input id="cfgCorteMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
-<span style="font-size:0.8em;color:var(--muted)">Ex: 30 → roda em HH:30</span>
+<span style="font-size:0.8em;color:var(--muted)">Ex: 30 → runs at HH:30</span>
 </div>
 </div>
 </div>
 <!-- Publicacao -->
 <div class="config-section">
-<h3>Publicacao de Clips</h3>
+<h3>Clip Publishing</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Privacidade padrao</label>
+<label>Default Privacy</label>
 <select id="cfgPrivacy">
 <option value="unlisted">Unlisted</option>
 <option value="public">Public</option>
@@ -917,72 +917,72 @@
 </select>
 </div>
 <div class="config-field">
-<label>Clips por publicacao</label>
+<label>Clips per publication</label>
 <input id="cfgPubMax" max="50" min="1" type="number" value="2"/>
-<div class="hint">Quantos clips publicar por vez</div>
+<div class="hint">How many clips to publish at a time</div>
 </div>
 <div class="config-field">
-<label>Link da live na descricao</label>
+<label>Livestream link in the description</label>
 <select id="cfgPubLinkLive">
-<option value="true">Sim</option>
-<option value="false">Nao</option>
+<option value="true">Yes</option>
+<option value="false">No</option>
 </select>
-<div class="hint">Inclui link da live original</div>
+<div class="hint">Includes a link to the original livestream</div>
 </div>
 </div>
 <div style="margin-top: 14px;">
 <div class="hour-picker-header">
-<label>Horarios de publicacao (clique para ativar/desativar)</label>
+<label>Publishing schedules (click to enable/disable)</label>
 <div class="hour-picker-actions">
-<button onclick="hourPickerSelectAll('pub')">Todas</button>
-<button onclick="hourPickerClearAll('pub')">Limpar</button>
+<button onclick="hourPickerSelectAll('pub')">All</button>
+<button onclick="hourPickerClearAll('pub')">Clear</button>
 </div>
 </div>
 <div class="hour-picker" id="pubHourPicker"></div>
 <div class="hour-summary" id="pubSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Exact minute:</label>
 <input id="cfgPubMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
-<span style="font-size:0.8em;color:var(--muted)">Ex: 15 → roda em HH:15</span>
+<span style="font-size:0.8em;color:var(--muted)">Ex: 15 → runs at HH:15</span>
 </div>
 </div>
 </div>
 <!-- Notificacao Telegram -->
 <div class="config-section">
-<h3>Notificacao Telegram</h3>
+<h3>Telegram notification</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 2fr;">
 <div class="config-field">
-<label>Notificar publicacoes</label>
+<label>Notify about publications</label>
 <select id="cfgTelegramNotifyEnabled">
-<option value="false">Nao</option>
-<option value="true">Sim</option>
+<option value="false">No</option>
+<option value="true">Yes</option>
 </select>
-<div class="hint">Avisa a cada video publicado (clip, import ou TikTok)</div>
+<div class="hint">Notifies you whenever a video is published (clip, import, or TikTok)</div>
 </div>
 <div class="config-field">
-<label>Chat IDs do Telegram</label>
+<label>Telegram Chat IDs</label>
 <input id="cfgTelegramNotifyChatId" placeholder="123456789,987654321" type="text"/>
 <div class="hint">
-              Um ou mais IDs separados por virgula (grupo comeca com -). Cada
-              destinatario precisa dar /start no bot uma vez. O envio e feito
-              pelo master-dashboard. Tambem pode ser preenchido por cadastro:
-              o usuario manda "meu canal e o livesN" pro bot.
+              One or more IDs separated by commas (group starts with -). Each
+              recipient needs to send /start to the bot once. Sending is done
+              through the master-dashboard. You can also enter this during registration:
+              the user sends "meu canal e o livesN" to the bot.
             </div>
 </div>
 </div>
 </div>
 <div style="margin-top: 8px;">
-<button onclick="saveHorarios(this)">Salvar Horarios</button>
+<button onclick="saveHorarios(this)">Save Schedules</button>
 </div>
 </div>
 <!-- Tab: APIs & IA -->
 <div class="config-tab-content" id="cfgTab_apis">
 <!-- Analise IA -->
 <div class="config-section">
-<h3>Analise de Cortes (IA)</h3>
+<h3>Clip Analysis (AI)</h3>
 <div class="config-grid" style="grid-template-columns: 1fr;">
 <div class="config-field">
-<label>Modo de Analise</label>
+<label>Analysis Mode</label>
 <select id="cfgAiMode" onchange="updateAiFields()">
 <option value="claude-api">Claude CLI (OAuth)</option>
 <option value="anthropic-api">Anthropic API Key</option>
@@ -998,16 +998,16 @@
 <h3>Thumbnails <span id="thumbPresetLabel" style="font-size:0.7em;color:var(--accent);margin-left:8px;"></span></h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Modo Thumbnail</label>
+<label>Thumbnail Mode</label>
 <select id="cfgThumbMode">
-<option value="api">IA (API)</option>
-<option value="local">Local (frame do video)</option>
-<option value="fallback">Fallback (gradiente + texto)</option>
-<option value="none">Sem thumbnail</option>
+<option value="api">AI (API)</option>
+<option value="local">Local (video frame)</option>
+<option value="fallback">Fallback (gradient + text)</option>
+<option value="none">No thumbnail</option>
 </select>
 </div>
 <div class="config-field">
-<label>Provider de Imagem</label>
+<label>Image Provider</label>
 <select id="cfgThumbImageProvider" onchange="updateThumbFields()">
 <option value="agnes">Agnes (free)</option>
 <option value="kie">Kie.ai</option>
@@ -1026,7 +1026,7 @@
 <input id="cfgInemaimgUrl" type="hidden"/>
 <input id="cfgAiModel" type="hidden"/>
 <div style="margin-top:12px;padding:10px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:8px;">
-<label style="font-weight:600;font-size:0.8rem;margin-bottom:8px;display:block;">LLM para gerar prompt (tenta na ordem, fallback local se todos falharem)</label>
+<label style="font-weight:600;font-size:0.8rem;margin-bottom:8px;display:block;">LLM to generate prompts (tries in order, local fallback if all fail)</label>
 <div class="config-grid" style="grid-template-columns: auto 1fr auto 1fr auto 1fr; gap:8px; align-items:center;">
 <span style="font-size:0.75rem;color:var(--muted);font-weight:600;">1.</span>
 <select id="cfgThumbLlm1Provider" style="padding:4px 8px;font-size:0.8rem;">
@@ -1053,7 +1053,7 @@
 <option value="agnes">Agnes (free)</option>
 </select>
 <span></span>
-<input id="cfgThumbLlm1Model" placeholder="(nao precisa para OAuth)" style="padding:4px 8px;font-size:0.8rem;" type="text"/>
+<input id="cfgThumbLlm1Model" placeholder="(not needed for OAuth)" style="padding:4px 8px;font-size:0.8rem;" type="text"/>
 <span></span>
 <input id="cfgThumbLlm2Model" placeholder="google/gemini-2.5-flash-lite" style="padding:4px 8px;font-size:0.8rem;" type="text" value="google/gemini-2.5-flash-lite"/>
 <span></span>
@@ -1062,45 +1062,45 @@
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top:12px;">
 <div class="config-field">
-<label>Posicao do Titulo</label>
+<label>Title Position</label>
 <select id="cfgThumbTextPosition">
-<option value="top-left">Topo Esquerda</option>
-<option value="top-center">Topo Centro</option>
-<option value="top-right">Topo Direita</option>
-<option value="center-left">Centro Esquerda</option>
-<option value="center">Centro</option>
-<option value="center-right">Centro Direita</option>
-<option value="bottom-left">Base Esquerda</option>
-<option value="bottom-center">Base Centro</option>
-<option value="bottom-right">Base Direita</option>
+<option value="top-left">Top Left</option>
+<option value="top-center">Top Center</option>
+<option value="top-right">Top Right</option>
+<option value="center-left">Center Left</option>
+<option value="center">Center</option>
+<option value="center-right">Center Right</option>
+<option value="bottom-left">Left Base</option>
+<option value="bottom-center">Center Base</option>
+<option value="bottom-right">Right Base</option>
 </select>
 </div>
 <div class="config-field">
-<label>Tamanho da Fonte</label>
+<label>Font Size</label>
 <input id="cfgThumbFontSize" max="120" min="30" step="2" type="number" value="78"/>
 </div>
 <div class="config-field">
-<label>Texto da Marca</label>
+<label>Brand Text</label>
 <input id="cfgThumbBrand" placeholder="INEMA TDS" type="text" value="INEMA TDS"/>
 </div>
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top:8px;">
 <div class="config-field">
-<label>Cor do Titulo</label>
+<label>Title Color</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgThumbTextColor" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--bg);cursor:pointer;" type="color" value="#FFFFFF"/>
 <input id="cfgThumbTextColorHex" oninput="document.getElementById('cfgThumbTextColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#FFFFFF"/>
 </div>
 </div>
 <div class="config-field">
-<label>Cor do Accent</label>
+<label>Accent Color</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgThumbAccentColor" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--bg);cursor:pointer;" type="color" value="#00D4FF"/>
 <input id="cfgThumbAccentColorHex" oninput="document.getElementById('cfgThumbAccentColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#00D4FF"/>
 </div>
 </div>
 <div class="config-field">
-<label>Cor da Marca</label>
+<label>Brand Color</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgThumbBrandColor" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--bg);cursor:pointer;" type="color" value="#6366F1"/>
 <input id="cfgThumbBrandColorHex" oninput="document.getElementById('cfgThumbBrandColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#6366F1"/>
@@ -1109,58 +1109,58 @@
 </div>
 <div style="margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-<label style="font-weight:600;">Thumbnails Pendentes</label>
+<label style="font-weight:600;">Pending Thumbnails</label>
 <div style="display:flex;gap:8px;">
-<button class="small secondary" onclick="loadPendingThumbs()">Atualizar</button>
-<button class="small" id="btnUploadThumbs" onclick="uploadPendingThumbs()" style="background:var(--green);">Enviar para YouTube</button>
+<button class="small secondary" onclick="loadPendingThumbs()">Update</button>
+<button class="small" id="btnUploadThumbs" onclick="uploadPendingThumbs()" style="background:var(--green);">Upload to YouTube</button>
 </div>
 </div>
-<div id="thumbsPendingInfo" style="color:var(--muted);font-size:0.85em;">Clique em Atualizar para verificar</div>
+<div id="thumbsPendingInfo" style="color:var(--muted);font-size:0.85em;">Click Update to check</div>
 <div id="thumbsPendingList" style="max-height:200px;overflow-y:auto;margin-top:8px;display:none;"></div>
 </div>
 </div>
 <div style="margin-top: 8px;">
-<button onclick="saveApis(this)">Salvar APIs &amp; IA</button>
+<button onclick="saveApis(this)">Save APIs &amp; AI</button>
 </div>
 </div>
 <!-- Tab: Prompts -->
 <div class="config-tab-content" id="cfgTab_prompts">
 <div style="margin-bottom: 12px;">
-<button onclick="savePrompts(this)">Salvar Prompts</button>
+<button onclick="savePrompts(this)">Save Prompts</button>
 </div>
 <div class="config-section">
 <h3>Prompts</h3>
 <div class="config-field">
-<label>Prompt Analise de Cortes (Claude analisa a transcricao e identifica topicos)</label>
+<label>Clip Analysis Prompt (Claude analyzes the transcript and identifies topics)</label>
 <textarea id="cfgPromptCortes" rows="12" style="width:100%;font-family:monospace;font-size:0.8rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px;resize:vertical"></textarea>
 </div>
 <div class="config-field" style="margin-top:12px">
-<label>Prompt Publicacao (refina titulo e descricao antes de publicar no YouTube)</label>
+<label>Publishing Prompt (refines the title and description before publishing on YouTube)</label>
 <textarea id="cfgPromptPub" rows="10" style="width:100%;font-family:monospace;font-size:0.8rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px;resize:vertical"></textarea>
 </div>
 <div class="config-field" style="margin-top:12px">
-<label>Prompt Thumbnail (LLM gera prompt estruturado para o gerador de imagem)</label>
+<label>Thumbnail Prompt (LLM generates a structured prompt for the image generator)</label>
 <textarea id="cfgPromptThumb" rows="12" style="width:100%;font-family:monospace;font-size:0.8rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px;resize:vertical"></textarea>
 </div>
 </div>
 <div style="margin-top: 8px;">
-<button onclick="savePrompts(this)">Salvar Prompts</button>
+<button onclick="savePrompts(this)">Save Prompts</button>
 </div>
 </div>
 <!-- Tab: Manutencao -->
 <div class="config-tab-content" id="cfgTab_manutencao">
 <div class="config-section">
-<h3>Limpeza de Disco</h3>
+<h3>Disk Cleanup</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Clips (mp4 cortados)</label>
-<button id="btnCleanClips" onclick="cleanupClips()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Limpar Clips</button>
-<div class="hint">Remove todos os mp4 da pasta clips/. Mantem manifest e planilha.</div>
+<label>Clips (trimmed MP4s)</label>
+<button id="btnCleanClips" onclick="cleanupClips()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Clear Clips</button>
+<div class="hint">Removes all mp4 files from the clips/ folder. Keeps the manifest and spreadsheet.</div>
 </div>
 <div class="config-field">
-<label>Videos Originais (source.mp4)</label>
-<button id="btnCleanSources" onclick="cleanupSources()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Limpar Originais</button>
-<div class="hint">Remove os source.mp4 (videos completos baixados). Mantem clips.</div>
+<label>Original Videos (source.mp4)</label>
+<button id="btnCleanSources" onclick="cleanupSources()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Clear Originals</button>
+<div class="hint">Removes source.mp4 files (downloaded full videos). Keeps clips.</div>
 </div>
 </div>
 <div id="cleanupResult" style="margin-top:8px;color:var(--muted);font-size:0.85em;"></div>
@@ -1190,19 +1190,19 @@
 <button class="small preset-btn" data-preset="retro" onclick="applyThumbPreset('retro')" style="padding:4px 10px;font-size:0.75em;background:#F2E8D5;color:#C45E26;border:1px solid #C45E26;">Retro</button>
 <button class="small preset-btn" data-preset="3dextrude" onclick="applyThumbPreset('3dextrude')" style="padding:4px 10px;font-size:0.75em;background:#1a0a2e;color:#FFD700;border:1px solid #FFD700;">3D Gold</button>
 <button class="small preset-btn" data-preset="glassmorphism" onclick="applyThumbPreset('glassmorphism')" style="padding:4px 10px;font-size:0.75em;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);">Glass</button>
-<button class="small preset-btn" data-preset="darkacademia" onclick="applyThumbPreset('darkacademia')" style="padding:4px 10px;font-size:0.75em;background:#2C1810;color:#D4A574;border:1px solid #D4A574;">Academia</button>
+<button class="small preset-btn" data-preset="darkacademia" onclick="applyThumbPreset('darkacademia')" style="padding:4px 10px;font-size:0.75em;background:#2C1810;color:#D4A574;border:1px solid #D4A574;">Academy</button>
 <button class="small preset-btn" data-preset="boldoutline" onclick="applyThumbPreset('boldoutline')" style="padding:4px 10px;font-size:0.75em;background:#000;color:#fff;border:2px solid #fff;">BoldOutline</button>
 <button class="small preset-btn" data-preset="elegantdark" onclick="applyThumbPreset('elegantdark')" style="padding:4px 10px;font-size:0.75em;background:#0a0a14;color:#C9B37E;border:1px solid #C9B37E;">Elegant</button>
 <button class="small preset-btn" data-preset="tiktok" onclick="applyThumbPreset('tiktok')" style="padding:4px 10px;font-size:0.75em;background:#010101;color:#FE2C55;border:1px solid #25F4EE;">TikTok</button>
 <button class="small preset-btn" data-preset="stories" onclick="applyThumbPreset('stories')" style="padding:4px 10px;font-size:0.75em;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border:1px solid #fff;">Stories</button>
 </div>
-<div class="hint" style="margin-top:4px;">Clique num preset para carregar. Alteracoes sao salvas no preset ativo.</div>
+<div class="hint" style="margin-top:4px;">Click a preset to load it. Changes are saved to the active preset.</div>
 </div>
 <div class="config-section">
-<h3>Tipografia do Titulo</h3>
+<h3>Title Typography</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Fonte do titulo</label>
+<label>Title font</label>
 <select id="cfgDesignFont">
 <option value="montserrat-extrabold">Montserrat ExtraBold</option>
 <option value="montserrat-black">Montserrat Black</option>
@@ -1210,210 +1210,210 @@
 <option value="anton">Anton</option>
 <option value="dejavu">DejaVu Sans Bold</option>
 </select>
-<div class="hint">Fonte usada no texto principal da thumbnail</div>
+<div class="hint">Font used in the thumbnail's main text</div>
 </div>
 <div class="config-field">
-<label>Tamanho do titulo (px)</label>
+<label>Title size (px)</label>
 <input id="cfgDesignFontSize" max="140" min="40" step="2" type="number" value="78"/>
-<div class="hint">Tamanho em pixels da frase principal</div>
+<div class="hint">Pixel size of the main phrase</div>
 </div>
 <div class="config-field">
-<label>Ultima linha maior (%)</label>
+<label>Larger last line (%)</label>
 <input id="cfgDesignLastLineScale" max="50" min="0" step="5" type="number" value="0"/>
-<div class="hint">0 = mesmo tamanho. 15 = ultima linha 15% maior para destaque</div>
+<div class="hint">0 = same size. 15 = last line 15% larger for emphasis</div>
 </div>
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top:8px;">
 <div class="config-field">
-<label>Entrelinha (px)</label>
+<label>Line spacing (px)</label>
 <input id="cfgDesignLineHeight" max="140" min="50" step="2" type="number" value="94"/>
-<div class="hint">Espaco entre linhas do titulo. Menor = mais compacto</div>
+<div class="hint">Spacing between title lines. Lower = more compact</div>
 </div>
 <div class="config-field">
-<label>Tracking (espaco entre letras)</label>
+<label>Tracking (letter spacing)</label>
 <select id="cfgDesignTracking">
 <option value="normal">Normal</option>
-<option value="tight">Apertado (-2px)</option>
-<option value="very-tight">Muito apertado (-4px)</option>
+<option value="tight">Tight (-2px)</option>
+<option value="very-tight">Very tight (-4px)</option>
 </select>
-<div class="hint">Letras mais juntas = visual mais compacto e forte</div>
+<div class="hint">Tighter letter spacing = a more compact, stronger look</div>
 </div>
 <div class="config-field">
-<label>Caixa do texto</label>
+<label>Text box</label>
 <select id="cfgDesignCase">
-<option value="upper">MAIUSCULAS</option>
+<option value="upper">UPPERCASE</option>
 <option value="original">Original</option>
 </select>
-<div class="hint">Maiusculas tem mais impacto em thumbnails</div>
+<div class="hint">Uppercase has more impact in thumbnails</div>
 </div>
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr; margin-top:8px;">
 <div class="config-field">
-<label>Posicao do titulo</label>
+<label>Title Position</label>
 <select id="cfgDesignPosition">
-<option value="top-left">Topo Esquerda</option>
-<option value="top-center">Topo Centro</option>
-<option value="top-right">Topo Direita</option>
-<option value="center-left">Centro Esquerda</option>
-<option value="center">Centro</option>
-<option value="center-right">Centro Direita</option>
-<option value="bottom-left">Base Esquerda</option>
-<option value="bottom-center">Base Centro</option>
-<option value="bottom-right">Base Direita</option>
+<option value="top-left">Top Left</option>
+<option value="top-center">Top Center</option>
+<option value="top-right">Top Right</option>
+<option value="center-left">Center Left</option>
+<option value="center">Center</option>
+<option value="center-right">Center Right</option>
+<option value="bottom-left">Left Base</option>
+<option value="bottom-center">Center Base</option>
+<option value="bottom-right">Right Base</option>
 </select>
-<div class="hint">Onde o titulo aparece na thumbnail</div>
+<div class="hint">Where the title appears on the thumbnail</div>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Cores do Titulo</h3>
+<h3>Title Colors</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Cor do titulo</label>
+<label>Title color</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgDesignTextColor" oninput="document.getElementById('cfgDesignTextColorHex').value=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#F5F3EE"/>
 <input id="cfgDesignTextColorHex" oninput="document.getElementById('cfgDesignTextColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#F5F3EE"/>
 </div>
-<div class="hint">Cor principal do texto</div>
+<div class="hint">Primary text color</div>
 </div>
 <div class="config-field">
-<label>Cor destaque (ultima linha)</label>
+<label>Highlight color (last line)</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgDesignHighlightColor" oninput="document.getElementById('cfgDesignHighlightColorHex').value=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#D9B65B"/>
 <input id="cfgDesignHighlightColorHex" oninput="document.getElementById('cfgDesignHighlightColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#D9B65B"/>
 </div>
-<div class="hint">Cor diferenciada da ultima linha para dar enfase</div>
+<div class="hint">Distinctive color for the last line to add emphasis</div>
 </div>
 <div class="config-field">
-<label>Usar destaque?</label>
+<label>Use highlight?</label>
 <select id="cfgDesignHighlightEnabled">
-<option value="true">Sim</option>
-<option value="false">Nao</option>
+<option value="true">Yes</option>
+<option value="false">No</option>
 </select>
-<div class="hint">Ativa cor diferente na ultima linha</div>
+<div class="hint">Use a different color for the last line</div>
 </div>
 <div class="config-field">
-<label>Cor do accent</label>
+<label>Accent color</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgDesignAccentColor" oninput="document.getElementById('cfgDesignAccentColorHex').value=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#00D4FF"/>
 <input id="cfgDesignAccentColorHex" oninput="document.getElementById('cfgDesignAccentColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#00D4FF"/>
 </div>
-<div class="hint">Cor da linha decorativa abaixo do titulo</div>
+<div class="hint">Color of the decorative line below the title</div>
 </div>
 <div class="config-field">
-<label>Largura accent (px)</label>
+<label>Accent width (px)</label>
 <input id="cfgDesignAccentWidth" max="800" min="50" step="10" type="number" value="250"/>
-<div class="hint">Comprimento da linha accent</div>
+<div class="hint">Accent line length</div>
 </div>
 <div class="config-field">
-<label>Espessura accent (px)</label>
+<label>Accent thickness (px)</label>
 <input id="cfgDesignAccentHeight" max="20" min="1" step="1" type="number" value="5"/>
-<div class="hint">Grossura da linha accent</div>
+<div class="hint">Accent line thickness</div>
 </div>
 <div class="config-field">
-<label>Distancia accent (px)</label>
+<label>Accent distance (px)</label>
 <input id="cfgDesignAccentGap" max="60" min="0" step="2" type="number" value="30"/>
-<div class="hint">Espaco entre o titulo e a linha accent</div>
+<div class="hint">Space between the title and the accent line</div>
 </div>
 <div class="config-field">
-<label>Exibir accent</label>
+<label>Show accent</label>
 <select id="cfgDesignAccentEnabled">
-<option value="true">Sim</option>
-<option value="false">Nao</option>
+<option value="true">Yes</option>
+<option value="false">No</option>
 </select>
-<div class="hint">Desativa a linha accent</div>
+<div class="hint">Disables the accent line</div>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Sombra e Contorno</h3>
+<h3>Shadow and Outline</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Tipo de sombra</label>
+<label>Shadow type</label>
 <select id="cfgDesignShadowType">
-<option value="blur">Difusa (blur)</option>
-<option value="outline">Contorno duro</option>
-<option value="none">Nenhuma</option>
+<option value="blur">Diffuse (blur)</option>
+<option value="outline">Hard outline</option>
+<option value="none">None</option>
 </select>
-<div class="hint">Blur = elegante e suave. Outline = forte e legivel em tamanho pequeno</div>
+<div class="hint">Blur = elegant and subtle. Outline = bold and legible at small sizes</div>
 </div>
 <div class="config-field">
-<label>Cor da sombra</label>
+<label>Shadow Color</label>
 <input id="cfgDesignShadowColor" oninput="this.title=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#000000"/>
-<div class="hint">Geralmente preto. Neon usa cor do texto</div>
+<div class="hint">Usually black. Neon uses the text color</div>
 </div>
 <div class="config-field">
-<label>Blur / Espessura (px)</label>
+<label>Blur / Thickness (px)</label>
 <input id="cfgDesignShadowSize" max="15" min="1" step="1" type="number" value="5"/>
-<div class="hint">Maior = sombra mais espalhada ou contorno mais grosso</div>
+<div class="hint">Higher = more spread-out shadow or thicker outline</div>
 </div>
 <div class="config-field">
-<label>Opacidade sombra</label>
+<label>Shadow opacity</label>
 <input id="cfgDesignShadowOpacity" max="255" min="0" step="10" type="number" value="180"/>
-<div class="hint">0 = transparente, 255 = opaco total</div>
+<div class="hint">0 = transparent, 255 = fully opaque</div>
 </div>
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr; margin-top:8px;">
 <div class="config-field">
-<label>Borda do titulo</label>
+<label>Title outline</label>
 <select id="cfgDesignStrokeEnabled">
-<option value="false">Sem borda</option>
-<option value="true">Com borda</option>
+<option value="false">No border</option>
+<option value="true">With outline</option>
 </select>
-<div class="hint">Borda/stroke ao redor das letras do titulo</div>
+<div class="hint">Outline/stroke around the title letters</div>
 </div>
 <div class="config-field">
-<label>Cor da borda</label>
+<label>Border Color</label>
 <input id="cfgDesignStrokeColor" oninput="this.title=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#000000"/>
-<div class="hint">Cor do contorno ao redor do texto</div>
+<div class="hint">Outline color around the text</div>
 </div>
 <div class="config-field">
-<label>Espessura borda (px)</label>
+<label>Border thickness (px)</label>
 <input id="cfgDesignStrokeSize" max="10" min="1" step="1" type="number" value="2"/>
-<div class="hint">Grossura da borda em pixels</div>
+<div class="hint">Border thickness in pixels</div>
 </div>
 <div class="config-field">
 <label></label>
-<div class="hint" style="padding-top:8px;">Borda é diferente de sombra: contorna cada letra individualmente</div>
+<div class="hint" style="padding-top:8px;">An outline is different from a shadow: it traces each letter individually</div>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Fundo do Texto</h3>
+<h3>Text Background</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Degrade escuro</label>
+<label>Dark gradient</label>
 <select id="cfgDesignGradient">
-<option value="none">Nenhum</option>
-<option value="left">Esquerda</option>
-<option value="top-left">Topo esquerdo</option>
-<option value="top">Topo</option>
-<option value="full-bottom">Base completa</option>
+<option value="none">None</option>
+<option value="left">Left</option>
+<option value="top-left">Top left</option>
+<option value="top">Top</option>
+<option value="full-bottom">Full Base</option>
 </select>
-<div class="hint">Escurece parte da imagem para o texto se destacar</div>
+<div class="hint">Darkens part of the image to make the text stand out</div>
 </div>
 <div class="config-field">
-<label>Opacidade do degrade</label>
+<label>Gradient opacity</label>
 <input id="cfgDesignGradientOpacity" max="255" min="0" step="10" type="number" value="140"/>
-<div class="hint">0 = invisivel, 255 = preto total</div>
+<div class="hint">0 = invisible, 255 = solid black</div>
 </div>
 <div class="config-field">
-<label>Cobertura (%)</label>
+<label>Coverage (%)</label>
 <input id="cfgDesignGradientCoverage" max="80" min="10" step="5" type="number" value="40"/>
-<div class="hint">Percentual da imagem coberta pelo degrade</div>
+<div class="hint">Percentage of the image covered by the gradient</div>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Marca (watermark)</h3>
+<h3>Brand (watermark)</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Texto da marca</label>
+<label>Brand text</label>
 <input id="cfgDesignBrand" placeholder="INEMA TDS" type="text" value="INEMA TDS"/>
-<div class="hint">Nome exibido no canto da thumbnail</div>
+<div class="hint">Name displayed in the corner of the thumbnail</div>
 </div>
 <div class="config-field">
-<label>Fonte da marca</label>
+<label>Brand font</label>
 <select id="cfgDesignBrandFont">
 <option value="montserrat-extrabold">Montserrat ExtraBold</option>
 <option value="montserrat-black">Montserrat Black</option>
@@ -1421,33 +1421,33 @@
 <option value="anton">Anton</option>
 <option value="dejavu">DejaVu Sans Bold</option>
 </select>
-<div class="hint">Fonte usada na marca</div>
+<div class="hint">Font used for the brand</div>
 </div>
 <div class="config-field">
-<label>Tamanho da marca (px)</label>
+<label>Brand size (px)</label>
 <input id="cfgDesignBrandSize" max="48" min="14" step="2" type="number" value="26"/>
-<div class="hint">Tamanho do texto da marca</div>
+<div class="hint">Brand text size</div>
 </div>
 <div class="config-field">
-<label>Cor da marca</label>
+<label>Brand color</label>
 <div style="display:flex;gap:8px;align-items:center;">
 <input id="cfgDesignBrandColor" oninput="document.getElementById('cfgDesignBrandColorHex').value=this.value" style="width:40px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;" type="color" value="#6366F1"/>
 <input id="cfgDesignBrandColorHex" oninput="document.getElementById('cfgDesignBrandColor').value=this.value" style="width:90px;font-family:monospace;font-size:0.8rem;" type="text" value="#6366F1"/>
 </div>
-<div class="hint">Cor do nome da marca</div>
+<div class="hint">Brand name color</div>
 </div>
 </div>
 <div class="config-grid" style="grid-template-columns: 1fr; margin-top:8px;">
 <div class="config-field">
-<label>Posicao da marca</label>
+<label>Brand Position</label>
 <select id="cfgDesignBrandPosition">
-<option value="bottom-left">Base Esquerda</option>
-<option value="bottom-center">Base Centro</option>
-<option value="bottom-right">Base Direita</option>
-<option value="top-left">Topo Esquerda</option>
-<option value="top-right">Topo Direita</option>
+<option value="bottom-left">Left Base</option>
+<option value="bottom-center">Center Base</option>
+<option value="bottom-right">Right Base</option>
+<option value="top-left">Top Left</option>
+<option value="top-right">Top Right</option>
 </select>
-<div class="hint">Onde a marca aparece na thumbnail. Default: base esquerda</div>
+<div class="hint">Where the brand appears on the thumbnail. Default: bottom left</div>
 </div>
 </div>
 </div>
@@ -1473,23 +1473,23 @@
 <div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="retro" onclick="applyThumbPreset('retro')" style="padding:3px 8px;font-size:0.7em;background:#F2E8D5;color:#C45E26;border:1px solid #C45E26;">Retro</button><input class="random-preset" data-preset="retro" title="Random" type="checkbox"/></div>
 <div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="3dextrude" onclick="applyThumbPreset('3dextrude')" style="padding:3px 8px;font-size:0.7em;background:#1a0a2e;color:#FFD700;border:1px solid #FFD700;">3D Gold</button><input class="random-preset" data-preset="3dextrude" title="Random" type="checkbox"/></div>
 <div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="glassmorphism" onclick="applyThumbPreset('glassmorphism')" style="padding:3px 8px;font-size:0.7em;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);">Glass</button><input class="random-preset" data-preset="glassmorphism" title="Random" type="checkbox"/></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="darkacademia" onclick="applyThumbPreset('darkacademia')" style="padding:3px 8px;font-size:0.7em;background:#2C1810;color:#D4A574;border:1px solid #D4A574;">Academia</button><input class="random-preset" data-preset="darkacademia" title="Random" type="checkbox"/></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="darkacademia" onclick="applyThumbPreset('darkacademia')" style="padding:3px 8px;font-size:0.7em;background:#2C1810;color:#D4A574;border:1px solid #D4A574;">Academy</button><input class="random-preset" data-preset="darkacademia" title="Random" type="checkbox"/></div>
 <div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="boldoutline" onclick="applyThumbPreset('boldoutline')" style="padding:3px 8px;font-size:0.7em;background:#000;color:#fff;border:2px solid #fff;">BoldOutline</button><input class="random-preset" data-preset="boldoutline" title="Random" type="checkbox"/></div>
 <div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="elegantdark" onclick="applyThumbPreset('elegantdark')" style="padding:3px 8px;font-size:0.7em;background:#0a0a14;color:#C9B37E;border:1px solid #C9B37E;">Elegant</button><input class="random-preset" data-preset="elegantdark" title="Random" type="checkbox"/></div>
 <div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="tiktok" onclick="applyThumbPreset('tiktok')" style="padding:3px 8px;font-size:0.7em;background:#010101;color:#FE2C55;border:1px solid #25F4EE;">TikTok</button><input class="random-preset" data-preset="tiktok" title="Random" type="checkbox"/></div>
 <div style="display:flex;flex-direction:column;align-items:center;gap:1px;"><button class="small preset-btn" data-preset="stories" onclick="applyThumbPreset('stories')" style="padding:3px 8px;font-size:0.7em;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border:1px solid #fff;">Stories</button><input class="random-preset" data-preset="stories" title="Random" type="checkbox"/></div>
 </div>
-<div class="hint" style="margin-bottom:6px;">Checkboxes = modo random (cada publicacao sorteia um)</div>
+<div class="hint" style="margin-bottom:6px;">Checkboxes = random mode (each publication picks one at random)</div>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:8px;">
 <div class="config-field">
-<label>Texto de exemplo</label>
-<input id="cfgDesignPreviewText" placeholder="Texto para preview" type="text" value="MULTIPLIQUE SEU LUCRO"/>
-<div class="hint">Texto que aparece na preview (simula a frase_curta)</div>
+<label>Sample text</label>
+<input id="cfgDesignPreviewText" placeholder="Preview text" type="text" value="MULTIPLIQUE SEU LUCRO"/>
+<div class="hint">Text shown in the preview (simulates frase_curta)</div>
 </div>
 <div style="display:flex;gap:8px;align-items:flex-end;">
-<button onclick="previewDesign(this, 'dark')" style="padding:8px 16px;background:var(--accent);">Preview Escuro</button>
-<button onclick="previewDesign(this, 'light')" style="padding:8px 16px;background:#ccc;color:#222;">Preview Claro</button>
-<button onclick="saveDesign(this)">Salvar Design</button>
+<button onclick="previewDesign(this, 'dark')" style="padding:8px 16px;background:var(--accent);">Dark Preview</button>
+<button onclick="previewDesign(this, 'light')" style="padding:8px 16px;background:#ccc;color:#222;">Light Preview</button>
+<button onclick="saveDesign(this)">Save Design</button>
 </div>
 </div>
 <div id="designPreviewBox" style="display:none;margin-top:8px;border:1px solid var(--border);border-radius:8px;overflow:hidden;max-width:640px;">
@@ -1500,97 +1500,97 @@
 <!-- Tab: Planilha -->
 <div class="config-tab-content" id="cfgTab_planilha">
 <div class="config-section">
-<h3>Planilha</h3>
+<h3>Spreadsheet</h3>
 <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
 <select id="sheetSelector" style="padding:6px 12px;font-size:0.85em;">
 <option value="CONFIG">CONFIG</option>
-<option value="LIVES">LIVES</option>
-<option value="PUBLICADOS">PUBLICADOS</option>
+<option value="LIVES">LIVESTREAMS</option>
+<option value="PUBLICADOS">PUBLISHED</option>
 </select>
-<button class="small" onclick="loadSheet()">Carregar</button>
-<button class="small" onclick="saveSheet(this)" style="background:var(--green);">Salvar</button>
+<button class="small" onclick="loadSheet()">Load</button>
+<button class="small" onclick="saveSheet(this)" style="background:var(--green);">Save</button>
 <button class="small secondary" onclick="downloadSheetCSV()">Download CSV</button>
 <label class="small secondary" style="display:inline-flex;align-items:center;padding:4px 10px;cursor:pointer;border:1px solid var(--border);border-radius:6px;font-size:0.75rem;">
             Upload CSV <input accept=".csv" onchange="uploadSheetCSV(event)" style="display:none;" type="file"/>
 </label>
-<button class="small secondary" onclick="addSheetRow()">+ Linha</button>
+<button class="small secondary" onclick="addSheetRow()">+ Line</button>
 <span id="sheetInfo" style="color:var(--muted);font-size:0.8em;margin-left:8px;"></span>
 </div>
 <div id="sheetTableContainer" style="overflow:auto;max-height:65vh;border:1px solid var(--border);border-radius:6px;">
-<div style="padding:20px;color:var(--muted);text-align:center;">Selecione uma aba e clique Carregar</div>
+<div style="padding:20px;color:var(--muted);text-align:center;">Select a tab and click Load</div>
 </div>
 </div>
 </div>
 <div class="config-tab-content" id="cfgTab_imports">
 <div class="config-section">
-<h3>Import de Clips</h3>
+<h3>Clip Import</h3>
 <p style="color:var(--muted);font-size:0.82em;margin-bottom:14px;">
-          Coloque pastas com MP4s em <code>imports/</code> na raiz do projeto. O sistema detecta e move automaticamente para a fila de publicacao.
+          Place folders with MP4s in <code>imports/</code> in the project root. The system automatically detects it and moves it to the publishing queue.
         </p>
 <div class="config-grid">
 <div class="config-field">
-<label>Verificacao automatica (horaria)</label>
+<label>Automatic check (hourly)</label>
 <select name="import_auto">
-<option value="false">Desativado</option>
-<option value="true">Ativado</option>
+<option value="false">Disabled</option>
+<option value="true">Enabled</option>
 </select>
-<span class="hint">Varre imports/ a cada hora automaticamente</span>
+<span class="hint">Scans imports/ automatically every hour</span>
 </div>
 <div class="config-field">
-<label>Gerar descricao via IA</label>
+<label>Generate description with AI</label>
 <select name="import_gerar_descricao">
-<option value="false">Nao gerar</option>
-<option value="true">Gerar com Claude</option>
+<option value="false">Do not generate</option>
+<option value="true">Generate with Claude</option>
 </select>
-<span class="hint">Quando o manifest nao tem descricao, usa IA para gerar</span>
+<span class="hint">If the manifest has no description, uses AI to generate one</span>
 </div>
 <div class="config-field">
-<label>Max clips por rodada</label>
+<label>Max clips per batch</label>
 <input id="cfgImportPubMax" max="10" min="1" style="width:60px" type="number" value="1"/>
-<span class="hint">Quantos clips de import publicar por horario</span>
+<span class="hint">How many imported clips to publish per time slot</span>
 </div>
 <div class="config-field">
-<label>Privacidade imports</label>
+<label>Import Privacy</label>
 <select id="cfgImportPrivacy">
-<option value="">Usar padrao</option>
+<option value="">Use default</option>
 <option value="unlisted">Unlisted</option>
 <option value="public">Public</option>
 <option value="private">Private</option>
 </select>
 </div>
 <div class="config-field">
-<label>Agendamento de publicacao</label>
+<label>Publication scheduling</label>
 <select name="import_fila_global" onchange="toggleImportHorarios(this.value)">
-<option value="true">Fila global (pub_horarios)</option>
-<option value="false">Horarios proprios</option>
+<option value="true">Global queue (pub_horarios)</option>
+<option value="false">Custom schedules</option>
 </select>
-<span class="hint">Fila global: segue pub_horarios. Horarios proprios: define abaixo quantas vezes por dia</span>
+<span class="hint">Global queue: follows pub_horarios. Custom schedules: set below how many times per day</span>
 </div>
 </div>
 </div>
 <div class="config-section" id="importHorariosSection" style="display:none">
-<h3>Horarios de Publicacao de Imports</h3>
+<h3>Import Publishing Schedules</h3>
 <div class="hour-picker-header">
-<label>Selecione os horarios (clique para ativar/desativar)</label>
+<label>Select schedules (click to enable/disable)</label>
 <div class="hour-picker-actions">
-<button onclick="hourPickerSelectAll('import')">Todas</button>
-<button onclick="hourPickerClearAll('import')">Limpar</button>
+<button onclick="hourPickerSelectAll('import')">All</button>
+<button onclick="hourPickerClearAll('import')">Clear</button>
 </div>
 </div>
 <div class="hour-picker" id="importHourPicker"></div>
 <div class="hour-summary" id="importSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Exact minute:</label>
 <input id="cfgImportMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
-<span style="font-size:0.8em;color:var(--muted)">Ex: 30 → publica em HH:30</span>
+<span style="font-size:0.8em;color:var(--muted)">Ex: 30 → publishes at HH:30</span>
 </div>
 </div>
 <div class="config-section">
-<h3>Acoes</h3>
+<h3>Actions</h3>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-<button onclick="importScan(this)" style="background:var(--green);">Processar imports/ agora</button>
-<button class="secondary" onclick="importClean('imports', this)">Limpar imports/ (residuos)</button>
-<button class="secondary" onclick="importClean('clips', this)">Limpar clips/ (publicados)</button>
+<button onclick="importScan(this)" style="background:var(--green);">Process imports/ now</button>
+<button class="secondary" onclick="importClean('imports', this)">Clear imports/ (leftovers)</button>
+<button class="secondary" onclick="importClean('clips', this)">Clear clips/ (published)</button>
 <span id="importActionMsg" style="color:var(--muted);font-size:0.82em;margin-left:8px;"></span>
 </div>
 <div id="importScanResult" style="margin-top:12px;font-size:0.82em;display:none;"></div>
@@ -1599,59 +1599,59 @@
 <!-- Tab: Enrich Lives -->
 <div class="config-tab-content" id="cfgTab_enrich">
 <div class="config-section">
-<h3>Enriquecer Lives</h3>
-<p style="color:var(--muted);font-size:0.82em;margin-bottom:12px">Lives com titulo generico "INEMA" recebem titulo, descricao e thumbnail automaticamente via IA.</p>
+<h3>Enrich Lives</h3>
+<p style="color:var(--muted);font-size:0.82em;margin-bottom:12px">Livestreams with the generic title "INEMA" automatically get a title, description, and thumbnail generated by AI.</p>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr 1fr;">
 <div class="config-field">
-<label>Enrich automatico</label>
+<label>Automatic enrichment</label>
 <select id="cfgEnrichAuto">
-<option value="false">Nao</option>
-<option value="true">Sim</option>
+<option value="false">No</option>
+<option value="true">Yes</option>
 </select>
 </div>
 <div class="config-field">
-<label>Max lives por rodada</label>
+<label>Max livestreams per batch</label>
 <input id="cfgEnrichMax" max="50" min="1" type="number" value="3"/>
 </div>
 <div class="config-field">
-<label>Lives pendentes</label>
+<label>Pending livestreams</label>
 <div id="enrichPendingCount" style="padding:8px 0;color:var(--accent);font-weight:bold">-</div>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Horarios de Enrich</h3>
+<h3>Enrich Schedules</h3>
 <div class="hour-picker-header">
-<label>Selecione os horarios (clique para ativar/desativar)</label>
+<label>Select schedules (click to enable/disable)</label>
 <div class="hour-picker-actions">
-<button onclick="hourPickerSelectAll('enrich')">Todas</button>
-<button onclick="hourPickerClearAll('enrich')">Limpar</button>
+<button onclick="hourPickerSelectAll('enrich')">All</button>
+<button onclick="hourPickerClearAll('enrich')">Clear</button>
 </div>
 </div>
 <div class="hour-picker" id="enrichHourPicker"></div>
 <div class="hour-summary" id="enrichSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Exact minute:</label>
 <input id="cfgEnrichMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
-<span style="font-size:0.8em;color:var(--muted)">Ex: 15 → roda em HH:15</span>
+<span style="font-size:0.8em;color:var(--muted)">Ex: 15 → runs at HH:15</span>
 </div>
 </div>
 <div class="config-section">
-<h3>Prompt para Titulo + Descricao</h3>
+<h3>Title + Description Prompt</h3>
 <textarea id="cfgEnrichPrompt" rows="8" style="width:100%;font-family:monospace;font-size:0.82em;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;resize:vertical"></textarea>
-<span class="hint">Prompt enviado a IA para gerar titulo e descricao da live. Deve retornar JSON: { "title": "...", "description": "..." }</span>
+<span class="hint">Prompt sent to the AI to generate the livestream title and description. Must return JSON: { "title": "...", "description": "..." }</span>
 </div>
 <div class="config-section">
-<h3>Imagem de Fundo (Thumbnail)</h3>
-<p style="color:var(--muted);font-size:0.82em;margin-bottom:8px">Imagem usada como fundo da thumbnail das lives enriquecidas. Se nao definida, usa gradiente escuro.</p>
+<h3>Background Image (Thumbnail)</h3>
+<p style="color:var(--muted);font-size:0.82em;margin-bottom:8px">Image used as the background for enriched live thumbnails. If none is set, a dark gradient is used.</p>
 <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
 <div>
 <img id="enrichBgPreview" src="" style="max-width:320px;max-height:180px;border-radius:8px;border:1px solid var(--border);display:none"/>
-<div id="enrichBgPlaceholder" style="width:320px;height:180px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.82em">Nenhuma imagem</div>
+<div id="enrichBgPlaceholder" style="width:320px;height:180px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.82em">No image</div>
 </div>
 <div style="display:flex;flex-direction:column;gap:8px">
 <label style="background:var(--accent);color:#fff;padding:6px 16px;border-radius:6px;cursor:pointer;text-align:center;font-size:0.85em">
-              Escolher imagem
+              Choose image
               <input accept="image/*" id="enrichBgFile" onchange="enrichUploadBg(this)" style="display:none" type="file"/>
 </label>
 <span id="enrichBgMsg" style="color:var(--muted);font-size:0.78em"></span>
@@ -1659,13 +1659,13 @@
 </div>
 </div>
 <div class="config-section">
-<h3>Acoes</h3>
+<h3>Actions</h3>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-<button onclick="enrichRunNow(this)" style="background:var(--accent);">Enriquecer Agora</button>
+<button onclick="enrichRunNow(this)" style="background:var(--accent);">Enrich Now</button>
 <span id="enrichActionMsg" style="color:var(--muted);font-size:0.82em;margin-left:8px;"></span>
 </div>
 <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-<button onclick="enrichFromUrl(this)" style="background:#a78bfa;white-space:nowrap">Importar e Enriquecer</button>
+<button onclick="enrichFromUrl(this)" style="background:#a78bfa;white-space:nowrap">Import and Enrich</button>
 <input id="enrichUrlInput" placeholder="https://www.youtube.com/watch?v=..." style="flex:1;min-width:280px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85em" type="text"/>
 </div>
 <span id="enrichUrlMsg" style="color:var(--muted);font-size:0.78em;margin-top:4px;display:block"></span>
@@ -1674,17 +1674,17 @@
 <!-- Tab: TikTok -->
 <div class="config-tab-content" id="cfgTab_tiktok">
 <div class="config-section">
-<h3>Publicacao TikTok</h3>
+<h3>TikTok Publishing</h3>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Max clips por rodada</label>
+<label>Max clips per batch</label>
 <input id="cfgTiktokPubMax" max="10" min="1" style="width:60px" type="number" value="1"/>
-<span class="hint">Quantos clips de TikTok publicar por horario</span>
+<span class="hint">How many TikTok clips to publish per time slot</span>
 </div>
 <div class="config-field">
-<label>Privacidade TikTok</label>
+<label>TikTok Privacy</label>
 <select id="cfgTiktokPrivacy">
-<option value="">Usar padrao</option>
+<option value="">Use default</option>
 <option value="unlisted">Unlisted</option>
 <option value="public">Public</option>
 <option value="private">Private</option>
@@ -1693,88 +1693,88 @@
 </div>
 </div>
 <div class="config-section">
-<h3>Horarios de Publicacao</h3>
+<h3>Publishing Schedules</h3>
 <div class="hour-picker-header">
-<label>Selecione os horarios de publicacao (clique para ativar/desativar)</label>
+<label>Select publishing schedules (click to enable/disable)</label>
 <div class="hour-picker-actions">
-<button onclick="hourPickerSelectAll('tiktokPub')">Todas</button>
-<button onclick="hourPickerClearAll('tiktokPub')">Limpar</button>
+<button onclick="hourPickerSelectAll('tiktokPub')">All</button>
+<button onclick="hourPickerClearAll('tiktokPub')">Clear</button>
 </div>
 </div>
 <div class="hour-picker" id="tiktokPubHourPicker"></div>
 <div class="hour-summary" id="tiktokPubSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Exact minute:</label>
 <input id="cfgTiktokPubMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
 </div>
 </div>
 <div class="config-section">
-<h3>Scanner TikTok</h3>
-<p style="color:var(--muted);font-size:0.82em;margin-bottom:12px">Importa videos de canais TikTok automaticamente.</p>
+<h3>TikTok Scanner</h3>
+<p style="color:var(--muted);font-size:0.82em;margin-bottom:12px">Automatically imports videos from TikTok channels.</p>
 <div class="config-grid" style="grid-template-columns: 1fr 1fr;">
 <div class="config-field">
-<label>Scan automatico</label>
+<label>Automatic scan</label>
 <select id="cfgTiktokAuto">
-<option value="false">Nao</option>
-<option value="true">Sim</option>
+<option value="false">No</option>
+<option value="true">Yes</option>
 </select>
 </div>
 </div>
 </div>
 <div class="config-section">
-<h3>Horarios de Scan</h3>
+<h3>Scan Schedules</h3>
 <div class="hour-picker-header">
-<label>Selecione os horarios de scan (clique para ativar/desativar)</label>
+<label>Select scan schedules (click to enable/disable)</label>
 <div class="hour-picker-actions">
-<button onclick="hourPickerSelectAll('tiktok')">Todas</button>
-<button onclick="hourPickerClearAll('tiktok')">Limpar</button>
+<button onclick="hourPickerSelectAll('tiktok')">All</button>
+<button onclick="hourPickerClearAll('tiktok')">Clear</button>
 </div>
 </div>
 <div class="hour-picker" id="tiktokHourPicker"></div>
 <div class="hour-summary" id="tiktokSummary"></div>
 <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-<label style="font-size:0.85em;color:var(--muted)">Minuto exato:</label>
+<label style="font-size:0.85em;color:var(--muted)">Exact minute:</label>
 <input id="cfgTiktokMinuto" max="59" min="0" style="width:60px" type="number" value="0"/>
 </div>
 </div>
 <div class="config-section">
-<h3>Canais Cadastrados</h3>
+<h3>Registered Channels</h3>
 <table id="tiktokChannelsTable" style="width:100%;font-size:0.82em;border-collapse:collapse">
 <thead>
 <tr style="border-bottom:1px solid var(--border);text-align:left">
 <th style="padding:6px">Handle</th>
-<th style="padding:6px">Nome</th>
-<th style="padding:6px">Ativo</th>
-<th style="padding:6px">Desde</th>
+<th style="padding:6px">Name</th>
+<th style="padding:6px">Active</th>
+<th style="padding:6px">Since</th>
 <th style="padding:6px">Max/scan</th>
-<th style="padding:6px">Ultimo scan</th>
-<th style="padding:6px" title="Pendentes na fila / Baixados / Pulados / Erros">Fila (P/B/X/E)</th>
-<th style="padding:6px">Acoes</th>
+<th style="padding:6px">Last scan</th>
+<th style="padding:6px" title="Pending in queue / Downloaded / Skipped / Errors">Queue (P/B/X/E)</th>
+<th style="padding:6px">Actions</th>
 </tr>
 </thead>
 <tbody id="tiktokChannelsBody">
-<tr><td colspan="8" style="padding:12px;color:var(--muted)">Carregando...</td></tr>
+<tr><td colspan="8" style="padding:12px;color:var(--muted)">Loading...</td></tr>
 </tbody>
 </table>
 <div style="margin-top:12px;display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
 <div><label style="font-size:0.78em;color:var(--muted)">Handle</label><br/><input id="tiktokNewHandle" placeholder="@usuario" style="width:140px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="text"/></div>
-<div><label style="font-size:0.78em;color:var(--muted)">Nome</label><br/><input id="tiktokNewNome" placeholder="Nome amigavel" style="width:140px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="text"/></div>
-<div><label style="font-size:0.78em;color:var(--muted)">Desde</label><br/><input id="tiktokNewDesde" style="width:140px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="date"/></div>
+<div><label style="font-size:0.78em;color:var(--muted)">Name</label><br/><input id="tiktokNewNome" placeholder="Friendly name" style="width:140px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="text"/></div>
+<div><label style="font-size:0.78em;color:var(--muted)">Since</label><br/><input id="tiktokNewDesde" style="width:140px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="date"/></div>
 <div><label style="font-size:0.78em;color:var(--muted)">Max/scan</label><br/><input id="tiktokNewMax" max="20" min="1" style="width:60px;padding:4px 8px;font-size:0.85em;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)" type="number" value="2"/></div>
-<button onclick="tiktokAddChannel()" style="background:var(--accent);padding:5px 14px">Adicionar</button>
+<button onclick="tiktokAddChannel()" style="background:var(--accent);padding:5px 14px">Add</button>
 </div>
 </div>
 <div class="config-section">
-<h3>Acoes</h3>
+<h3>Actions</h3>
 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-<button onclick="tiktokScanAll(this, 'full')" style="background:#a78bfa" title="Scan completo em todos os canais ativos (ate 5000 videos cada)">Scan completo</button>
-<button onclick="tiktokScanAll(this, 'latest')" style="background:#38bdf8" title="Scan incremental: pega os videos mais novos que a ultima upload_date conhecida">Pegar novos</button>
-<button onclick="tiktokDownloadNow(this)" style="background:#22c55e" title="Dispara download da fila ja populada, sem fazer scan">Download da fila</button>
-<label style="font-size:0.82em;color:var(--muted);margin-left:6px"><input id="tiktokIncludeInactive" type="checkbox"/> incluir inativos</label>
+<button onclick="tiktokScanAll(this, 'full')" style="background:#a78bfa" title="Full scan across all active channels (up to 5000 videos each)">Full scan</button>
+<button onclick="tiktokScanAll(this, 'latest')" style="background:#38bdf8" title="Incremental scan: gets the newest videos after the last known upload_date">Fetch new</button>
+<button onclick="tiktokDownloadNow(this)" style="background:#22c55e" title="Starts downloading the already populated queue without scanning">Download the queue</button>
+<label style="font-size:0.82em;color:var(--muted);margin-left:6px"><input id="tiktokIncludeInactive" type="checkbox"/> include inactive</label>
 <span id="tiktokScanMsg" style="color:var(--muted);font-size:0.82em"></span>
 </div>
 <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-<button onclick="tiktokDownloadUrl(this)" style="background:#f472b6;white-space:nowrap">Baixar Video</button>
+<button onclick="tiktokDownloadUrl(this)" style="background:#f472b6;white-space:nowrap">Download Video</button>
 <input id="tiktokUrlInput" placeholder="https://www.tiktok.com/@user/video/123..." style="flex:1;min-width:280px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85em" type="text"/>
 </div>
 <span id="tiktokUrlMsg" style="color:var(--muted);font-size:0.78em;margin-top:4px;display:block"></span>
@@ -1783,41 +1783,41 @@
 </div>
 <!-- Tabs -->
 <div class="tabs" id="tabsBar">
-<button class="tab active" data-tab="lives" onclick="showTab('lives', this); showLivesView('todas')">Lives</button>
-<button class="tab" data-tab="lives" onclick="showTab('lives', this); showLivesView('ultimas')">Ultimas Lives</button>
-<button class="tab" data-tab="lives" onclick="showTab('lives', this); showLivesView('proximas')">Proximas Lives</button>
-<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, '')">Todos Clips</button>
-<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'publicado')">Clips Publicados <span id="tabCountPub" style="font-size:0.8em;opacity:0.6"></span></button>
-<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'pendente')">Clips Pendentes <span id="tabCountPend" style="font-size:0.8em;opacity:0.6"></span></button>
-<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'erro')">Clips Erros <span id="tabCountErro" style="font-size:0.8em;opacity:0.6"></span></button>
+<button class="tab active" data-tab="lives" onclick="showTab('lives', this); showLivesView('todas')">Livestreams</button>
+<button class="tab" data-tab="lives" onclick="showTab('lives', this); showLivesView('ultimas')">Latest Lives</button>
+<button class="tab" data-tab="lives" onclick="showTab('lives', this); showLivesView('proximas')">Upcoming Livestreams</button>
+<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, '')">All Clips</button>
+<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'publicado')">Published Clips <span id="tabCountPub" style="font-size:0.8em;opacity:0.6"></span></button>
+<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'pendente')">Pending Clips <span id="tabCountPend" style="font-size:0.8em;opacity:0.6"></span></button>
+<button class="tab" data-tab="publicados" onclick="showTab('publicados', this, 'erro')">Clip Errors <span id="tabCountErro" style="font-size:0.8em;opacity:0.6"></span></button>
 </div>
 <!-- Lives Toolbar + Table -->
 <div id="tabLives">
 <div class="toolbar">
-<input id="livesSearch" oninput="livesPage=1;filterLives()" placeholder="Pesquisar por titulo..." type="text"/>
-<span class="toolbar-label">Situacao:</span>
+<input id="livesSearch" oninput="livesPage=1;filterLives()" placeholder="Search by title..." type="text"/>
+<span class="toolbar-label">Situation:</span>
 <select id="livesStatus" onchange="livesPage=1;filterLives()">
-<option value="">Todas</option>
-<option value="pendente">Pendentes (sem corte)</option>
-<option value="concluido">Cortadas</option>
-<option value="aguardando_pub">Aguardando publicacao</option>
-<option value="publicado">Totalmente publicadas</option>
-<option value="erro">Com erro</option>
-<option value="sem_topicos">Sem topicos (IA nao achou corte)</option>
+<option value="">All</option>
+<option value="pendente">Pending (uncut)</option>
+<option value="concluido">Cut</option>
+<option value="aguardando_pub">Awaiting publication</option>
+<option value="publicado">Fully published</option>
+<option value="erro">With error</option>
+<option value="sem_topicos">No topics (AI couldn't find a clip)</option>
 </select>
-<span class="toolbar-label">Origem:</span>
+<span class="toolbar-label">Source:</span>
 <select id="livesOrigem" onchange="livesPage=1;filterLives()">
-<option value="">Todas</option>
-<option value="live">Apenas Lives</option>
-<option value="import">Apenas Imports</option>
+<option value="">All</option>
+<option value="live">Live Streams Only</option>
+<option value="import">Imports Only</option>
 </select>
-<span class="toolbar-label">Ordem:</span>
+<span class="toolbar-label">Order:</span>
 <select id="livesOrder" onchange="livesPage=1;filterLives()">
-<option value="oldest">Mais antigas</option>
-<option value="newest">Mais recentes</option>
-<option value="title">Titulo A-Z</option>
-<option value="duration-desc">Maior duracao</option>
-<option value="duration-asc">Menor duracao</option>
+<option value="oldest">Older first</option>
+<option value="newest">Newest</option>
+<option value="title">Title A-Z</option>
+<option value="duration-desc">Longer duration</option>
+<option value="duration-asc">Shorter duration</option>
 </select>
 <span class="result-count" id="livesCount"></span>
 </div>
@@ -1826,18 +1826,18 @@
 <thead>
 <tr>
 <th>Video</th>
-<th>Data Live</th>
-<th>Titulo</th>
-<th>Duracao</th>
-<th>Cortes</th>
-<th>Data Corte</th>
+<th>Live Date</th>
+<th>Title</th>
+<th>Duration</th>
+<th>Cuts</th>
+<th>Cut Date</th>
 <th>Clips</th>
-<th>Publicados</th>
+<th>Published</th>
 <th></th>
 </tr>
 </thead>
 <tbody id="livesBody">
-<tr><td class="empty" colspan="9">Carregando...</td></tr>
+<tr><td class="empty" colspan="9">Loading...</td></tr>
 </tbody>
 </table>
 <div class="pagination" id="livesPagination"></div>
@@ -1846,58 +1846,58 @@
 <!-- Publicados Toolbar + Table -->
 <div id="tabPublicados" style="display:none">
 <div class="toolbar">
-<input id="pubSearch" oninput="clipsPage=1;filterPubs()" placeholder="Pesquisar por titulo ou tags..." type="text"/>
+<input id="pubSearch" oninput="clipsPage=1;filterPubs()" placeholder="Search by title or tags..." type="text"/>
 <span class="toolbar-label">Status:</span>
 <select id="pubStatus" onchange="clipsPage=1;filterPubs()">
-<option value="">Todos</option>
-<option value="publicado">Publicados</option>
-<option value="erro">Erros</option>
-<option value="pendente">Pendentes</option>
-<option value="parado">Parados</option>
+<option value="">All</option>
+<option value="publicado">Published</option>
+<option value="erro">Errors</option>
+<option value="pendente">Pending</option>
+<option value="parado">Stopped</option>
 </select>
 <span class="toolbar-label">Privacy:</span>
 <select id="pubPrivacy" onchange="clipsPage=1;filterPubs()">
-<option value="">Todas</option>
+<option value="">All</option>
 <option value="unlisted">Unlisted</option>
 <option value="public">Public</option>
 <option value="private">Private</option>
 </select>
-<span class="toolbar-label">Origem:</span>
+<span class="toolbar-label">Source:</span>
 <select id="pubOrigem" onchange="clipsPage=1;filterPubs()">
-<option value="">Todas</option>
-<option value="live">Apenas Lives</option>
-<option value="import">Apenas Imports</option>
-<option value="tiktok">Apenas TikTok</option>
+<option value="">All</option>
+<option value="live">Live Streams Only</option>
+<option value="import">Imports Only</option>
+<option value="tiktok">TikTok Only</option>
 </select>
-<span class="toolbar-label">Ordem:</span>
+<span class="toolbar-label">Order:</span>
 <select id="pubOrder" onchange="clipsPage=1;filterPubs()">
-<option value="newest">Mais recentes</option>
-<option value="oldest">Mais antigos</option>
-<option value="title">Titulo A-Z</option>
-<option value="duration-desc">Maior duracao</option>
+<option value="newest">Newest</option>
+<option value="oldest">Oldest</option>
+<option value="title">Title A-Z</option>
+<option value="duration-desc">Longer duration</option>
 </select>
 <span class="result-count" id="pubCount"></span>
 </div>
 <div class="table-container">
 <div class="filter-bar" id="pubFilter" style="display:none">
-<span class="filter-text">Filtrando clips da live: <strong id="pubFilterId"></strong></span>
-<button onclick="clearPubFilter()">Limpar filtro</button>
+<span class="filter-text">Filtering live clips: <strong id="pubFilterId"></strong></span>
+<button onclick="clearPubFilter()">Clear filter</button>
 </div>
 <table>
 <thead>
 <tr>
 <th>Status</th>
-<th>Titulo</th>
-<th>Live</th>
-<th>Data / Tempo</th>
+<th>Title</th>
+<th>Livestream</th>
+<th>Date / Time</th>
 <th>Privacy</th>
 <th>Link</th>
-<th>Arquivo</th>
+<th>File</th>
 <th>Tags</th>
 </tr>
 </thead>
 <tbody id="pubBody">
-<tr><td class="empty" colspan="8">Carregando...</td></tr>
+<tr><td class="empty" colspan="8">Loading...</td></tr>
 </tbody>
 </table>
 <div class="pagination" id="clipsPagination"></div>
@@ -1908,11 +1908,11 @@
 <div class="modal-overlay" id="modalTranscript" onclick="if(event.target===this)closeModal('modalTranscript')">
 <div class="modal">
 <div class="modal-header">
-<h2 id="modalTranscriptTitle">Transcricao</h2>
+<h2 id="modalTranscriptTitle">Transcript</h2>
 <button class="modal-close" onclick="closeModal('modalTranscript')">x</button>
 </div>
 <div class="modal-body">
-<div id="modalTranscriptContent">Carregando...</div>
+<div id="modalTranscriptContent">Loading...</div>
 </div>
 </div>
 </div>
@@ -1924,7 +1924,7 @@
 <button class="modal-close" onclick="closeModal('modalClips')">x</button>
 </div>
 <div class="modal-body">
-<div id="modalClipsContent">Carregando...</div>
+<div id="modalClipsContent">Loading...</div>
 </div>
 </div>
 </div>
@@ -4251,235 +4251,235 @@ loadAll();
 <h3 style="color:var(--accent);margin-bottom:8px">v3.32.32</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Varios destinatarios por canal (Chat IDs separados por virgula)</li>
-<li>Cadastro pelo proprio bot: usuario manda "meu canal e o livesN"</li>
-<li>Cadastro tem interruptor liga/desliga controlado na master</li>
+<li>Multiple recipients per channel (Chat IDs separated by commas)</li>
+<li>Sign up through the bot: user sends "my channel is livesN"</li>
+<li>Sign-up has an on/off switch controlled from the master</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.28.32</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Notificacao Telegram por canal: novo Chat ID + liga/desliga na aba Horarios</li>
-<li>Cada video publicado (clip / import / TikTok) gera aviso com o link do YouTube</li>
-<li>Botao "Enviar o video" na mensagem manda o MP4 (ate 50 MB)</li>
-<li>Deteccao e envio rodam no master-dashboard, com bot dedicado</li>
+<li>Telegram notification by channel: new Chat ID + on/off toggle in the Schedules tab</li>
+<li>Each published video (clip / import / TikTok) generates a notification with the YouTube link</li>
+<li>The "Send video" button in the message sends the MP4 (up to 50 MB)</li>
+<li>Detection and sending run in master-dashboard, with a dedicated bot</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.27.32</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Bug:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Preview do designer (e geracao de thumbnail no scheduler) quebrava em maquina nova com "No module named 'PIL'": o Pillow nao era instalado. O setup-system agora instala python3-pil via apt (jeito correto no Ubuntu 24/PEP 668) e a verificacao final checa import PIL.</li>
+<li>The designer preview (and thumbnail generation in the scheduler) failed on new machines with "No module named 'PIL'": Pillow wasn’t installed. setup-system now installs python3-pil via apt (the right approach on Ubuntu 24/PEP 668), and the final check verifies the PIL import.</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.27.31</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Bug:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Scheduler: video_ids que comecam com '-' (ex: -I2kOs0_GCk) eram interpretados como flag pelo yt-clip e davam "opcao desconhecida". Agora scheduler invoca com separador '--' e yt-clip aceita '--' antes do video_id.</li>
-<li>Scheduler: melhor captura de erro no corte. Antes guardava so 5 ultimas linhas (engolia o erro real quando yt-dlp cuspia muito '[download]%'). Agora filtra linhas de download, mantem 30 ultimas linhas relevantes e salva output completo em data/last_corte_error_&lt;video_id&gt;.log.</li>
+<li>Scheduler: video_ids starting with '-' (e.g., -I2kOs0_GCk) were interpreted as flags by yt-clip and caused "unknown option" errors. The scheduler now invokes it with a '--' separator, and yt-clip accepts '--' before the video_id.</li>
+<li>Scheduler: improved error capture during clipping. Previously, it only saved the last 5 lines (hiding the actual error when yt-dlp printed a lot of '[download]%'). Now it filters download lines, keeps the last 30 relevant lines, and saves the complete output to data/last_corte_error_&lt;video_id&gt;.log.</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.27.30</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Bug:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix imports_clips_pend no dashboard: contava por set de titulos do manifest, e manifests com titulos duplicados (ex: todos 'Video') colapsavam para 1 e zeravam pendentes. Agora compara quantidade (len(manifest) - publicados_count).</li>
+<li>Fix imports_clips_pend on the dashboard: it counted using a set of manifest titles, and manifests with duplicate titles (e.g., all "Video") collapsed to 1 and showed zero pending. Now compares counts (len(manifest) - published_count).</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.27.29</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Nova instancia lives12 (porta 8402) registrada no master dashboard e no script de sync. Services systemd yt-scheduler12/yt-dashboard12 instalados. Aguarda config/.env + credenciais OAuth.</li>
+<li>New lives12 instance (port 8402) registered in the master dashboard and sync script. yt-scheduler12/yt-dashboard12 systemd services installed. Awaiting config/.env + OAuth credentials.</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.26.29</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Novo provider de imagem "Local (inemaimg)": usa API local (FastAPI) com modelos flux2-klein/flux2-dev/qwen-edit-2511/ernie/sdxl/sd15. URL configuravel por instancia (default http://localhost:8000). Mesmo padrao do imkt4/timesmkt3.</li>
+<li>New "Local (inemaimg)" image provider: uses a local API (FastAPI) with flux2-klein/flux2-dev/qwen-edit-2511/ernie/sdxl/sd15 models. Configurable URL per instance (default http://localhost:8000). Same pattern as imkt4/timesmkt3.</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.25.28</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix critico: scheduler.acquire_lock tinha race que permitia 2 schedulers rodando em paralelo → publicava 2 clips por slot em vez de 1. Agora abre lock sem truncar e so grava PID apos flock.</li>
+<li>Critical fix: scheduler.acquire_lock had a race condition that allowed 2 schedulers to run in parallel → published 2 clips per slot instead of 1. Now opens the lock without truncating it and only writes the PID after flock.</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.25.27</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>"Pegar novos" agora usa scan incremental com early-break: cutoff = MAX(upload_date) conhecida; yt-dlp para assim que ve video antigo. Rapido mesmo em canais grandes.</li>
-<li>Flag "incluir inativos" no dashboard para scan global tambem em canais desativados</li>
+<li>“Fetch new” now uses an incremental scan with early break: cutoff = MAX(upload_date) known; yt-dlp stops as soon as it sees an old video. Fast even on large channels.</li>
+<li>"include inactive" flag in dashboard for global scan, including disabled channels</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.24.27</h3>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Features (refactor TikTok):</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Features (TikTok refactor):</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Nova tabela tiktok_videos com status (pendente/baixado/pulado/erro) e migracao automatica do tiktok_downloaded legacy</li>
-<li>Scan separado do download: scan popula fila (ate 5000 videos por canal), download consome da fila oldest-first</li>
-<li>Scheduler agora faz so download da fila no horario (rapido); scan manual via dashboard</li>
-<li>UI: coluna Fila (P/B/X/E) por canal; botoes Scan/Novos por canal + Scan completo/Pegar novos/Download da fila globais</li>
-<li>Novos endpoints: /api/tiktok/fetch-latest, /api/tiktok/download, /api/tiktok/queue</li>
+<li>New tiktok_videos table with status (pending/downloaded/skipped/error) and automatic migration from legacy tiktok_downloaded</li>
+<li>Scan separate from download: scan adds videos to the queue (up to 5000 videos per channel), download processes the queue oldest-first</li>
+<li>Scheduler now only downloads from the queue on schedule (fast); scan manually via the dashboard</li>
+<li>UI: Queue column (P/B/X/E) per channel; Scan/New buttons per channel + global Full Scan/Get New/Download Queue</li>
+<li>New endpoints: /api/tiktok/fetch-latest, /api/tiktok/download, /api/tiktok/queue</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.23.27</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>yt-clip: valida source.mp4 com ffprobe antes de cortar; remove e re-baixa se corrompido (quebrava loop de cortes vazios silenciosos)</li>
-<li>yt-clip: checa returncode do ffmpeg em cada clip; aborta com erro se todos falharem (antes reportava "concluido" falsamente)</li>
+<li>yt-clip: validates source.mp4 with ffprobe before cutting; removes and downloads it again if corrupted (previously caused a loop of silent empty cuts)</li>
+<li>yt-clip: checks the ffmpeg return code for each clip; aborts with an error if all fail (previously it falsely reported "completed")</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.23.26</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>TikTok Scanner: photo-posts/slideshows (somente audio, sem video) eram re-baixados infinitamente e deixavam pastas orfas sem manifest</li>
-<li>Agora detectados no scan via duration=0 e marcados como baixados; pastas orfas anteriores limpas</li>
+<li>TikTok Scanner: photo posts/slideshows (audio only, no video) were being downloaded repeatedly and leaving orphaned folders without a manifest</li>
+<li>Now detected during the scan via duration=0 and marked as downloaded; previous orphaned folders cleaned up</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.23.25</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix: clips_pendentes nunca decrementava apos publicacao (imports mostravam pendentes fantasma)</li>
-<li>Recalculo de clips_publicados e clips_pendentes com base na tabela publicados real</li>
+<li>Fix: clips_pendentes was never decremented after publishing (imports showed phantom pending items)</li>
+<li>Recalculates clips_publicados and clips_pendentes based on the actual publicados table</li>
 </ul>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Auto-sync com filtro de data: novo campo "A partir de" ao lado do botao Auto-sync</li>
-<li>Auto-sync a meia-noite so considera lives publicadas a partir da data configurada (evita reimportacao de todo o historico do canal)</li>
+<li>Auto-sync with date filter: new “Starting from” field next to the Auto-sync button</li>
+<li>Midnight auto-sync only considers live streams published on or after the configured date (prevents reimporting the channel’s entire history)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.21.25</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>TikTok Scanner: importa videos de canais TikTok automaticamente para fila de imports</li>
-<li>Nova aba "TikTok" na Config: cadastro de canais, toggle ativo/inativo, data desde, max por scan</li>
-<li>Horarios configuraveis para scan automatico</li>
-<li>Botao "Escanear Agora" para scan manual</li>
+<li>TikTok Scanner: automatically imports videos from TikTok channels into the import queue</li>
+<li>New "TikTok" tab in Config: channel setup, active/inactive toggle, date from, max per scan</li>
+<li>Configurable schedules for automatic scans</li>
+<li>"Scan Now" button for a manual scan</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.20.25</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Enrich Lives: lives com titulo generico "INEMA" recebem titulo, descricao e thumbnail via IA automaticamente</li>
-<li>Nova aba "Enrich Lives" na Config: toggle, horarios, max por rodada, prompt editavel, botao "Enriquecer Agora"</li>
-<li>Prompt configuravel para geracao de titulo e descricao (config/prompt_enrich.txt)</li>
-<li>Thumbnail gerada com imagem padrao + texto overlay (mesmo estilo dos clips)</li>
+<li>Enrich Lives: lives with the generic title "INEMA" automatically receive a title, description, and thumbnail via AI</li>
+<li>New "Enrich Lives" tab in Config: toggle, schedules, max per run, editable prompt, "Enrich Now" button</li>
+<li>Configurable prompt for generating the title and description (config/prompt_enrich.txt)</li>
+<li>Thumbnail generated with a default image + overlaid text (same style as the clips)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.19.25</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Stats imports alinhados sob os 3 cards de clips</li>
-<li>Botao "Distribuir p/ 7 Canais": distribui MP4s de imports/ round-robin para as 7 instancias e dispara scan em cada uma</li>
+<li>Import stats aligned beneath the 3 clip cards</li>
+<li>"Distribute to 7 Channels" button: distributes MP4s from imports/ round-robin across the 7 instances and starts a scan on each one</li>
 </ul>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Imports: descricao vazia causava erro_upload no yt-publish (fallback para titulo)</li>
+<li>Imports: empty description caused an upload error on yt-publish (fallback to title)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.18.24</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Aba Planilha: visualizar, editar, download CSV e upload CSV das abas CONFIG/LIVES/PUBLICADOS</li>
-<li>Presets editaveis: customizacoes salvas por preset (persistem no banco local)</li>
-<li>Novos presets TikTok e Stories</li>
+<li>Spreadsheet tab: view, edit, download CSV, and upload CSV for the CONFIG/LIVES/PUBLICADOS tabs</li>
+<li>Editable presets: customizations saved per preset (persist in the local database)</li>
+<li>New TikTok and Stories presets</li>
 </ul>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Simplificacao fallback: sempre usa preset "fallback" (removido seletor separado)</li>
+<li>Fallback simplification: always uses the "fallback" preset (separate selector removed)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.15.23</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Design Thumb: aba completa com 20 presets (Premium, YouTube, Clean, Neon, MrBeast, Cinematic, Gradient, etc)</li>
-<li>Design Thumb: preview ao vivo (escuro/claro) com texto customizavel</li>
-<li>Design Thumb: random presets com checkbox (sorteia estilo a cada publicacao)</li>
-<li>Design Thumb: borda/stroke no titulo (cor, espessura, toggle)</li>
-<li>Design Thumb: accent configuravel (cor, largura, espessura, distancia, toggle)</li>
-<li>Design Thumb: marca com fonte, tamanho e posicao independente (default: base esquerda)</li>
-<li>Dashboard: tabs Ultimas Lives, Proximas Lives, Todos Clips, Clips Publicados/Pendentes/Erros</li>
-<li>Dashboard: config em 5 abas (Horarios, APIs, Prompts, Design Thumb, Manutencao) com save independente</li>
-<li>Dashboard: stats Lives Erro e Clips Erro</li>
-<li>Dashboard: campos dinamicos por provider + nome instancia dinamico</li>
-<li>Dashboard: coluna Data Live e Data Corte na tabela de lives</li>
-<li>Providers de imagem: MiniMax, Google Imagen, Kie.ai z-image</li>
-<li>Refinamento de titulo usa Claude CLI (OAuth)</li>
+<li>Thumbnail Design: full tab with 20 presets (Premium, YouTube, Clean, Neon, MrBeast, Cinematic, Gradient, etc.)</li>
+<li>Thumbnail Design: live preview (dark/light) with customizable text</li>
+<li>Thumbnail Design: random presets with checkbox (randomly selects a style for each publication)</li>
+<li>Thumbnail Design: title border/stroke (color, thickness, toggle)</li>
+<li>Thumbnail Design: configurable accent (color, width, thickness, spacing, toggle)</li>
+<li>Thumbnail Design: brand with independent font, size, and position (default: bottom left)</li>
+<li>Dashboard: tabs for Latest Lives, Upcoming Lives, All Clips, Published/Pending/Errors Clips</li>
+<li>Dashboard: config in 5 tabs (Schedules, APIs, Prompts, Thumbnail Design, Maintenance) with independent saving</li>
+<li>Dashboard: Lives Error and Clips Error stats</li>
+<li>Dashboard: dynamic fields by provider + dynamic instance name</li>
+<li>Dashboard: Live Date and Cut Date columns in the lives table</li>
+<li>Image providers: MiniMax, Google Imagen, Kie.ai z-image</li>
+<li>Title refinement uses Claude CLI (OAuth)</li>
 </ul>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Fixes:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Fix publicacao duplicada: dashboard rodava scheduler embutido</li>
-<li>Fix yt-dlp: fallback sem cookies</li>
-<li>Fix re-publicacao: clips com erro nao re-tentados</li>
-<li>Fix Kie.ai z-image: endpoint /jobs/createTask + prompt truncado 400 chars</li>
-<li>Fix prompt imagem: instrucao NO TEXT no inicio e fim</li>
-<li>Fix health check thumb: testa provider configurado</li>
-<li>Fix preset: seta todos os campos ao trocar (accent, stroke)</li>
-<li>Fix JS: protecao contra null em loadConfig</li>
-<li>Fix validacao de data no sync</li>
+<li>Fix duplicate publishing: dashboard ran embedded scheduler</li>
+<li>Fix yt-dlp: fallback without cookies</li>
+<li>Fix republishing: clips with errors were not retried</li>
+<li>Kie.ai z-image fix: /jobs/createTask endpoint + prompt truncated to 400 chars</li>
+<li>Fix image prompt: NO TEXT instruction at the beginning and end</li>
+<li>Fix thumb health check: tests the configured provider</li>
+<li>Fix preset: sets all fields when switching (accent, stroke)</li>
+<li>JS fix: null protection in loadConfig</li>
+<li>Fix date validation in sync</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.9.14</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>LLM chain: 3 providers em cadeia para gerar prompt de thumbnail (fallback automatico)</li>
-<li>Multi-provider de imagem: Piramyd + Kie.ai (GPT-4o, Flux Kontext)</li>
-<li>Kie.ai API key no painel + campo modelo de imagem como texto livre</li>
-<li>Config append: novas chaves sao adicionadas automaticamente na planilha</li>
+<li>LLM chain: 3 providers in a chain to generate thumbnail prompts (automatic fallback)</li>
+<li>Multi-provider image: Piramyd + Kie.ai (GPT-4o, Flux Kontext)</li>
+<li>Kie.ai API key in the dashboard + image model field as free text</li>
+<li>Config append: new keys are automatically added to the spreadsheet</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.9.13</h3>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Painel clips: coluna Link mostra URL real da publicacao no YouTube</li>
-<li>Botao excluir ao lado da privacy (sempre visivel)</li>
-<li>Icone arquivo mudou de pasta para play (▶)</li>
-<li>Excluir clips pendentes (remove do manifest)</li>
+<li>Clips panel: the Link column shows the actual YouTube publication URL</li>
+<li>Delete button next to privacy (always visible)</li>
+<li>File icon changed to play (▶)</li>
+<li>Delete pending clips (remove from manifest)</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.9.12</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Lock na planilha: marca "publicando" antes de enviar, evita duplicatas entre processos</li>
-<li>Health bar - status do sistema (yt-dlp, Database, APIs, YouTube, Scheduler)</li>
-<li>Proximos horarios de corte/pub visiveis no dashboard</li>
-<li>Toggle "Link da live na descricao" nas configuracoes</li>
-<li>Corte roda em thread separada - nao bloqueia publicacao</li>
-<li>Changelog acessivel pelo numero da versao</li>
-<li>Sync rapido com 1 clique (sem filtros) + sync avancado separado</li>
-<li>Auto-sync: toggle ON/OFF, sincroniza lives faltantes a meia-noite</li>
+<li>Spreadsheet lock: marks as "publishing" before uploading, preventing duplicates across processes</li>
+<li>Health bar - system status (yt-dlp, Database, APIs, YouTube, Scheduler)</li>
+<li>Upcoming clip/publishing times visible in the dashboard</li>
+<li>Toggle "Link da live na descricao" in settings</li>
+<li>Cutting runs in a separate thread — it doesn't block publishing</li>
+<li>Changelog accessible via the version number</li>
+<li>Quick sync with 1 click (no filters) + separate advanced sync</li>
+<li>Auto-sync: ON/OFF toggle, syncs missing live streams at midnight</li>
 </ul>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corrigidos:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Fixed bugs:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix contador clips_publicados contando em dobro</li>
-<li>Fix crash no startup (UnboundLocalError config)</li>
-<li>Fix flood de log do yt-dlp travando terminal (filtro a cada 10%)</li>
-<li>Fix link da live na descricao retornando {video_id} literal</li>
-<li>Fix minuto do horario nao carregando no dashboard</li>
-<li>Fix publicacao perdida quando corte demorava</li>
-<li>Services systemd apontando para diretorio correto</li>
+<li>Fix clips_publicados counter double-counting</li>
+<li>Fix startup crash (UnboundLocalError config)</li>
+<li>Fix yt-dlp log flooding that froze the terminal (filter every 10%)</li>
+<li>Fix live link in description returning {video_id} literally</li>
+<li>Fix schedule minute not loading in dashboard</li>
+<li>Fix lost publishing when clipping took too long</li>
+<li>systemd services pointing to the correct directory</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.2.0</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Canais no header + painel de sync com filtros</li>
-<li>Campo minuto exato no hour picker (cortes e publicacao)</li>
-<li>Refina titulo/descricao com IA antes de publicar</li>
-<li>Server multi-thread</li>
+<li>Channels in the header + sync panel with filters</li>
+<li>Exact minute field in the hour picker (cuts and publishing)</li>
+<li>Refines the title/description with AI before publishing</li>
+<li>Multithreaded server</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v3.1.0</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Config isolado por projeto</li>
-<li>Canal destino INEMA TIA + yt-auth</li>
+<li>Project-isolated config</li>
+<li>INEMA TIA destination channel + yt-auth</li>
 <li>Thumbnails doc</li>
 </ul>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corrigidos:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Fixed bugs:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix carregamento .env</li>
+<li>Fix .env loading</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v2.1.0</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 8px 20px;color:var(--text)">
-<li>Multi-provider IA (Anthropic, Piramyd, OpenRouter)</li>
+<li>Multi-provider AI (Anthropic, Piramyd, OpenRouter)</li>
 </ul>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corrigidos:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Fixed bugs:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix publicacao scheduler</li>
+<li>Fix publishing scheduler</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v2.0.0</h3>
 <p style="color:var(--muted);margin-bottom:4px"><strong>Features:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Prompts editaveis no dashboard</li>
-<li>Paginacao de lives</li>
-<li>Geracao de thumbnails com IA</li>
-<li>Limite de clips por publicacao + status bar</li>
-<li>Scheduler automatico com horarios configuraveis</li>
+<li>Editable prompts in the dashboard</li>
+<li>Live pagination</li>
+<li>AI thumbnail generation</li>
+<li>Clip limit per post + status bar</li>
+<li>Automatic scheduler with configurable schedules</li>
 </ul>
-<p style="color:var(--muted);margin-bottom:4px"><strong>Bugs corrigidos:</strong></p>
+<p style="color:var(--muted);margin-bottom:4px"><strong>Fixed bugs:</strong></p>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Fix corte duplicado</li>
+<li>Fix duplicate cut</li>
 </ul>
 <h3 style="color:var(--accent);margin-bottom:8px">v1.0.0</h3>
 <ul style="margin:0 0 16px 20px;color:var(--text)">
-<li>Dashboard web + server para pipeline de Lives &amp; Clips</li>
-<li>Scripts CLI (yt-clip, yt-publish)</li>
+<li>Web dashboard + server for the Lives &amp; Clips pipeline</li>
+<li>CLI scripts (yt-clip, yt-publish)</li>
 <li>Docker support</li>
 </ul>
 </div>

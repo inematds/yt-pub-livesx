@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 
-<html lang="pt-BR">
+<html lang="es">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>YT-Pub Master Dashboard</title>
+<title>Panel principal de YT-Pub</title>
 <style>
   :root {
     --bg: #0f1117;
@@ -329,25 +329,25 @@
   .modal-close:hover { color: var(--text); }
 </style>
 <link href="https://inematds.github.io/yt-pub-livesx/master-dashboard/" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/yt-pub-livesx/en/master-dashboard/" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/yt-pub-livesx/es/master-dashboard/" hreflang="es" rel="alternate"/></head>
-<body><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="./" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">PT</a><a href="../en/master-dashboard/" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="../es/master-dashboard/" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<body><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../master-dashboard/" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="../../en/master-dashboard/" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="./" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">ES</a></div>
 <div class="container">
 <header>
-<h1><span>YT-Pub</span> Master Dashboard</h1>
+<h1><span>YT-Pub</span> Panel principal</h1>
 <div class="header-right">
 <span class="telegram-badge" id="telegramBadge">Telegram: --</span>
 <span class="meta">Heartbeat: <span id="countdown">--</span></span>
-<span class="meta">Atualizado: <span id="updatedAt">--</span></span>
-<button id="btnDistribuir" onclick="distribuirImports()" style="background:rgba(139,92,246,0.3);color:#a78bfa;border:1px solid #a78bfa">Distribuir Imports</button>
-<button onclick="checkAllOAuth()" style="background:#065f46">Testar Todos OAuth</button>
-<button class="terminal-btn" onclick="toggleTerminal(null)">Terminal Geral</button>
-<button onclick="refresh()">Atualizar</button>
+<span class="meta">Actualizado: <span id="updatedAt">--</span></span>
+<button id="btnDistribuir" onclick="distribuirImports()" style="background:rgba(139,92,246,0.3);color:#a78bfa;border:1px solid #a78bfa">Distribuir imports</button>
+<button onclick="checkAllOAuth()" style="background:#065f46">Probar todos los OAuth</button>
+<button class="terminal-btn" onclick="toggleTerminal(null)">Terminal general</button>
+<button onclick="refresh()">Actualizar</button>
 </div>
 </header>
 <div class="summary" id="summary"></div>
 <div class="grid" id="grid"></div>
 <!-- Auth extras -->
 <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
-<h3 style="font-size:0.9rem;color:var(--muted);margin-bottom:12px">Validar Gmail (projeto inema-tds)</h3>
+<h3 style="font-size:0.9rem;color:var(--muted);margin-bottom:12px">Validar Gmail (proyecto inema-tds)</h3>
 <div id="extraAuth" style="display:flex;gap:12px;flex-wrap:wrap">
 <div class="instance" id="extra-card-vip" style="flex:1;min-width:200px;cursor:default;padding:12px"></div>
 <div class="instance" id="extra-card-pix" style="flex:1;min-width:200px;cursor:default;padding:12px"></div>
@@ -369,22 +369,22 @@
 </div>
 <div class="terminal-tabs" id="terminalTabs"></div>
 <div class="terminal-body">
-<div class="terminal-output" id="terminalOutput">Pronto. Digite um comando abaixo.\n\nComandos permitidos: journalctl, systemctl, ps, ls, cat, head, tail, grep, wc, df, du, free, uptime, date, sqlite3, python3, pip, which, echo, find, stat</div>
+<div class="terminal-output" id="terminalOutput">Listo. Escribe un comando abajo.\n\nComandos permitidos: journalctl, systemctl, ps, ls, cat, head, tail, grep, wc, df, du, free, uptime, date, sqlite3, python3, pip, which, echo, find, stat</div>
 <div class="terminal-input-row">
-<span class="prefix" id="terminalPrefix">geral $</span>
+<span class="prefix" id="terminalPrefix">general $</span>
 <input id="terminalInput" onkeydown="if(event.key==='Enter')execCmd()" placeholder="comando..." type="text"/>
-<button onclick="execCmd()">Executar</button>
+<button onclick="execCmd()">Ejecutar</button>
 </div>
 <div class="quick-cmds">
-<button onclick="quickCmd('systemctl --user list-units yt-* --all')">services</button>
+<button onclick="quickCmd('systemctl --user list-units yt-* --all')">servicios</button>
 <button onclick="quickCmd('journalctl --user -u yt-scheduler --no-pager -n 30')">logs sched</button>
 <button onclick="quickCmd('ps aux | grep scheduler | grep -v grep')">ps scheduler</button>
-<button onclick="quickCmd('df -h /')">disk</button>
-<button onclick="quickCmd('free -h')">memory</button>
-<button onclick="quickCmd('uptime')">uptime</button>
+<button onclick="quickCmd('df -h /')">disco</button>
+<button onclick="quickCmd('free -h')">memoria</button>
+<button onclick="quickCmd('uptime')">tiempo activo</button>
 <button onclick="quickCmd('ls lives/ 2&gt;/dev/null | wc -l')">lives count</button>
 <button count(*)="" from="" onclick="quickCmd('sqlite3 data/lives.db \" publicados\"')"="" select="">total pub</button>
-<button 5\"')"="" by="" clip_titulo,data_publicacao="" data_publicacao="" desc="" from="" limit="" onclick="quickCmd('sqlite3 data/lives.db \" order="" publicados="" select="">ultimos 5</button>
+<button 5\"')"="" by="" clip_titulo,data_publicacao="" data_publicacao="" desc="" from="" limit="" onclick="quickCmd('sqlite3 data/lives.db \" order="" publicados="" select="">últimos 5</button>
 </div>
 </div>
 </div>
