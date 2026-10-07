@@ -706,7 +706,7 @@
 
 <div class="container">
   <header>
-    <h1><span>INEMA</span> Lives & Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.33.32</a></small>
+    <h1><span>INEMA</span> Lives & Clips <small style="font-size:0.5em;color:var(--muted)">- <span id="instanceName"></span> <a href="#" onclick="openModal('modalChangelog');return false" style="color:var(--accent);text-decoration:none" title="Ver changelog">v3.34.32</a></small>
       <span id="headerCanais" style="display:block;font-size:0.4em;font-weight:normal;margin-top:4px"></span>
     </h1>
     <div class="header-actions">
@@ -1687,6 +1687,15 @@
           </select>
           <span class="hint">No modo viral, se o Codex falhar, usa o banner padrao abaixo.</span>
         </div>
+        <div class="config-field" style="max-width:420px;margin-bottom:10px">
+          <label>Rosto do apresentador na thumb viral</label>
+          <select id="cfgEnrichThumbRosto">
+            <option value="auto">Quando fizer sentido (IA decide)</option>
+            <option value="sempre">Sempre</option>
+            <option value="nunca">Nunca</option>
+          </select>
+          <span class="hint">Usa a pessoa da imagem de fundo abaixo como referencia do rosto.</span>
+        </div>
         <p style="color:var(--muted);font-size:0.82em;margin-bottom:8px">Imagem de fundo do banner padrao. Se nao definida, usa gradiente escuro.</p>
         <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
           <div>
@@ -2090,6 +2099,7 @@ async function saveEnrich(btn) {
     enrich_horarios:    hoursToString('enrich'),
     enrich_minuto:      document.getElementById('cfgEnrichMinuto').value,
     enrich_thumb_mode:  document.getElementById('cfgEnrichThumbMode').value,
+    enrich_thumb_rosto: document.getElementById('cfgEnrichThumbRosto').value,
   };
   // Save prompt to file via prompts endpoint
   const promptText = document.getElementById('cfgEnrichPrompt').value;
@@ -3543,6 +3553,7 @@ async function loadConfig() {
   buildHourPicker('enrich');
   if (c.enrich_minuto) document.getElementById('cfgEnrichMinuto').value = c.enrich_minuto;
   document.getElementById('cfgEnrichThumbMode').value = c.enrich_thumb_mode || 'codex';
+  document.getElementById('cfgEnrichThumbRosto').value = c.enrich_thumb_rosto || 'auto';
 
   // Load enrich background preview
   try {
@@ -4310,6 +4321,11 @@ loadAll();
       <button onclick="closeModal('modalChangelog')" style="background:none;border:none;color:var(--muted);font-size:1.2em;cursor:pointer">X</button>
     </div>
     <div class="modal-body" style="padding:16px;overflow-y:auto;font-size:0.85em;line-height:1.8">
+      <h3 style="color:var(--accent);margin-bottom:8px">v3.34.32</h3>
+      <p style="color:var(--muted);margin-bottom:4px"><strong>Melhoria:</strong></p>
+      <ul style="margin:0 0 16px 20px;color:var(--text)">
+        <li>Thumb viral com o rosto do apresentador quando fizer sentido (IA decide; ou sempre/nunca). Referencia = imagem de fundo do banner</li>
+      </ul>
       <h3 style="color:var(--accent);margin-bottom:8px">v3.33.32</h3>
       <p style="color:var(--muted);margin-bottom:4px"><strong>Feature:</strong></p>
       <ul style="margin:0 0 16px 20px;color:var(--text)">

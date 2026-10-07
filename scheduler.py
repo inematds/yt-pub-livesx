@@ -621,8 +621,9 @@ def update_video_metadata(video_id, title, description):
 CODEX_BIN = os.path.expanduser('~/.npm-global/bin/codex')
 
 
-def _arte_codex(cena, timeout=900):
+def _arte_codex(cena, timeout=900, rosto=None):
     """Gera a arte 16:9 (sem texto) da thumb no Codex image_gen, pela assinatura.
+    rosto: imagem de referencia do apresentador (usa o mesmo rosto na cena).
     Retorna uma PIL.Image 1280x720. Levanta excecao se o Codex nao gerar."""
     import shutil
     from PIL import Image, ImageOps
@@ -639,11 +640,22 @@ def _arte_codex(cena, timeout=900):
         'sem logo, sem interface de usuario, nao e captura de tela.\n'
         'Ao terminar, responda so com o caminho do arquivo.'
     )
+    if rosto:
+        prompt += (
+            '\n\nA imagem anexada e a referencia do apresentador do canal. Se ela mostrar uma pessoa, '
+            'coloque ESSA MESMA pessoa (mesmo rosto, mesma idade, oculos/bone/barba se tiver) na cena, '
+            'em primeiro plano no lado direito, com expressao forte reagindo ao assunto; o restante da '
+            'cena vai atras ou ao lado dela. Nao copie o fundo da referencia. Se a referencia nao '
+            'tiver pessoa, ignore-a.'
+        )
     try:
         out = os.path.join(work, '_codex_out.txt')
+        cmd = [codex_bin, 'exec', '--skip-git-repo-check',
+               '--dangerously-bypass-approvals-and-sandbox', '-o', out]
+        if rosto:
+            cmd += ['-i', rosto]
         r = subprocess.run(
-            [codex_bin, 'exec', '--skip-git-repo-check',
-             '--dangerously-bypass-approvals-and-sandbox', '-o', out, '-'],
+            cmd + ['-'],
             input=prompt, cwd=work, capture_output=True, text=True, timeout=timeout)
         png = os.path.join(work, 'arte.png')
         if not os.path.exists(png) or os.path.getsize(png) == 0:
@@ -655,7 +667,7 @@ def _arte_codex(cena, timeout=900):
         shutil.rmtree(work, ignore_errors=True)
 
 
-def generate_enrich_thumbnail(title, config, frase='', cena=''):
+def generate_enrich_thumbnail(title, config, frase='', cena='', rosto=False):
     """Thumb das lives enriquecidas.
     enrich_thumb_mode=codex (default): arte viral do Codex image_gen + frase curta.
     enrich_thumb_mode=fundo: imagem de fundo fixa + titulo (banner padrao).
@@ -671,7 +683,13 @@ def generate_enrich_thumbnail(title, config, frase='', cena=''):
     if config.get('enrich_thumb_mode', 'codex') == 'codex':
         try:
             log('  Thumb viral: gerando arte no Codex image_gen...')
-            bg = _arte_codex(cena or f'Assunto da live: {title}')
+            # enrich_thumb_rosto: auto (IA decide) | sempre | nunca
+            modo_rosto = config.get('enrich_thumb_rosto', 'auto')
+            usar_rosto = modo_rosto == 'sempre' or (modo_rosto == 'auto' and rosto)
+            ref = default_bg_path if usar_rosto and os.path.exists(default_bg_path) else None
+            if ref:
+                log('  Thumb viral: com o rosto do apresentador (referencia thumb_default.jpg)')
+            bg = _arte_codex(cena or f'Assunto da live: {title}', rosto=ref)
             if frase:
                 texto = frase[:70]
             log('  Thumb viral: arte do Codex OK')
@@ -766,7 +784,10 @@ def enrich_live_with_ai(video_id, data_live, duracao_min, transcript_text, confi
             '- "thumb_frase": 2 a 4 palavras de impacto para a thumbnail (gancho viral, '
             'curiosidade ou beneficio), sem ponto final, sem aspas\n'
             '- "thumb_cena": descricao visual em portugues de UMA cena-imagem marcante sobre o '
-            'assunto principal da live, sem nenhum texto na imagem'
+            'assunto principal da live, sem nenhum texto na imagem\n'
+            '- "thumb_rosto": true se a thumb fica mais forte com o rosto do apresentador reagindo '
+            '(opiniao, teste, reacao, polemica, tutorial pessoal); false se o assunto se sustenta '
+            'so com o objeto/cena'
         )
 
     try:
@@ -793,6 +814,7 @@ def enrich_live_with_ai(video_id, data_live, duracao_min, transcript_text, confi
             if extras is not None:
                 extras['frase'] = str(refined.get('thumb_frase', '') or '').strip()
                 extras['cena'] = str(refined.get('thumb_cena', '') or '').strip()
+                extras['rosto'] = str(refined.get('thumb_rosto', '')).strip().lower() in ('true', '1', 'sim', 'yes')
             if new_title:
                 log(f'  Titulo gerado: {new_title[:60]}')
                 return new_title, new_desc
@@ -925,7 +947,8 @@ def _enrich_single_live(vid, live, config):
         update_status('enriquecendo', f'Thumbnail: {vid}', vid, step='thumbnail')
         cena = thumb_extras.get('cena') or f'Assunto da live: {new_title}. {(new_desc or "")[:300]}'
         thumb_path = generate_enrich_thumbnail(new_title, config,
-                                               frase=thumb_extras.get('frase', ''), cena=cena)
+                                               frase=thumb_extras.get('frase', ''), cena=cena,
+                                               rosto=thumb_extras.get('rosto', False))
         if thumb_path and os.path.exists(thumb_path):
             thumbs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lives', 'thumbs')
             os.makedirs(thumbs_dir, exist_ok=True)
