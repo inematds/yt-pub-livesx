@@ -99,6 +99,7 @@
 <a class="sec" href="#fluxo">Como funciona</a>
 <a class="sec" href="#guia">Guia de uso</a>
 <a class="sec" href="#exemplos">Exemplos</a>
+<a class="sec" href="#thumb">Thumb viral</a>
 <a class="sec" href="#roadmap">Roadmap</a>
 <button aria-label="Alternar tema" class="tgl" id="themeToggle" title="Alternar tema">🌙</button>
 <a class="btn" href="https://github.com/inematds/yt-pub-livesx" rel="noopener" target="_blank">GitHub</a>
@@ -215,6 +216,13 @@
 <div class="card"><h3>Import de vídeos prontos</h3><p>Largue arquivos em <code>imports/</code> e o <code>import_worker</code> os transforma em fila do pipeline — thumbnail e publicação inclusos.</p></div>
 <div class="card"><h3>Deploy em VPS com SSH tunnel</h3><p>Habilite lingering, rode as duas partes e acesse os dashboards via <code>ssh -L</code> sem expor portas publicamente.</p></div>
 </div>
+</div></section>
+<section id="thumb"><div class="wrap">
+<span class="chip">Novo · out/2026</span>
+<h2>Thumb viral das lives, feita pelo Codex</h2>
+<p class="sub">Quando uma live é enriquecida, a IA escreve título, descrição, uma frase de impacto e uma cena. O Codex (image_gen, pela assinatura) desenha a arte e o design do canal entra por cima: marca, fonte e cores continuam os mesmos.</p>
+<div class="grid g3"><div class="card"><h3>Rosto quando faz sentido</h3><p>Em opinião, teste ou reação, a IA coloca o apresentador na cena, usando a imagem de fundo do canal como referência do rosto. Também dá para escolher Sempre ou Nunca.</p></div><div class="card"><h3>Banner padrão como reserva</h3><p>Se o Codex falhar, sai o banner de antes (fundo fixo + título). O estilo é escolhido na aba Enrich Lives do dashboard.</p></div><div class="card"><h3>Título e descrição completos</h3><p>Lives sem título também são enriquecidas. Lives com título mas sem descrição no YouTube recebem só a descrição; título e thumb ficam como estão.</p></div></div>
+<div class="grid g2" style="margin-top:22px"><figure style="margin:0"><img src="assets/thumb-viral-rosto.jpg" alt="Viral com rosto: a IA decidiu" loading="lazy" style="width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--line)"><figcaption style="color:var(--mut);font-size:.85em;margin-top:6px">Viral com rosto: a IA decidiu</figcaption></figure><figure style="margin:0"><img src="assets/thumb-viral-rosto2.jpg" alt="Viral com rosto: modo Sempre" loading="lazy" style="width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--line)"><figcaption style="color:var(--mut);font-size:.85em;margin-top:6px">Viral com rosto: modo Sempre</figcaption></figure><figure style="margin:0"><img src="assets/thumb-viral-cena.jpg" alt="Viral só com a cena" loading="lazy" style="width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--line)"><figcaption style="color:var(--mut);font-size:.85em;margin-top:6px">Viral só com a cena</figcaption></figure><figure style="margin:0"><img src="assets/thumb-banner-padrao.jpg" alt="Banner padrão (reserva)" loading="lazy" style="width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--line)"><figcaption style="color:var(--mut);font-size:.85em;margin-top:6px">Banner padrão (reserva)</figcaption></figure></div>
 </div></section>
 <section id="roadmap"><div class="wrap">
 <span class="chip">Roadmap</span>
