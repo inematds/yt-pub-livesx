@@ -618,16 +618,71 @@ def update_video_metadata(video_id, title, description):
     return result
 
 
-def generate_enrich_thumbnail(title, config):
-    """Generate thumbnail with default background + text overlay using Design Thumb settings."""
+CODEX_BIN = os.path.expanduser('~/.npm-global/bin/codex')
+
+
+def _arte_codex(cena, timeout=900):
+    """Gera a arte 16:9 (sem texto) da thumb no Codex image_gen, pela assinatura.
+    Retorna uma PIL.Image 1280x720. Levanta excecao se o Codex nao gerar."""
+    import shutil
+    from PIL import Image, ImageOps
+    codex_bin = shutil.which('codex') or CODEX_BIN
+    work = tempfile.mkdtemp(prefix='enrich-arte-')
+    prompt = (
+        'Use sua ferramenta de geracao de imagem (image_gen) para criar UMA imagem horizontal '
+        '(paisagem, 16:9) e salve o PNG como arte.png neste diretorio. Nao crie nem edite nenhum outro arquivo.\n\n'
+        f'Conteudo da imagem: thumbnail VIRAL de YouTube. {cena}\n'
+        'Estilo de thumb de alto clique: um unico sujeito principal grande e nitido no lado DIREITO, '
+        'expressao ou acao forte, alto contraste, cores saturadas, luz de recorte, profundidade de campo, '
+        'lado ESQUERDO e parte de baixo mais escuros e limpos (ali vai o texto depois).\n'
+        'SEM TEXTO de qualquer tipo: sem palavras, sem letras, sem numeros, sem legendas, sem marca d\'agua, '
+        'sem logo, sem interface de usuario, nao e captura de tela.\n'
+        'Ao terminar, responda so com o caminho do arquivo.'
+    )
+    try:
+        out = os.path.join(work, '_codex_out.txt')
+        r = subprocess.run(
+            [codex_bin, 'exec', '--skip-git-repo-check',
+             '--dangerously-bypass-approvals-and-sandbox', '-o', out, '-'],
+            input=prompt, cwd=work, capture_output=True, text=True, timeout=timeout)
+        png = os.path.join(work, 'arte.png')
+        if not os.path.exists(png) or os.path.getsize(png) == 0:
+            raise RuntimeError(f'codex nao gerou arte.png (code {r.returncode}): '
+                               f'{(r.stderr or r.stdout)[-200:]}')
+        img = Image.open(png).convert('RGB')
+        return ImageOps.fit(img, (1280, 720), Image.LANCZOS)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def generate_enrich_thumbnail(title, config, frase='', cena=''):
+    """Thumb das lives enriquecidas.
+    enrich_thumb_mode=codex (default): arte viral do Codex image_gen + frase curta.
+    enrich_thumb_mode=fundo: imagem de fundo fixa + titulo (banner padrao).
+    Se o Codex falhar, cai no banner padrao."""
     import types
     import random
     from PIL import Image
 
     default_bg_path = os.path.join(CONFIG_DIR, 'thumb_default.jpg')
+    texto = title[:70]
+    bg = None
+
+    if config.get('enrich_thumb_mode', 'codex') == 'codex':
+        try:
+            log('  Thumb viral: gerando arte no Codex image_gen...')
+            bg = _arte_codex(cena or f'Assunto da live: {title}')
+            if frase:
+                texto = frase[:70]
+            log('  Thumb viral: arte do Codex OK')
+        except Exception as e:
+            log(f'  Thumb viral falhou ({e}), usando banner padrao')
+            bg = None
 
     # Load or generate default background
-    if os.path.exists(default_bg_path):
+    if bg is not None:
+        pass
+    elif os.path.exists(default_bg_path):
         bg = Image.open(default_bg_path).resize((1280, 720), Image.LANCZOS).convert('RGB')
     else:
         bg = Image.new('RGB', (1280, 720))
@@ -681,12 +736,13 @@ def generate_enrich_thumbnail(title, config):
 
     # Compose thumbnail with title text
     thumb_path = f'/tmp/yt_enrich_{int(time.time())}.jpg'
-    yt_thumb.compose_thumbnail(bg, title[:70], '', thumb_path)
+    yt_thumb.compose_thumbnail(bg, texto, '', thumb_path)
     return thumb_path
 
 
-def enrich_live_with_ai(video_id, data_live, duracao_min, transcript_text, config):
-    """Use AI to generate title and description based on the live's transcript."""
+def enrich_live_with_ai(video_id, data_live, duracao_min, transcript_text, config, extras=None):
+    """Use AI to generate title and description based on the live's transcript.
+    Se extras (dict) vier, pede tambem frase/cena da thumb viral e grava nele."""
     prompt_file = os.path.join(CONFIG_DIR, 'prompt_enrich.txt')
     if not os.path.exists(prompt_file):
         log(f'  prompt_enrich.txt not found, skipping AI enrichment')
@@ -704,6 +760,14 @@ def enrich_live_with_ai(video_id, data_live, duracao_min, transcript_text, confi
         f'=== TRANSCRICAO DA LIVE ===\n{transcript_text}'
     )
     full_prompt = f'{system_prompt}\n\n---\n\n{user_msg}'
+    if extras is not None:
+        full_prompt += (
+            '\n\n---\n\nNo mesmo JSON, inclua tambem:\n'
+            '- "thumb_frase": 2 a 4 palavras de impacto para a thumbnail (gancho viral, '
+            'curiosidade ou beneficio), sem ponto final, sem aspas\n'
+            '- "thumb_cena": descricao visual em portugues de UMA cena-imagem marcante sobre o '
+            'assunto principal da live, sem nenhum texto na imagem'
+        )
 
     try:
         log(f'  Gerando titulo/descricao com IA para {video_id}...')
@@ -726,6 +790,9 @@ def enrich_live_with_ai(video_id, data_live, duracao_min, transcript_text, confi
             refined = json.loads(json_match.group())
             new_title = refined.get('title', '')
             new_desc = refined.get('description', '')
+            if extras is not None:
+                extras['frase'] = str(refined.get('thumb_frase', '') or '').strip()
+                extras['cena'] = str(refined.get('thumb_cena', '') or '').strip()
             if new_title:
                 log(f'  Titulo gerado: {new_title[:60]}')
                 return new_title, new_desc
@@ -734,6 +801,89 @@ def enrich_live_with_ai(video_id, data_live, duracao_min, transcript_text, confi
     except Exception as e:
         log(f'  Erro ao gerar com IA: {e}')
         return None, None
+
+
+def _titulo_generico(live):
+    """Live sem titulo de verdade: vazio ou o generico 'INEMA'."""
+    return (live.get('titulo', '') or '').strip().upper() in ('', 'INEMA')
+
+
+DESC_OK_FILE = os.path.join(LIVES_DIR, 'desc_ok.json')
+
+
+def _lives_sem_descricao(lives):
+    """Lives com titulo proprio mas sem descricao no YouTube.
+    Confere via videos.list (50 ids por chamada); quem ja tem descricao (ou nao
+    existe mais) vai pro cache lives/desc_ok.json e nao e conferido de novo."""
+    try:
+        with open(DESC_OK_FILE) as f:
+            ok = set(json.load(f))
+    except (OSError, ValueError):
+        ok = set()
+    cand = [l for l in lives
+            if not (l.get('video_id', '') or '').startswith('import_')
+            and l.get('observacoes', '') not in ('enriquecida', 'refazer_enrich')
+            and not _titulo_generico(l)
+            and l.get('video_id') not in ok]
+    if not cand:
+        return []
+    sem = []
+    try:
+        token = get_access_token()
+        for i in range(0, len(cand), 50):
+            lote = cand[i:i + 50]
+            ids = ','.join(l['video_id'] for l in lote)
+            req = urllib.request.Request(
+                f'https://www.googleapis.com/youtube/v3/videos?part=snippet&id={ids}')
+            req.add_header('Authorization', f'Bearer {token}')
+            resp = json.loads(urllib.request.urlopen(req, timeout=60).read())
+            descs = {it['id']: (it.get('snippet', {}).get('description') or '').strip()
+                     for it in resp.get('items', [])}
+            for l in lote:
+                vid = l['video_id']
+                if vid in descs and not descs[vid]:
+                    sem.append(l)
+                else:
+                    ok.add(vid)  # tem descricao, ou nao existe/nao e deste canal
+    except Exception as e:
+        log(f'  Enrich: falha ao conferir descricoes no YouTube: {e}')
+    try:
+        os.makedirs(os.path.dirname(DESC_OK_FILE), exist_ok=True)
+        with open(DESC_OK_FILE, 'w') as f:
+            json.dump(sorted(ok), f)
+    except OSError:
+        pass
+    if sem:
+        log(f'  Enrich: {len(sem)} lives com titulo mas sem descricao no YouTube')
+    return sem
+
+
+def _enrich_so_descricao(vid, live, config):
+    """Live com titulo proprio e sem descricao: gera so a descricao.
+    Mantem o titulo e a thumb que ja estao no YouTube."""
+    condensed_file = os.path.join(LIVES_DIR, vid, 'condensed.txt')
+    if not os.path.exists(condensed_file):
+        log(f'  Enrich desc: sem transcricao para {vid}, espera o corte')
+        return False
+    with open(condensed_file) as f:
+        transcript = f.read()
+    if not transcript:
+        return False
+    titulo = live.get('titulo', '').strip()
+    update_status('enriquecendo', f'Gerando descricao: {vid}', vid, step='analise')
+    _, new_desc = enrich_live_with_ai(vid, live.get('data_live', ''),
+                                      live.get('duracao_min', '0'), transcript, config)
+    if not new_desc:
+        log(f'  Enrich desc: IA nao gerou descricao para {vid}')
+        return False
+    try:
+        update_video_metadata(vid, titulo, new_desc)
+    except Exception as yt_err:
+        log(f'  Enrich desc: erro ao atualizar YouTube para {vid}: {yt_err}')
+        return False
+    db.update_live(vid, observacoes='enriquecida')
+    log(f'  Enrich desc OK: {vid} ({titulo[:50]})')
+    return True
 
 
 def _enrich_single_live(vid, live, config):
@@ -756,7 +906,9 @@ def _enrich_single_live(vid, live, config):
 
     # Generate title + description with AI
     update_status('enriquecendo', f'Gerando titulo/descricao: {vid}', vid, step='analise')
-    new_title, new_desc = enrich_live_with_ai(vid, data_live, duracao, transcript, config)
+    thumb_extras = {}
+    new_title, new_desc = enrich_live_with_ai(vid, data_live, duracao, transcript, config,
+                                              extras=thumb_extras)
     if not new_title:
         log(f'  Enrich: IA nao gerou titulo para {vid}')
         return False
@@ -771,7 +923,9 @@ def _enrich_single_live(vid, live, config):
     # Generate and upload thumbnail
     try:
         update_status('enriquecendo', f'Thumbnail: {vid}', vid, step='thumbnail')
-        thumb_path = generate_enrich_thumbnail(new_title, config)
+        cena = thumb_extras.get('cena') or f'Assunto da live: {new_title}. {(new_desc or "")[:300]}'
+        thumb_path = generate_enrich_thumbnail(new_title, config,
+                                               frase=thumb_extras.get('frase', ''), cena=cena)
         if thumb_path and os.path.exists(thumb_path):
             thumbs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lives', 'thumbs')
             os.makedirs(thumbs_dir, exist_ok=True)
@@ -799,19 +953,30 @@ def process_enrich(config):
     max_por_vez = int(config.get('enrich_max_por_vez', '3'))
     lives = get_pending_lives()
 
-    # Filter: lives with generic title OR marked for re-enrichment
+    # Filter: lives with generic/empty title OR marked for re-enrichment
     genericas = [
         l for l in lives
         if not (l.get('video_id', '') or '').startswith('import_')
         and (
-            (l.get('titulo', '').strip().upper() == 'INEMA' and l.get('observacoes', '') != 'enriquecida')
+            (_titulo_generico(l) and l.get('observacoes', '') != 'enriquecida')
             or l.get('observacoes', '') == 'refazer_enrich'
         )
     ]
 
+    # Lives com titulo proprio mas sem descricao: completa so a descricao
+    sem_desc = _lives_sem_descricao(lives)
+    desc_ok = 0
+    for live in sem_desc[:max_por_vez]:
+        try:
+            if _enrich_so_descricao(live['video_id'], live, config):
+                desc_ok += 1
+        except Exception as e:
+            log(f'  Erro ao completar descricao de {live.get("video_id")}: {e}')
+
     if not genericas:
         log('  Nenhuma live para enriquecer')
-        return {'enriched': 0, 'errors': 0}
+        update_status('idle', f'Enrich concluido: {desc_ok} descricoes completadas')
+        return {'enriched': desc_ok, 'errors': 0}
 
     log(f'  {len(genericas)} lives para enriquecer, processando ate {max_por_vez}')
     update_status('enriquecendo', f'Enriquecendo {min(len(genericas), max_por_vez)} lives...')
@@ -862,8 +1027,8 @@ def process_enrich(config):
             log(f'  Erro ao enriquecer {vid}: {e}')
             errors += 1
 
-    update_status('idle', f'Enrich concluido: {enriched} OK, {errors} erros')
-    return {'enriched': enriched, 'errors': errors}
+    update_status('idle', f'Enrich concluido: {enriched} OK, {desc_ok} descricoes, {errors} erros')
+    return {'enriched': enriched + desc_ok, 'errors': errors}
 
 
 def update_live_status(video_id, status_field, new_status, extra=None):
@@ -930,7 +1095,7 @@ def process_cortes(config):
             enrich_auto = config.get('enrich_auto', 'false') == 'true'
             enrich_paused = config.get('pipeline_enrich_paused', 'false') == 'true'
             needs_enrich = (
-                live.get('titulo', '').strip().upper() == 'INEMA'
+                _titulo_generico(live)
                 and live.get('observacoes', '') != 'enriquecida'
             )
             if enrich_auto and not enrich_paused and needs_enrich:
