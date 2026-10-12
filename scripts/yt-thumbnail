@@ -258,19 +258,45 @@ def generate_prompt_json(title, description=''):
     raise last_err
 
 
+_TEXTO_RE = None
+
+
+def _sem_mencao_a_texto(campo):
+    """Tira do campo visual os trechos que falam de texto/manchete/titulo/espaco para texto.
+    O flux le "space for headline text" e desenha ele mesmo uma manchete de letras sem nexo
+    (ex.: it0oYGJiRW0); o texto real e aplicado depois pelo Pillow."""
+    global _TEXTO_RE
+    import re
+    if _TEXTO_RE is None:
+        _TEXTO_RE = re.compile(r'\b(text|texts|headline|headlines|title|titles|typography|letters?|'
+                               r'words?|caption|captions|font|lettering|writing|written|label|labels|'
+                               r'receipts?|percentage|percent|%|numbers?|sign|signs|signage|'
+                               r'banner|poster|posters)\b|%', re.I)
+    partes = re.split(r'(?<=[;.,])\s+', str(campo or ''))
+    limpas = [p for p in partes if not _TEXTO_RE.search(p)]
+    return ' '.join(limpas).strip(' ,;')
+
+
 def build_image_prompt(prompt_data):
     """Monta o prompt final para o gerador de imagem."""
+    prompt_data = dict(prompt_data)
+    for k in ('cena_principal', 'fundo_tematico', 'composicao'):
+        prompt_data[k] = _sem_mencao_a_texto(prompt_data.get(k, ''))
+    prompt_data['composicao'] = ((prompt_data['composicao'] + '; ') if prompt_data['composicao'] else '') + \
+        'one side of the frame darker and empty (plain dark background, nothing drawn there)'
     return (
+        # Sem "YouTube thumbnail": o flux associa a manchete e desenha letras sem nexo
         f'IMPORTANT: DO NOT include any text, letters, words or writing in the image. '
-        f'Professional YouTube thumbnail, photorealistic, cinematic lighting. '
+        f'Cinematic photograph, photorealistic, cinematic lighting. '
         f'Scene: {prompt_data["cena_principal"]}. '
         f'Background: {prompt_data["fundo_tematico"]}. '
         f'Color scheme: {prompt_data["cores_dominantes"]}. '
         f'Composition: {prompt_data["composicao"]}. '
         f'Style: Realistic photo with cinematic lighting, high contrast, dramatic shadows, '
-        f'optimized for YouTube thumbnail. Aspect ratio 16:9. '
+        f'wide 16:9 frame. '
         f'NO TEXT IN IMAGE. '
-        f'Do not include: text, letters, words, writing, {prompt_data["negative_prompt"]}'
+        f'Do not include: text, letters, words, writing, '
+        f'{_sem_mencao_a_texto(prompt_data.get("negative_prompt", "")) or "watermark, logos"}'
     )
 
 
