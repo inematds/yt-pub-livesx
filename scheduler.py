@@ -627,7 +627,9 @@ def _arte_codex(cena, timeout=900, rosto=None):
     Retorna uma PIL.Image 1280x720. Levanta excecao se o Codex nao gerar."""
     import shutil
     from PIL import Image, ImageOps
-    codex_bin = shutil.which('codex') or CODEX_BIN
+    # O PATH do systemd poe /usr/bin antes do npm-global: /usr/bin/codex e antigo (0.116)
+    # e morre com o service_tier do config.toml. Preferir o codex atual do npm-global.
+    codex_bin = CODEX_BIN if os.path.exists(CODEX_BIN) else (shutil.which('codex') or CODEX_BIN)
     work = tempfile.mkdtemp(prefix='enrich-arte-')
     prompt = (
         'Use sua ferramenta de geracao de imagem (image_gen) para criar UMA imagem horizontal '
