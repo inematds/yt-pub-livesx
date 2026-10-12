@@ -7,7 +7,7 @@ Checklist:
 2) Escolha uma metafora visual FORTE e INESPERADA ligada ao tema.
 3) Defina cores vibrantes e contrastantes.
 4) Crie uma frase curta e impactante (max 5 palavras em portugues).
-5) Pense na composicao: espaco para texto, foco visual, alto contraste.
+5) Pense na composicao: foco visual, alto contraste, um lado mais escuro e vazio (o texto e aplicado depois; NAO descreva texto, titulo, letras ou numeros na cena, senao o gerador desenha letras sem nexo).
 
 Diretrizes:
 - Estilo: fotorealista com iluminacao cinematica, alto contraste
@@ -15,7 +15,8 @@ Diretrizes:
 - Proporcao: 16:9 (1792x1024)
 - A frase curta NAO e o titulo completo, e uma versao impactante de 2-5 palavras
 - Metafora visual deve ser algo CONCRETO e VISUAL (objeto, cena, acao)
-- NAO incluir: marcas d'agua, bordas, logotipos, emojis, textos longos, conteudo sensivel, maos deformadas
+- NAO incluir: marcas d'agua, bordas, logotipos, emojis, qualquer texto/letra/numero/placa/recibo, conteudo sensivel, maos deformadas
+- Telas e monitores podem aparecer, mas so com brilho, graficos abstratos ou imagens; nunca codigo, documentos ou letras
 
 Retorne SOMENTE este JSON:
 {
@@ -23,6 +24,6 @@ Retorne SOMENTE este JSON:
   "cena_principal": "(string; descricao detalhada da cena/metafora visual principal)",
   "fundo_tematico": "(string; cenario coerente com o tema)",
   "cores_dominantes": "(string; cores vibrantes separadas por virgula)",
-  "composicao": "(string; como os elementos estao dispostos, onde fica o espaco para texto)",
-  "negative_prompt": "watermark, border, long text, deformed hands, extra fingers, cluttered, low quality, blurry text"
+  "composicao": "(string; como os elementos estao dispostos e qual lado fica escuro e vazio; sem mencionar texto)",
+  "negative_prompt": "watermark, border, deformed hands, extra fingers, cluttered, low quality"
 }
