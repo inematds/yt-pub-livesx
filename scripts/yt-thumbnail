@@ -220,7 +220,11 @@ def generate_prompt_json(title, description=''):
     user_msg += ('\n\nIMPORTANTE: escreva os campos visuais '
                  '(cena_principal, fundo_tematico, cores_dominantes, composicao, '
                  'negative_prompt) EM INGLES. Os campos de texto que aparecem na '
-                 'thumbnail continuam em portugues.')
+                 'thumbnail continuam em portugues.'
+                 '\nA cena NAO pode ter nada com escrita: sem telas, monitores, codigo, '
+                 'documentos, livros, placas, cartazes ou interfaces. Mostre o assunto com '
+                 'pessoas, objetos, simbolos, luz e formas abstratas (o gerador de imagem '
+                 'desenha letras falsas em qualquer superficie escrita).')
 
     messages = [
         {'role': 'system', 'content': SYSTEM_PROMPT},
@@ -852,6 +856,47 @@ def compose_thumbnail(bg, frase_curta, cores_str, output_path):
     return output_path
 
 
+_OCR = None
+THUMB_TEXTO_TENTATIVAS = int(os.environ.get('THUMB_TEXTO_TENTATIVAS', '3'))
+
+
+def textos_na_imagem(img):
+    """Textos que o OCR local (rapidocr, CPU) acha na arte gerada. Lista vazia = limpa.
+    None = detector indisponivel (a checagem e pulada)."""
+    global _OCR
+    try:
+        import numpy as np
+        if _OCR is None:
+            from rapidocr_onnxruntime import RapidOCR
+            _OCR = RapidOCR()
+        res, _ = _OCR(np.array(img.convert('RGB'))[:, :, ::-1])
+    except Exception as e:
+        print(f'  [texto] detector indisponivel ({e}), sem checagem', flush=True)
+        return None
+    # Geradores escrevem letras falsas; qualquer trecho com 2+ caracteres e confianca razoavel conta
+    return [t for _, t, sc in (res or []) if len(t.strip()) >= 2 and float(sc) >= 0.6]
+
+
+def generate_clean_image(image_prompt):
+    """Gera a arte e refaz se vier com texto (ate THUMB_TEXTO_TENTATIVAS).
+    Se todas vierem com texto, levanta excecao (o chamador usa o fundo liso)."""
+    prompt = image_prompt
+    for tentativa in range(1, THUMB_TEXTO_TENTATIVAS + 1):
+        img = generate_ai_image(prompt)
+        textos = textos_na_imagem(img)
+        if not textos:
+            if tentativa > 1:
+                print(f'  [texto] tentativa {tentativa}: arte limpa', flush=True)
+            return img
+        print(f'  [texto] tentativa {tentativa}: arte com texto {textos[:4]}, refazendo', flush=True)
+        # Tela/codigo/papel na cena puxam letras falsas: na nova tentativa, tira tudo isso
+        prompt = ('ABSOLUTELY NO TEXT: no letters, no words, no numbers, no logos. '
+                  'NO computer screens, NO monitors, NO code, NO documents, NO books, NO signs, '
+                  'NO posters, NO user interfaces; replace them with glowing abstract shapes and light. '
+                  + image_prompt)
+    raise ValueError(f'arte com texto em {THUMB_TEXTO_TENTATIVAS} tentativas')
+
+
 def generate_thumbnail(title, description='', output_path='thumbnail.jpg'):
     """Pipeline completo: LLM prompt -> IA image -> Pillow compose."""
     try:
@@ -862,7 +907,7 @@ def generate_thumbnail(title, description='', output_path='thumbnail.jpg'):
 
         # 2. Gera imagem
         image_prompt = build_image_prompt(prompt_data)
-        bg = generate_ai_image(image_prompt)
+        bg = generate_clean_image(image_prompt)
 
         # 3. Compoe thumbnail
         print('  [3/3] Compondo thumbnail...', flush=True)

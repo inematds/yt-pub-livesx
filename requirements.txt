@@ -1,3 +1,4 @@
 cryptography>=41.0.0
 anthropic>=0.30.0
 requests>=2.31.0
+rapidocr-onnxruntime  # detecta texto na arte gerada (thumb refeita se vier com texto)
