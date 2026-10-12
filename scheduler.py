@@ -620,9 +620,64 @@ def update_video_metadata(video_id, title, description):
 
 CODEX_BIN = os.path.expanduser('~/.npm-global/bin/codex')
 
+# Estilos do texto na thumb viral: cada um muda layout, tipografia e paleta, para o
+# canal nao virar uma grade de thumbs iguais. Sorteado sem repetir os ultimos usados.
+ESTILOS_THUMB = {
+    'manchete': ('Texto empilhado em 2-3 linhas no lado ESQUERDO, fonte sans condensada extra-bold, '
+                 'branco com uma palavra em amarelo; sujeito grande a direita; fundo escuro com luz ambar e ciano.'),
+    'poster-filme': ('Estilo poster de filme: UMA palavra-chave gigante atravessando a imagem ATRAS do sujeito '
+                     '(o sujeito cobre parte das letras sem impedir a leitura), o resto da frase pequeno embaixo; '
+                     'fonte serifada pesada; paleta vermelho-sangue e preto, luz dramatica de cima.'),
+    'tarja': ('Sujeito centralizado e grande; a frase numa TARJA inclinada (vermelha ou laranja solida) no terco de baixo, '
+              'letras brancas sans bold; fundo desfocado colorido (roxo/magenta), sem ambar.'),
+    'numero-gigante': ('Um NUMERO, simbolo ou palavra curta da frase ENORME ocupando a metade direita (3D, metalico ou '
+                       'de vidro); o resto da frase em linha unica no topo esquerdo; sujeito menor a esquerda; '
+                       'fundo verde-escuro ou azul-petroleo.'),
+    'antes-depois': ('Imagem DIVIDIDA por uma linha diagonal: lado esquerdo cinza/apagado, lado direito colorido/vivo; '
+                     'a frase centralizada no topo, sans bold branca com contorno preto; seta grossa cruzando a divisao.'),
+    'fundo-claro': ('Fundo CLARO e liso (branco, amarelo-limao ou laranja solido), sem cara de "tech escuro"; '
+                    'sujeito ou objeto recortado com sombra; frase em PRETO, fonte sans grotesca bold, a direita; '
+                    'um detalhe em vermelho.'),
+    'marcador': ('Visual de quadro/caderno: a frase escrita A MAO com marcador grosso (letra legivel), '
+                 'uma palavra sublinhada ou circulada em vermelho; seta desenhada a mao; '
+                 'sujeito ou objeto real ao lado; fundo branco-giz ou quadro verde.'),
+    'neon': ('Cena noturna ou de estudio; a frase aparece como LETREIRO DE NEON aceso (rosa e azul) na parede, '
+             'no alto; sujeito em meia-luz embaixo; reflexo no chao molhado.'),
+    'balao': ('Estilo quadrinho/pop-art: a frase dentro de um BALAO DE FALA grande saindo do sujeito; retícula de pontos '
+              'no fundo, cores primarias saturadas (amarelo, azul, vermelho), contorno preto grosso.'),
+    'close-extremo': ('CLOSE no rosto do sujeito ocupando 2/3 da imagem; a frase em coluna estreita no terco '
+                      'livre, fonte sans grande, branca; paleta fria azul-gelo.'),
+}
+ESTILOS_HIST = os.path.join(PROJECT_ROOT, 'data', 'thumb_estilos.jsonl')
 
-def _arte_codex(cena, timeout=900, rosto=None):
-    """Gera a arte 16:9 (sem texto) da thumb no Codex image_gen, pela assinatura.
+
+def _sortear_estilo_thumb(ultimos=5):
+    """Escolhe um estilo que nao esteja entre os `ultimos` usados neste canal."""
+    import random
+    recentes = []
+    try:
+        with open(ESTILOS_HIST) as f:
+            recentes = [json.loads(l).get('estilo') for l in f if l.strip()][-ultimos:]
+    except (OSError, ValueError):
+        pass
+    livres = [e for e in ESTILOS_THUMB if e not in recentes] or list(ESTILOS_THUMB)
+    return random.choice(livres)
+
+
+def _registrar_estilo_thumb(estilo, frase):
+    try:
+        os.makedirs(os.path.dirname(ESTILOS_HIST), exist_ok=True)
+        with open(ESTILOS_HIST, 'a') as f:
+            f.write(json.dumps({'data': datetime.now().strftime('%F %T'), 'estilo': estilo,
+                                'frase': frase}, ensure_ascii=False) + '\n')
+    except OSError:
+        pass
+
+
+def _arte_codex(cena, timeout=900, rosto=None, frase=None, estilo=None, marca=''):
+    """Gera a arte 16:9 da thumb no Codex image_gen, pela assinatura.
+    Sem frase: arte sem texto (o texto entra depois, por cima).
+    Com frase + estilo: o Codex desenha a frase na arte no layout do estilo (ESTILOS_THUMB).
     rosto: imagem de referencia do apresentador (usa o mesmo rosto na cena).
     Retorna uma PIL.Image 1280x720. Levanta excecao se o Codex nao gerar."""
     import shutil
@@ -631,24 +686,39 @@ def _arte_codex(cena, timeout=900, rosto=None):
     # e morre com o service_tier do config.toml. Preferir o codex atual do npm-global.
     codex_bin = CODEX_BIN if os.path.exists(CODEX_BIN) else (shutil.which('codex') or CODEX_BIN)
     work = tempfile.mkdtemp(prefix='enrich-arte-')
-    prompt = (
-        'Use sua ferramenta de geracao de imagem (image_gen) para criar UMA imagem horizontal '
-        '(paisagem, 16:9) e salve o PNG como arte.png neste diretorio. Nao crie nem edite nenhum outro arquivo.\n\n'
-        f'Conteudo da imagem: thumbnail VIRAL de YouTube. {cena}\n'
-        'Estilo de thumb de alto clique: um unico sujeito principal grande e nitido no lado DIREITO, '
-        'expressao ou acao forte, alto contraste, cores saturadas, luz de recorte, profundidade de campo, '
-        'lado ESQUERDO e parte de baixo mais escuros e limpos (ali vai o texto depois).\n'
-        'SEM TEXTO de qualquer tipo: sem palavras, sem letras, sem numeros, sem legendas, sem marca d\'agua, '
-        'sem logo, sem interface de usuario, nao e captura de tela.\n'
-        'Ao terminar, responda so com o caminho do arquivo.'
-    )
+    if frase and estilo in ESTILOS_THUMB:
+        prompt = (
+            'Use sua ferramenta de geracao de imagem (image_gen) para criar UMA thumbnail de YouTube VIRAL, '
+            'horizontal 16:9, e salve o PNG como arte.png neste diretorio. Nao crie nem edite nenhum outro arquivo.\n\n'
+            f'Assunto: {cena}\n\n'
+            f'FRASE que aparece ESCRITA na imagem (exatamente assim, portugues do Brasil com acentos): "{frase}"\n\n'
+            'ESTILO OBRIGATORIO desta thumb (siga o layout, a tipografia e a paleta, nao o padrao de sempre):\n'
+            f'{ESTILOS_THUMB[estilo]}\n\n'
+            'Regras fixas:\n'
+            '- A frase grande e legivel em tela de celular, ortografia exata.\n'
+            '- Todo texto longe das bordas: margem de pelo menos 12% em cima e embaixo (a imagem sera recortada para 16:9).\n'
+            + (f'- Uma etiqueta pequena e discreta "{marca}" num canto.\n' if marca else '')
+            + '- Nenhum outro texto: sem letras soltas, sem telas com texto legivel, sem legendas, sem logos de empresas.\n'
+            'Ao terminar, responda so com o caminho do arquivo.'
+        )
+    else:
+        prompt = (
+            'Use sua ferramenta de geracao de imagem (image_gen) para criar UMA imagem horizontal '
+            '(paisagem, 16:9) e salve o PNG como arte.png neste diretorio. Nao crie nem edite nenhum outro arquivo.\n\n'
+            f'Conteudo da imagem: thumbnail VIRAL de YouTube. {cena}\n'
+            'Estilo de thumb de alto clique: um unico sujeito principal grande e nitido no lado DIREITO, '
+            'expressao ou acao forte, alto contraste, cores saturadas, luz de recorte, profundidade de campo, '
+            'lado ESQUERDO e parte de baixo mais escuros e limpos (ali vai o texto depois).\n'
+            'SEM TEXTO de qualquer tipo: sem palavras, sem letras, sem numeros, sem legendas, sem marca d\'agua, '
+            'sem logo, sem interface de usuario, nao e captura de tela.\n'
+            'Ao terminar, responda so com o caminho do arquivo.'
+        )
     if rosto:
         prompt += (
             '\n\nA imagem anexada e a referencia do apresentador do canal. Se ela mostrar uma pessoa, '
-            'coloque ESSA MESMA pessoa (mesmo rosto, mesma idade, oculos/bone/barba se tiver) na cena, '
-            'em primeiro plano no lado direito, com expressao forte reagindo ao assunto; o restante da '
-            'cena vai atras ou ao lado dela. Nao copie o fundo da referencia. Se a referencia nao '
-            'tiver pessoa, ignore-a.'
+            'coloque ESSA MESMA pessoa (mesmo rosto, mesma idade, oculos/bone/barba se tiver) na cena '
+            'como sujeito principal, com expressao forte reagindo ao assunto. Nao copie o fundo da '
+            'referencia nem o texto dela. Se a referencia nao tiver pessoa, ignore-a.'
         )
     try:
         out = os.path.join(work, '_codex_out.txt')
@@ -671,7 +741,9 @@ def _arte_codex(cena, timeout=900, rosto=None):
 
 def generate_enrich_thumbnail(title, config, frase='', cena='', rosto=False):
     """Thumb das lives enriquecidas.
-    enrich_thumb_mode=codex (default): arte viral do Codex image_gen + frase curta.
+    enrich_thumb_mode=codex (default): o Codex desenha arte + frase, com estilo sorteado
+        (ESTILOS_THUMB) sem repetir os ultimos do canal.
+    enrich_thumb_mode=codex-fixo: arte do Codex sem texto + frase por cima no layout fixo.
     enrich_thumb_mode=fundo: imagem de fundo fixa + titulo (banner padrao).
     Se o Codex falhar, cai no banner padrao."""
     import types
@@ -681,8 +753,9 @@ def generate_enrich_thumbnail(title, config, frase='', cena='', rosto=False):
     default_bg_path = os.path.join(CONFIG_DIR, 'thumb_default.jpg')
     texto = title[:70]
     bg = None
+    modo = config.get('enrich_thumb_mode', 'codex')
 
-    if config.get('enrich_thumb_mode', 'codex') == 'codex':
+    if modo in ('codex', 'codex-fixo'):
         try:
             log('  Thumb viral: gerando arte no Codex image_gen...')
             # enrich_thumb_rosto: auto (IA decide) | sempre | nunca
@@ -691,6 +764,17 @@ def generate_enrich_thumbnail(title, config, frase='', cena='', rosto=False):
             ref = default_bg_path if usar_rosto and os.path.exists(default_bg_path) else None
             if ref:
                 log('  Thumb viral: com o rosto do apresentador (referencia thumb_default.jpg)')
+            if modo == 'codex':
+                frase_arte = (frase or ' '.join(title.split()[:5]))[:60]
+                estilo = _sortear_estilo_thumb()
+                log(f'  Thumb viral: estilo {estilo}, frase "{frase_arte}"')
+                arte = _arte_codex(cena or f'Assunto da live: {title}', rosto=ref, frase=frase_arte,
+                                   estilo=estilo, marca=config.get('thumb_brand', ''))
+                thumb_path = f'/tmp/yt_enrich_{int(time.time())}.jpg'
+                arte.save(thumb_path, 'JPEG', quality=90)
+                _registrar_estilo_thumb(estilo, frase_arte)
+                log('  Thumb viral: arte do Codex OK (texto na arte)')
+                return thumb_path
             bg = _arte_codex(cena or f'Assunto da live: {title}', rosto=ref)
             if frase:
                 texto = frase[:70]
