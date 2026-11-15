@@ -51,7 +51,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --privacy     public|unlisted|private (padrão: unlisted)"
       echo "  --ai          manual|claude-api (padrão: manual)"
       echo "                manual: gera prompt para colar no Claude (sessão interativa)"
-      echo "                claude-api: usa ANTHROPIC_API_KEY automaticamente"
+      echo "                config: usa tipo/motor/modelo/esforço de scripts/ia.yaml; claude-api é alias legado"
       echo "  --work-dir    Diretório de trabalho (padrão: ~/projetos/gws/lives)"
       echo "  --min-dur     Duração mínima de clip em segundos (padrão: 120)"
       echo "  --max-dur     Duração máxima de clip em segundos (padrão: 900)"
@@ -204,198 +204,14 @@ fi
 if [[ -f "$JOB_DIR/topics.json" ]]; then
   echo "    Análise já existe, pulando"
 
-elif [[ "$AI_MODE" == "claude-api" ]]; then
-  # --- Modo: Claude Code CLI (usa autenticacao OAuth) ---
-  echo "    Usando Claude Code CLI..."
-
-  # Monta prompt completo em arquivo
+elif [[ "$AI_MODE" =~ ^(claude-api|config|codex|codex-assinatura|claude-assinatura|anthropic-api|openai-api|openrouter-api)$ ]]; then
+  # claude-api é o alias histórico da assinatura. Modelo/esforço efetivos ficam em scripts/ia.yaml.
   cat > "$JOB_DIR/prompt.txt" << PROMPTEOF
 $PROMPT_TEMPLATE
 
 $(cat "$JOB_DIR/condensed.txt")
 PROMPTEOF
-
-  # Chama claude CLI e salva resposta (unset CLAUDECODE para permitir execucao em subprocess)
-  env -u CLAUDECODE claude -p "$(cat "$JOB_DIR/prompt.txt")" --output-format text > "$JOB_DIR/claude_response.txt" 2>/dev/null
-
-  # Extrai JSON da resposta
-  python3 << PYEOF
-import json, re
-
-with open('$JOB_DIR/claude_response.txt') as f:
-    response_text = f.read()
-
-json_match = re.search(r'\{[\s\S]*\}', response_text)
-if json_match:
-    topics_data = json.loads(json_match.group())
-    with open('$JOB_DIR/topics.json', 'w') as f:
-        json.dump(topics_data, f, ensure_ascii=False, indent=2)
-    print(f"    Encontrados {len(topics_data.get('topics',[]))} tópicos")
-else:
-    print("Erro: Claude não retornou JSON válido")
-    print(response_text[:500])
-    exit(1)
-PYEOF
-
-elif [[ "$AI_MODE" == "anthropic-api" ]]; then
-  # --- Modo: Anthropic API Key (usa ANTHROPIC_API_KEY diretamente) ---
-  echo "    Usando Anthropic API..."
-
-  if [[ -z "${ANTHROPIC_API_KEY:-}" ]]; then
-    echo "Erro: ANTHROPIC_API_KEY não definida" >&2
-    exit 1
-  fi
-
-  # Monta prompt completo em arquivo
-  cat > "$JOB_DIR/prompt.txt" << PROMPTEOF
-$PROMPT_TEMPLATE
-
-$(cat "$JOB_DIR/condensed.txt")
-PROMPTEOF
-
-  # Chama Anthropic API via curl
-  python3 << PYEOF
-import json, urllib.request, os, re
-
-api_key = os.environ['ANTHROPIC_API_KEY']
-
-with open('$JOB_DIR/prompt.txt') as f:
-    prompt_text = f.read()
-
-payload = {
-    'model': 'claude-sonnet-4-20250514',
-    'max_tokens': 4096,
-    'messages': [{'role': 'user', 'content': prompt_text}]
-}
-
-body = json.dumps(payload).encode()
-req = urllib.request.Request('https://api.anthropic.com/v1/messages', data=body)
-req.add_header('Content-Type', 'application/json')
-req.add_header('x-api-key', api_key)
-req.add_header('anthropic-version', '2023-06-01')
-
-resp = urllib.request.urlopen(req, timeout=120)
-result = json.loads(resp.read())
-response_text = result['content'][0]['text']
-
-json_match = re.search(r'\{[\s\S]*\}', response_text)
-if json_match:
-    topics_data = json.loads(json_match.group())
-    with open('$JOB_DIR/topics.json', 'w') as f:
-        json.dump(topics_data, f, ensure_ascii=False, indent=2)
-    print(f"    Encontrados {len(topics_data.get('topics',[]))} tópicos")
-else:
-    print("Erro: Claude não retornou JSON válido")
-    print(response_text[:500])
-    exit(1)
-PYEOF
-
-elif [[ "$AI_MODE" == "openrouter-api" ]]; then
-  # --- Modo: OpenRouter API ---
-  echo "    Usando OpenRouter API..."
-
-  if [[ -z "${OPENROUTER_API_KEY:-}" ]]; then
-    echo "Erro: OPENROUTER_API_KEY não definida" >&2
-    exit 1
-  fi
-
-  cat > "$JOB_DIR/prompt.txt" << PROMPTEOF
-$PROMPT_TEMPLATE
-
-$(cat "$JOB_DIR/condensed.txt")
-PROMPTEOF
-
-  python3 << PYEOF
-import json, urllib.request, os, re
-
-api_key = os.environ['OPENROUTER_API_KEY']
-model = os.environ.get('AI_MODEL', 'anthropic/claude-sonnet-4')
-
-with open('$JOB_DIR/prompt.txt') as f:
-    prompt_text = f.read()
-
-payload = {
-    'model': model,
-    'messages': [{'role': 'user', 'content': prompt_text}],
-    'max_tokens': 4096
-}
-
-body = json.dumps(payload).encode()
-req = urllib.request.Request('https://openrouter.ai/api/v1/chat/completions', data=body)
-req.add_header('Content-Type', 'application/json')
-req.add_header('Authorization', f'Bearer {api_key}')
-
-resp = urllib.request.urlopen(req, timeout=120)
-result = json.loads(resp.read())
-response_text = result['choices'][0]['message']['content']
-
-json_match = re.search(r'\{[\s\S]*\}', response_text)
-if json_match:
-    topics_data = json.loads(json_match.group())
-    with open('$JOB_DIR/topics.json', 'w') as f:
-        json.dump(topics_data, f, ensure_ascii=False, indent=2)
-    print(f"    Encontrados {len(topics_data.get('topics',[]))} tópicos")
-else:
-    print("Erro: não retornou JSON válido")
-    print(response_text[:500])
-    exit(1)
-PYEOF
-
-elif [[ "$AI_MODE" == "agnes-api" ]]; then
-  # --- Modo: Agnes API (free, OpenAI-compatible) ---
-  echo "    Usando Agnes API..."
-
-  # Chave lida em runtime do projeto agnes-nei — nao duplicamos a key aqui.
-  if [[ -z "${AGNES_API_KEY:-}" ]] && [[ -f /home/nmaldaner/projetos/agnes-nei/.env ]]; then
-    AGNES_API_KEY=$(grep '^AGNES_API_KEY=' /home/nmaldaner/projetos/agnes-nei/.env | cut -d= -f2-)
-    export AGNES_API_KEY
-  fi
-  if [[ -z "${AGNES_API_KEY:-}" ]]; then
-    echo "Erro: AGNES_API_KEY não encontrada (~/projetos/agnes-nei/.env)" >&2
-    exit 1
-  fi
-
-  cat > "$JOB_DIR/prompt.txt" << PROMPTEOF
-$PROMPT_TEMPLATE
-
-$(cat "$JOB_DIR/condensed.txt")
-PROMPTEOF
-
-  python3 << PYEOF
-import json, urllib.request, os, re
-
-api_key = os.environ['AGNES_API_KEY']
-model = os.environ.get('AI_MODEL', 'agnes-2.5-flash')
-
-with open('$JOB_DIR/prompt.txt') as f:
-    prompt_text = f.read()
-
-payload = {
-    'model': model,
-    'messages': [{'role': 'user', 'content': prompt_text}],
-    'max_tokens': 4096
-}
-
-body = json.dumps(payload).encode()
-req = urllib.request.Request('https://apihub.agnes-ai.com/v1/chat/completions', data=body)
-req.add_header('Content-Type', 'application/json')
-req.add_header('Authorization', f'Bearer {api_key}')
-
-resp = urllib.request.urlopen(req, timeout=120)
-result = json.loads(resp.read())
-response_text = result['choices'][0]['message']['content']
-
-json_match = re.search(r'\{[\s\S]*\}', response_text)
-if json_match:
-    topics_data = json.loads(json_match.group())
-    with open('$JOB_DIR/topics.json', 'w') as f:
-        json.dump(topics_data, f, ensure_ascii=False, indent=2)
-    print(f"    Encontrados {len(topics_data.get('topics',[]))} tópicos")
-else:
-    print("Erro: não retornou JSON válido")
-    print(response_text[:500])
-    exit(1)
-PYEOF
+  python3 "$SCRIPT_DIR/analise_cortes.py" "$JOB_DIR/prompt.txt" "$JOB_DIR/topics.json" --modo "$AI_MODE"
 
 elif [[ "$AI_MODE" == "manual" ]]; then
   # --- Modo: Manual (gera prompt para sessão interativa) ---
@@ -413,10 +229,13 @@ PROMPTEOF
   echo "    Opções:"
   echo "      1. Cole o conteúdo de prompt.txt no Claude e salve a resposta em topics.json"
   echo "      2. Use o Claude Code: leia prompt.txt, analise e escreva topics.json"
-  echo "      3. Rode novamente com --ai claude-api (requer ANTHROPIC_API_KEY)"
+  echo "      3. Rode novamente com --ai claude-api (configuração em scripts/ia.yaml; sem chave na assinatura)"
   echo ""
   echo "    Depois rode novamente: yt-clip $VIDEO_ID"
   exit 0
+else
+  echo "Modo de IA não suportado/autorizado: $AI_MODE; use config e scripts/ia.yaml" >&2
+  exit 2
 fi
 
 # Show topics

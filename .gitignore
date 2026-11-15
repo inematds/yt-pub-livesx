@@ -21,3 +21,7 @@ dashboard/scheduler_status.json
 imports/*/videos/
 imports/*/*.mp4
 imports/**/*.mp4
+
+# Telemetria e trava locais dos modelos
+**/ia-execucoes.jsonl
+scripts/ia.lock

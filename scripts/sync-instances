@@ -41,6 +41,9 @@ TARGETS=(
 )
 
 FILES=(
+    "scripts/imagem_reserva.py"
+    "scripts/ia_motor.py"
+    "scripts/analise_cortes.py"
     "scheduler.py"
     "db.py"
     "import_worker.py"
@@ -56,6 +59,10 @@ FILES=(
 for target in "${TARGETS[@]}"; do
     if [ ! -d "$target" ]; then
         continue
+    fi
+    # Só inicializa config ausente com exemplo sem APIs autorizadas; nunca sobrescreve seleção local.
+    if [ ! -f "$target/scripts/ia.yaml" ] && [ -f "$SOURCE/scripts/ia.exemplo.yaml" ]; then
+        cp "$SOURCE/scripts/ia.exemplo.yaml" "$target/scripts/ia.yaml"
     fi
     name=$(basename "$target")
     echo "==> Syncing to $name"
