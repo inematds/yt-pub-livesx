@@ -35,9 +35,46 @@ ESFORCOS = {'claude': {'low', 'medium', 'high', 'xhigh', 'max'},
             'openrouter': {'none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'}}
 
 
+# Níveis do modelos.env (24/11/2026): `modelo: TOPO|EXECUTOR|SUPER|MENOR` lê o modelo da fonte única
+# ~/.config/inema/modelos.env; `esforco:` igual ao nível (ou ausente) lê o *_EFFORT. Trocar lá muda todos os sistemas.
+NIVEIS = ('SUPER', 'TOPO', 'EXECUTOR', 'MENOR')
+PREFIXO_NIVEL = {'codex': 'CODEX', 'claude': 'CLAUDE', 'anthropic': 'CLAUDE', 'openrouter': 'OPENROUTER'}
+
+
+def _modelos_env():
+    p = Path(os.environ.get('INEMA_MODELOS_ENV', Path.home()/'.config/inema/modelos.env')).expanduser()
+    v = {}
+    for linha in p.read_text().splitlines():
+        linha = linha.strip()
+        if linha and not linha.startswith('#') and '=' in linha:
+            k, _, x = linha.partition('=')
+            v[k.strip()] = x.strip()
+    return v
+
+
+def resolver_niveis(d):
+    env = None
+    etapas = d.get('etapas') if isinstance(d, dict) else None
+    for e in (etapas or {}).values():
+        for c in (e, e.get('alternativa') if isinstance(e, dict) else None):
+            if not isinstance(c, dict) or c.get('modelo') not in NIVEIS:
+                continue
+            env = env if env is not None else _modelos_env()
+            nivel, pre = c['modelo'], PREFIXO_NIVEL.get(c.get('motor'))
+            if not pre:
+                raise ValueError(f'nível {nivel} não existe para o motor {c.get("motor")} no modelos.env')
+            m = env.get(f'INEMA_{pre}_{nivel}') or (env.get(f'INEMA_{pre}_TOPO') if nivel == 'SUPER' else '')
+            if not m:
+                raise ValueError(f'INEMA_{pre}_{nivel} vazio no modelos.env')
+            c['modelo'] = m
+            if c.get('esforco') in (None, nivel):
+                c['esforco'] = env.get(f'INEMA_{pre}_{nivel}_EFFORT') or 'medium'
+    return d
+
+
 def carregar(arquivo=None):
     p = Path(arquivo or os.environ.get(CONFIG_ENV, CONFIG)).expanduser().resolve()
-    d = yaml.safe_load(p.read_text())
+    d = resolver_niveis(yaml.safe_load(p.read_text()))
     validar(d)
     return d
 
@@ -389,17 +426,22 @@ def main():
             fcntl.flock(lock, fcntl.LOCK_EX)
             original = p.read_text()
             d = carregar(p)
+            bruto = yaml.safe_load(original)
             mudancas = {}
             for k in ('tipo', 'motor', 'modelo', 'esforco'):
                 if getattr(a, k) is not None:
                     mudancas[k] = getattr(a, k)
                     d['etapas'][a.etapa][k] = getattr(a, k)
+                    bruto['etapas'][a.etapa][k] = getattr(a, k)
             if a.chave_nome is not None:
                 mudancas['chave_nome'] = a.chave_nome
                 d['etapas'][a.etapa]['chave_nome'] = a.chave_nome
+                bruto['etapas'][a.etapa]['chave_nome'] = a.chave_nome
+            import copy
+            d = resolver_niveis(copy.deepcopy(bruto))
             validar(d)
             atualizado = alterar_com_comentarios(original, a.etapa, mudancas)
-            if yaml.safe_load(atualizado) != d:
+            if yaml.safe_load(atualizado) != bruto:
                 raise ValueError('Alteração inconsistente; configuração original preservada')
             with tempfile.NamedTemporaryFile(mode='w', dir=p.parent, delete=False) as f:
                 f.write(atualizado)

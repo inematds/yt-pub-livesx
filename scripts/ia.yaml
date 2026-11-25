@@ -32,8 +32,8 @@ etapas:
   analise_cortes:
     tipo: assinatura
     motor: codex
-    modelo: gpt-6.1-sol
-    esforco: medium
+    modelo: EXECUTOR
+    esforco: EXECUTOR
     capacidade: texto
     timeout: 900
     max_tokens: 12000
@@ -41,8 +41,8 @@ etapas:
   prompt_capa:
     tipo: assinatura
     motor: codex
-    modelo: gpt-6.1-sol
-    esforco: medium
+    modelo: EXECUTOR
+    esforco: EXECUTOR
     capacidade: texto
     timeout: 900
     max_tokens: 12000
@@ -50,8 +50,8 @@ etapas:
   capa:
     tipo: assinatura
     motor: codex
-    modelo: gpt-6.1-sol
-    esforco: medium
+    modelo: EXECUTOR
+    esforco: EXECUTOR
     capacidade: imagem
     timeout: 900
     max_tokens: 12000
